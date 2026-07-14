@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #1a1a1a; /* texto, bordes */
+  --cream: #f3efe4; /* fondo base papel */
+  --pink: #f26d9e;
+  --orange: #f26430;
+  --celeste: #8fc5e8;
+  --verde: #7cb562;
+  --lila: #b8a4e3;
+  --petroleo: #2f5d62;
+  --amarillo: #f4c542;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream font-sans text-ink antialiased;
+  }
+
+  ::selection {
+    @apply bg-amarillo text-ink;
+  }
+
+  :focus-visible {
+    @apply outline outline-[3px] outline-offset-2 outline-pink;
+  }
+}
