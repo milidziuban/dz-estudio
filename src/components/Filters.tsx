@@ -1,4 +1,4 @@
-import { CATEGORY_LABEL, COLLECTIONS } from "../data/products";
+import { CATEGORY_LABEL } from "../data/products";
 import { COLOR_HEX, COLOR_LABEL } from "../lib/colors";
 import { cn } from "../lib/cn";
 import type { ColorToken } from "../types/product";
@@ -44,8 +44,10 @@ type FiltersProps = {
 export default function Filters({ value, onChange }: FiltersProps) {
   const pill = (selected: boolean) =>
     cn(
-      "rounded-full border-2 border-ink px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
-      selected ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-amarillo",
+      "rounded-full border px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
+      selected
+        ? "border-ink bg-ink text-cream"
+        : "border-ink/25 bg-transparent text-ink hover:border-ink",
     );
 
   const isDefault =
@@ -80,33 +82,13 @@ export default function Filters({ value, onChange }: FiltersProps) {
               </button>
             ),
           )}
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
-          ✧ Colección
-        </legend>
-        <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className={pill(value.coleccion === "all")}
-            onClick={() => onChange({ coleccion: "all" })}
+            className={pill(value.categoria === "packs")}
+            onClick={() => onChange({ categoria: "packs" })}
           >
-            Todas
+            Packs
           </button>
-          {(Object.keys(COLLECTIONS) as (keyof typeof COLLECTIONS)[]).map(
-            (id) => (
-              <button
-                key={id}
-                type="button"
-                className={pill(value.coleccion === id)}
-                onClick={() => onChange({ coleccion: id })}
-              >
-                {COLLECTIONS[id].label}
-              </button>
-            ),
-          )}
         </div>
       </fieldset>
 
@@ -133,30 +115,12 @@ export default function Filters({ value, onChange }: FiltersProps) {
                 onChange({ color: value.color === token ? "all" : token })
               }
               className={cn(
-                "h-8 w-8 rounded-full border-2 border-ink transition-transform hover:scale-110",
+                "h-8 w-8 rounded-full border border-ink/20 transition-transform hover:scale-110",
                 value.color === token &&
-                  "ring-[3px] ring-ink ring-offset-2 ring-offset-cream",
+                  "ring-1 ring-ink ring-offset-2 ring-offset-cream",
               )}
               style={{ backgroundColor: COLOR_HEX[token] }}
             />
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
-          ✦ Precio
-        </legend>
-        <div className="flex flex-wrap gap-2">
-          {PRICE_RANGES.map((range) => (
-            <button
-              key={range.id}
-              type="button"
-              className={pill(value.precio === range.id)}
-              onClick={() => onChange({ precio: range.id })}
-            >
-              {range.label}
-            </button>
           ))}
         </div>
       </fieldset>
@@ -165,7 +129,7 @@ export default function Filters({ value, onChange }: FiltersProps) {
         <button
           type="button"
           onClick={() => onChange(DEFAULT_FILTERS)}
-          className="font-mono text-xs font-medium uppercase tracking-widest underline decoration-2 underline-offset-4 hover:decoration-pink"
+          className="font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink"
         >
           Limpiar filtros ✕
         </button>

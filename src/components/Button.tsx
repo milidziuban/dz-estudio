@@ -17,12 +17,12 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const classes = cn(
-    "inline-flex items-center justify-center gap-2 rounded-full border-[2.5px] border-ink px-7 py-3",
-    "font-sans text-sm font-bold uppercase tracking-wide",
-    "shadow-hard transition-all duration-150",
-    "hover:-translate-y-0.5 hover:shadow-hard-lg",
-    "active:translate-y-0 active:shadow-hard",
-    variant === "primary" ? "bg-ink text-cream" : "bg-cream text-ink",
+    "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5",
+    "font-mono text-xs font-medium uppercase tracking-widest",
+    "transition-colors duration-200",
+    variant === "primary"
+      ? "bg-ink text-cream hover:bg-ink/80"
+      : "border border-ink bg-transparent text-ink hover:bg-ink hover:text-cream",
     className,
   );
 

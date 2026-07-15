@@ -52,7 +52,7 @@ const CATEGORIES: { id: string; symbol: string; title: string; items: QA[] }[] =
       items: [
         {
           q: "¿Cómo las lavo?",
-          a: "La mayoría va a máquina con agua fría y ciclo suave. Cada pieza trae su etiqueta con las indicaciones exactas, y también están en la ficha de cada producto. Las mantas de lana y los bordados piden lavado a mano.",
+          a: "La mayoría va a máquina con agua fría y ciclo suave. Cada pieza trae su etiqueta con las indicaciones exactas, y también están en la ficha de cada producto. Los almohadones bordados y los bolsos de lona piden lavado a mano.",
         },
         {
           q: "¿Destiñen?",
@@ -99,7 +99,7 @@ export default function Faq() {
           <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
             ✦ Preguntas frecuentes
           </p>
-          <h1 className="mb-12 text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <h1 className="mb-12 text-4xl font-bold tracking-tight sm:text-5xl">
             Lo que{" "}
             <em className="font-serif font-normal italic text-petroleo">
               siempre

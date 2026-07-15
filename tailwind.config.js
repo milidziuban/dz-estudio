@@ -15,13 +15,9 @@ export default {
         amarillo: "#F4C542",
       },
       fontFamily: {
-        sans: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],
+        sans: ["Lato", "system-ui", "sans-serif"],
         serif: ['"Instrument Serif"', "Georgia", "serif"],
         mono: ['"DM Mono"', "ui-monospace", "monospace"],
-      },
-      boxShadow: {
-        hard: "4px 4px 0 0 #1A1A1A",
-        "hard-lg": "6px 6px 0 0 #1A1A1A",
       },
       keyframes: {
         marquee: {

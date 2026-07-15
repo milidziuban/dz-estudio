@@ -28,7 +28,7 @@ export default function Contacto() {
           <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
             ✦ Contacto
           </p>
-          <h1 className="mb-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
             Escribinos{" "}
             <em className="font-serif font-normal italic text-pink">
               sin vueltas
@@ -74,7 +74,7 @@ export default function Contacto() {
                       name="mensaje"
                       required
                       rows={5}
-                      className="w-full rounded-lg border-2 border-ink bg-cream px-4 py-3 font-mono text-sm placeholder:text-ink/40 focus:outline focus:outline-[3px] focus:outline-offset-2 focus:outline-pink"
+                      className="w-full rounded-lg border border-ink/25 bg-transparent px-4 py-3 font-mono text-sm placeholder:text-ink/40 transition-colors focus:border-ink focus:outline-none"
                       placeholder="Contanos en qué te damos una mano…"
                     />
                   </div>
@@ -128,7 +128,7 @@ export default function Contacto() {
                 </ul>
               </div>
 
-              <div className="rounded-[14px] border-2 border-ink bg-amarillo p-6">
+              <div className="rounded-2xl bg-amarillo p-6">
                 <h2 className="font-mono text-xs font-medium uppercase tracking-widest">
                   ✦ Showroom
                 </h2>

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { SITE } from "../lib/site";
-import ScallopBorder from "./ScallopBorder";
 
 const navItems = [
   { label: "Tienda", to: "/tienda" },
@@ -12,16 +11,16 @@ const navItems = [
 export default function Footer() {
   return (
     <footer className="bg-ink text-cream">
-      <ScallopBorder color="#F3EFE4" direction="down" />
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-3 md:py-20 lg:px-12">
         <div>
-          <p className="text-2xl font-extrabold">
-            DZ{" "}
-            <em className="font-serif font-normal italic text-pink">Estudio</em>
-          </p>
+          <img
+            src="/logo-extendido.svg"
+            alt="DZ Estudio"
+            className="h-6 w-auto"
+          />
           <p className="mt-3 text-sm leading-relaxed text-cream/80">
-            Textiles maximalistas para mesa y living. Ediciones limitadas,
-            hechas en Argentina.
+            Almohadones, individuales y bolsos en ediciones limitadas, hechos
+            en Argentina.
           </p>
         </div>
 
@@ -85,7 +84,7 @@ export default function Footer() {
       </div>
 
       <p className="border-t border-cream/20 px-5 py-5 text-center font-mono text-[11px] uppercase tracking-widest text-cream/60">
-        © 2026 DZ Estudio ✦ La mesa dice más de vos que tu Instagram
+        © 2026 DZ Estudio ✦ Maximalismo con criterio
       </p>
     </footer>
   );

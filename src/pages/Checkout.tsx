@@ -78,7 +78,7 @@ export default function Checkout() {
           No hay nada para pagar todavía ✧
         </p>
         <p className="mt-3">
-          Tu carrito está más vacío que mesa de soltero. ¿Empezamos?
+          Tu carrito está vacío. Vamos a arreglar eso.
         </p>
         <Button to="/tienda" className="mt-8">
           Ver la tienda ✦
@@ -172,8 +172,8 @@ export default function Checkout() {
     });
   };
 
-  const fieldset = "rounded-[14px] border-[2.5px] border-ink bg-cream p-6 shadow-hard-lg sm:p-8";
-  const legend = "mb-6 flex items-center gap-3 text-2xl font-extrabold";
+  const fieldset = "rounded-2xl bg-white p-6 sm:p-8";
+  const legend = "mb-6 flex items-center gap-3 text-2xl font-bold";
 
   return (
     <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
@@ -181,7 +181,7 @@ export default function Checkout() {
         <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
           ✦ Checkout
         </p>
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           Ya casi es{" "}
           <em className="font-serif font-normal italic text-pink">tuyo</em>
         </h1>
@@ -198,10 +198,10 @@ export default function Checkout() {
               >
                 <span
                   className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink font-mono text-sm font-medium",
+                    "flex h-9 w-9 items-center justify-center rounded-full font-mono text-sm font-medium transition-colors",
                     step === s.number && "bg-ink text-cream",
                     step > s.number && "bg-verde",
-                    step < s.number && "bg-cream",
+                    step < s.number && "border border-ink/25 bg-transparent",
                   )}
                 >
                   {step > s.number ? "✓" : s.number}
@@ -226,7 +226,7 @@ export default function Checkout() {
               <fieldset className={fieldset}>
                 <legend className="sr-only">Contacto</legend>
                 <p className={legend}>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-amarillo font-mono text-sm">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amarillo font-mono text-sm">
                     1
                   </span>
                   Contacto
@@ -278,7 +278,7 @@ export default function Checkout() {
               <fieldset className={fieldset}>
                 <legend className="sr-only">Envío</legend>
                 <p className={legend}>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-amarillo font-mono text-sm">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amarillo font-mono text-sm">
                     2
                   </span>
                   Envío
@@ -326,7 +326,7 @@ export default function Checkout() {
                   {SHIPPING_OPTIONS.map((option) => (
                     <label
                       key={option.id}
-                      className="flex cursor-pointer items-center justify-between gap-4 rounded-[14px] border-2 border-ink bg-cream p-4 transition-all has-[:checked]:bg-amarillo has-[:checked]:shadow-hard"
+                      className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-ink/20 p-4 transition-colors hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-amarillo/40"
                     >
                       <span className="flex items-center gap-3">
                         <input
@@ -376,7 +376,7 @@ export default function Checkout() {
               <fieldset className={fieldset}>
                 <legend className="sr-only">Pago</legend>
                 <p className={legend}>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-amarillo font-mono text-sm">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amarillo font-mono text-sm">
                     3
                   </span>
                   Pago
@@ -391,8 +391,10 @@ export default function Checkout() {
                     aria-selected={pagoSel === "mp"}
                     onClick={() => setValue("pago", "mp")}
                     className={cn(
-                      "rounded-full border-2 border-ink px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest",
-                      pagoSel === "mp" ? "bg-ink text-cream" : "bg-cream",
+                      "rounded-full border px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest transition-colors",
+                      pagoSel === "mp"
+                        ? "border-ink bg-ink text-cream"
+                        : "border-ink/25 bg-transparent hover:border-ink",
                     )}
                   >
                     Mercado Pago
@@ -403,8 +405,10 @@ export default function Checkout() {
                     aria-selected={pagoSel === "transferencia"}
                     onClick={() => setValue("pago", "transferencia")}
                     className={cn(
-                      "rounded-full border-2 border-ink px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest",
-                      pagoSel === "transferencia" ? "bg-ink text-cream" : "bg-cream",
+                      "rounded-full border px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest transition-colors",
+                      pagoSel === "transferencia"
+                        ? "border-ink bg-ink text-cream"
+                        : "border-ink/25 bg-transparent hover:border-ink",
                     )}
                   >
                     Transferencia
@@ -412,7 +416,7 @@ export default function Checkout() {
                 </div>
 
                 {pagoSel === "mp" ? (
-                  <div className="mt-6 rounded-[14px] border-2 border-ink bg-celeste p-6">
+                  <div className="mt-6 rounded-2xl bg-celeste p-6">
                     <p className="text-sm leading-relaxed">
                       Te llevamos a Mercado Pago para pagar con tarjeta de
                       crédito, débito o efectivo. Volvés acá con todo resuelto.
@@ -427,11 +431,12 @@ export default function Checkout() {
                         : "Pagar con Mercado Pago ✦"}
                     </Button>
                     <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-widest text-ink/60">
-                      Demo — el redirect real a MP llega con la Edge Function
+                      Pago procesado por Mercado Pago — no guardamos datos de tu
+                      tarjeta
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-6 rounded-[14px] border-2 border-ink bg-lila p-6">
+                  <div className="mt-6 rounded-2xl bg-lila p-6">
                     <p className="text-sm leading-relaxed">
                       Transferí el total y mandanos el comprobante por WhatsApp.
                       Te reservamos el pedido por 48 horas.
@@ -470,7 +475,7 @@ export default function Checkout() {
 
                 {submitError && (
                   <p
-                    className="mt-4 rounded-lg border-2 border-ink bg-orange p-3 text-sm font-semibold text-cream"
+                    className="mt-4 rounded-lg bg-orange p-3 text-sm font-semibold text-cream"
                     role="alert"
                   >
                     ✕ {submitError}
@@ -501,7 +506,7 @@ export default function Checkout() {
                     <ProductImage
                       image={product.images[0]}
                       alt=""
-                      className="aspect-square w-12 shrink-0 rounded-lg border-2 border-ink"
+                      className="aspect-square w-12 shrink-0 rounded-lg"
                     />
                     <span className="flex-1 text-xs font-bold leading-snug">
                       {product.name}
@@ -515,7 +520,7 @@ export default function Checkout() {
                   </li>
                 ))}
               </ul>
-              <dl className="mt-5 space-y-1.5 border-t-2 border-ink pt-4 font-mono text-sm tracking-wider">
+              <dl className="mt-5 space-y-1.5 border-t border-ink/15 pt-4 font-mono text-sm tracking-wider">
                 <div className="flex justify-between">
                   <dt className="text-xs uppercase">Subtotal</dt>
                   <dd>{formatPrice(subtotal)}</dd>
@@ -530,7 +535,7 @@ export default function Checkout() {
                         : formatPrice(shippingCost)}
                   </dd>
                 </div>
-                <div className="flex justify-between border-t-2 border-ink pt-2 text-base font-medium">
+                <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">
                   <dt className="uppercase">Total</dt>
                   <dd>{formatPrice(total)}</dd>
                 </div>

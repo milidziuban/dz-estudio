@@ -1,62 +1,28 @@
 -- ============================================================
--- DZ Estudio — Setup inicial de base de datos
--- Pegar completo en Supabase → SQL Editor → Run
+-- DZ Estudio — Migración de catálogo (jul 2026)
+-- Reemplaza el catálogo viejo (mesa/living: manteles, servilletas,
+-- caminos de mesa, mantas) por el catálogo real: almohadones,
+-- individuales y bolsos.
+-- Pegar completo en Supabase → SQL Editor → Run.
+-- ⚠️ Esto borra todas las filas de public.products y las reemplaza.
+-- Si ya tenés órdenes reales con esos IDs de producto, revisá antes
+-- de correrlo (las órdenes guardan los items como jsonb, no como FK,
+-- así que no se rompen, pero los IDs de producto ya no existirán).
 -- ============================================================
 
--- ✦ Tabla de productos
-create table public.products (
-  id bigint primary key,
-  slug text unique not null,
-  name text not null,
-  category text not null check (category in ('almohadones', 'individuales', 'bolsos')),
-  collection text not null check (collection in ('fiesta', 'sobremesa', 'nocturna', 'editorial')),
-  colors text[] not null default '{}',
-  price integer not null,
-  description text not null default '',
-  medidas text not null default '',
-  material text not null default '',
-  cuidados text not null default '',
-  edition_number integer not null default 1,
-  edition_total integer not null default 1,
-  images jsonb not null default '[]',
-  sales integer not null default 0,
-  created_at timestamptz not null default now()
-);
+-- 1. Sacar el check constraint viejo de categoría
+alter table public.products
+  drop constraint if exists products_category_check;
 
-alter table public.products enable row level security;
+-- 2. Vaciar el catálogo actual
+truncate table public.products;
 
-create policy "Lectura pública de productos"
-  on public.products for select
-  using (true);
+-- 3. Poner el constraint nuevo
+alter table public.products
+  add constraint products_category_check
+  check (category in ('almohadones', 'individuales', 'bolsos'));
 
--- ✧ Tabla de órdenes
-create table public.orders (
-  id uuid primary key default gen_random_uuid(),
-  created_at timestamptz not null default now(),
-  customer_email text not null,
-  customer_name text not null,
-  customer_phone text,
-  shipping_address jsonb not null,
-  shipping_method text not null check (shipping_method in ('showroom', 'andreani', 'correo')),
-  items jsonb not null,
-  subtotal integer not null,
-  shipping_cost integer not null,
-  total integer not null,
-  payment_method text not null check (payment_method in ('mp', 'transferencia')),
-  status text not null default 'pending' check (status in ('pending', 'paid', 'rejected', 'cancelled')),
-  mp_preference_id text,
-  mp_payment_id text
-);
-
-alter table public.orders enable row level security;
-
--- Cualquiera puede crear una orden, nadie puede leerlas con la anon key
--- (solo desde el dashboard o con service role)
-create policy "Cualquiera puede crear una orden"
-  on public.orders for insert
-  with check (true);
-
--- ✿ Seed: los 10 productos
+-- 4. Insertar el catálogo nuevo
 insert into public.products
   (id, slug, name, category, collection, colors, price, description, medidas, material, cuidados, edition_number, edition_total, images, sales, created_at)
 values

@@ -10,8 +10,8 @@ export default function Newsletter() {
 
   return (
     <section className="px-5 pb-16 sm:px-8 md:pb-24 lg:px-12">
-      <Card className="mx-auto max-w-4xl bg-celeste p-8 md:p-14">
-        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+      <Card className="mx-auto max-w-6xl rounded-3xl bg-celeste p-8 md:p-14">
+        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
           Novedades{" "}
           <em className="font-serif font-normal italic text-petroleo">
             sin spam
@@ -34,7 +34,7 @@ export default function Newsletter() {
             type="email"
             required
             placeholder="tu@email.com"
-            className="w-full rounded-lg border-2 border-ink bg-cream px-4 py-3 font-mono text-sm placeholder:text-ink/50 focus:outline focus:outline-[3px] focus:outline-offset-2 focus:outline-pink sm:max-w-xs"
+            className="w-full rounded-full border-0 bg-white px-5 py-3.5 font-mono text-sm placeholder:text-ink/40 focus:outline-none focus:ring-1 focus:ring-ink sm:max-w-xs"
           />
           <Button type="submit">Suscribirme ✦</Button>
         </form>

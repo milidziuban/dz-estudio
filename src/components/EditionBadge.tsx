@@ -15,7 +15,7 @@ export default function EditionBadge({
   return (
     <div
       className={cn(
-        "flex h-24 w-24 -rotate-6 flex-col items-center justify-center rounded-full border-2 border-ink bg-amarillo text-center",
+        "flex h-24 w-24 -rotate-6 flex-col items-center justify-center rounded-full bg-amarillo text-center",
         className,
       )}
     >

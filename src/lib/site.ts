@@ -2,9 +2,9 @@
 // ⚠️ Reemplazar los placeholders marcados antes de salir a producción.
 export const SITE = {
   name: "DZ Estudio",
-  tagline: "Textiles con carácter",
+  tagline: "Maximalismo con criterio",
   description:
-    "Textiles maximalistas y elegantes para mesa y living. Edición limitada, hechos en Argentina.",
+    "Almohadones, individuales y bolsos en ediciones limitadas, diseñados y hechos en Argentina.",
   // Se toma de VITE_SITE_URL en producción (Vercel); fallback para desarrollo.
   url:
     (import.meta.env.VITE_SITE_URL as string | undefined) ??

@@ -7,7 +7,7 @@ export default function Card({ className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[14px] border-[2.5px] border-ink bg-cream shadow-hard-lg",
+        "overflow-hidden rounded-2xl bg-white",
         className,
       )}
       {...props}

@@ -1,12 +1,11 @@
 import Seo from "../components/Seo";
-import ScallopBorder from "../components/ScallopBorder";
 
 export default function SobreNosotros() {
   return (
     <>
       <Seo
         title="Sobre nosotros"
-        description="La historia y la filosofía de DZ Estudio: textiles maximalistas, ediciones limitadas y color sin miedo, hechos en Argentina."
+        description="La historia y la filosofía de DZ Estudio: almohadones, individuales y bolsos en ediciones limitadas, diseñados y hechos en Argentina."
         path="/sobre-nosotros"
       />
 
@@ -17,16 +16,16 @@ export default function SobreNosotros() {
             <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest">
               ✦ Sobre nosotros
             </p>
-            <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
-              Una casa sin color es una casa a{" "}
+            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
+              Mucho color,{" "}
               <em className="font-serif font-normal italic text-pink">
-                medio terminar
-              </em>
-              .
+                poca
+              </em>{" "}
+              improvisación.
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed">
-              Hacemos textiles para gente que entiende que la mesa dice más de
-              vos que tu Instagram.
+              Hacemos almohadones, individuales y bolsos en ediciones cortas,
+              para gente a la que le importa lo que tiene en su casa.
             </p>
           </div>
         </header>
@@ -34,7 +33,7 @@ export default function SobreNosotros() {
         {/* Foto grande */}
         <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
           <div
-            className="mx-auto aspect-[16/9] max-w-5xl overflow-hidden rounded-[14px] border-[2.5px] border-ink shadow-hard-lg"
+            className="mx-auto aspect-[16/9] max-w-5xl overflow-hidden rounded-2xl"
             style={{ backgroundColor: "#F26D9E" }}
           >
             <img
@@ -52,40 +51,40 @@ export default function SobreNosotros() {
         {/* Secciones de texto */}
         <div className="mx-auto max-w-2xl space-y-14 px-5 pb-8 sm:px-8 lg:px-12">
           <section>
-            <h2 className="mb-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl">
               Cómo{" "}
               <em className="font-serif font-normal italic text-petroleo">
                 empezó
               </em>
             </h2>
             <p className="leading-relaxed">
-              Empezamos como casi todo lo bueno: por bronca. Bronca de recorrer
-              locales enteros de mantelería y encontrar siempre lo mismo —
-              beige, gris, el eterno blanco roto que promete ser elegante y
-              termina siendo aburrido. Queríamos poner la mesa y que la mesa
-              tuviera algo para decir. Como no existía, lo hicimos nosotros.
+              Empezamos por hartazgo de recorrer locales enteros y encontrar
+              siempre lo mismo: almohadones lisos, individuales sin gracia y
+              bolsos de tela que parecían todos el mismo bolso. Queríamos
+              objetos con una paleta definida y un proceso cuidado detrás.
+              Como no existían, los hicimos nosotros.
             </p>
             <p className="mt-4 leading-relaxed">
-              La primera colección fueron seis manteles cosidos en un
-              monoambiente de Villa Crespo, fotografiados sobre la única mesa
-              que teníamos. Se agotaron en dos semanas. Ahí entendimos que no
-              éramos los únicos cansados del beige.
+              La primera colección fueron ocho almohadones cosidos en un
+              monoambiente de Villa Crespo, fotografiados sobre el único
+              sillón que teníamos. Se agotaron en diez días. Ahí entendimos
+              que no éramos los únicos cansados del beige.
             </p>
           </section>
 
           <section>
-            <h2 className="mb-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl">
               En qué{" "}
               <em className="font-serif font-normal italic text-orange">
                 creemos
               </em>
             </h2>
             <p className="leading-relaxed">
-              Creemos en el maximalismo con criterio: dos colores que se animan,
-              nunca cinco que se pelean. En que una servilleta puede ser
-              graciosa sin ser un chiste. En que las cosas lindas también se
-              usan — nuestros textiles se ven mejor con la comida encima, no
-              guardados en un cajón esperando la ocasión que nunca llega.
+              Creemos en el maximalismo con criterio: dos colores que se
+              eligen, nunca cinco que se acumulan. En que un bolso puede
+              cargar la compra del súper y seguir siendo una pieza de diseño.
+              En que las cosas lindas se usan — nuestros almohadones se ven
+              mejor gastados de uso que nuevos en la caja.
             </p>
             <p className="mt-4 leading-relaxed">
               Y creemos, sobre todo, en no producir de más. Por eso trabajamos
@@ -96,7 +95,7 @@ export default function SobreNosotros() {
           </section>
 
           <section>
-            <h2 className="mb-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            <h2 className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl">
               Cómo lo{" "}
               <em className="font-serif font-normal italic text-verde">
                 hacemos
@@ -105,20 +104,18 @@ export default function SobreNosotros() {
             <p className="leading-relaxed">
               Todo se diseña y se confecciona en Argentina, con talleres con los
               que trabajamos hace años y a los que les pagamos lo que
-              corresponde. Elegimos algodones, linos y lanas que aguanten años
-              de lavados, sobremesas largas y algún vino volcado. Para quien no
-              le teme al color, ni a la lavandería.
+              corresponde. Elegimos algodones, linos y lonas que aguanten uso
+              diario, lavados frecuentes y el paso del tiempo.
             </p>
           </section>
 
           <blockquote className="border-l-4 border-pink pl-6">
             <p className="font-serif text-2xl italic leading-snug sm:text-3xl">
-              “Textiles que se ven mejor con la comida encima.”
+              “Los objetos lindos se usan. No se guardan esperando la
+              ocasión.”
             </p>
           </blockquote>
         </div>
-
-        <ScallopBorder color="#1A1A1A" direction="up" className="mt-8" />
       </article>
     </>
   );

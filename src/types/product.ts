@@ -9,7 +9,7 @@ export type ColorToken =
   | "ink"
   | "cream";
 
-export type Category = "mesa" | "living";
+export type Category = "almohadones" | "individuales" | "bolsos";
 
 export type CollectionId = "fiesta" | "sobremesa" | "nocturna" | "editorial";
 

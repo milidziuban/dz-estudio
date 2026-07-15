@@ -4,7 +4,6 @@ import { formatPrice } from "../lib/format";
 import type { Product } from "../types/product";
 import Card from "./Card";
 import ProductImage from "./ProductImage";
-import ScallopBorder from "./ScallopBorder";
 import Tag from "./Tag";
 
 type ProductCardProps = {
@@ -18,41 +17,35 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/producto/${product.slug}`}
-      className="group block rounded-[14px] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-4 focus-visible:outline-pink"
+      className="group block rounded-2xl"
       aria-label={`${product.name} — ${formatPrice(product.price)}`}
     >
-      <Card className="transition-transform duration-150 group-hover:-translate-y-1">
-        <div className="relative aspect-square">
+      <Card>
+        <div className="relative aspect-square overflow-hidden">
           <ProductImage
             image={primary}
             alt={product.name}
-            className="absolute inset-0"
+            className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.03]"
           />
           {secondary && (
             <ProductImage
               image={secondary}
               alt=""
-              className="absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             />
           )}
-          <div className="absolute inset-x-0 top-0">
-            <ScallopBorder color="#F3EFE4" direction="down" height={10} />
-          </div>
-          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border-2 border-ink bg-cream px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest opacity-0 shadow-hard transition-opacity duration-200 group-hover:opacity-100">
-            Ver más ✦
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-2 p-5">
-          <Tag color={collection.tagColor} className="self-start">
-            {collection.label}
-          </Tag>
-          <h3 className="text-lg font-bold leading-snug">{product.name}</h3>
-          <p className="font-mono text-sm font-medium uppercase tracking-wider">
-            {formatPrice(product.price)}
-          </p>
         </div>
       </Card>
+
+      <div className="flex flex-col gap-1.5 pt-4">
+        <Tag color={collection.tagColor} className="self-start">
+          {collection.label}
+        </Tag>
+        <h3 className="text-base font-bold leading-snug">{product.name}</h3>
+        <p className="font-mono text-sm uppercase tracking-wider text-ink/70">
+          {formatPrice(product.price)}
+        </p>
+      </div>
     </Link>
   );
 }

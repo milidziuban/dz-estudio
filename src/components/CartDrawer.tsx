@@ -55,11 +55,11 @@ export default function CartDrawer() {
         aria-modal="true"
         aria-label="Carrito"
         className={cn(
-          "absolute inset-y-0 right-0 flex w-[420px] max-w-[92vw] flex-col border-l-[2.5px] border-ink bg-cream transition-transform duration-300",
+          "absolute inset-y-0 right-0 flex w-[420px] max-w-[92vw] flex-col bg-cream shadow-2xl shadow-ink/20 transition-transform duration-300",
           isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between border-b-[2.5px] border-ink px-5 py-4">
+        <div className="flex items-center justify-between border-b border-ink/10 px-5 py-4">
           <p className="font-mono text-sm font-medium uppercase tracking-widest">
             ✦ Tu carrito {count > 0 && `(${count})`}
           </p>
@@ -67,7 +67,7 @@ export default function CartDrawer() {
             type="button"
             aria-label="Cerrar carrito"
             onClick={close}
-            className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-cream text-lg shadow-hard transition-transform hover:-translate-y-0.5"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-lg transition-colors hover:bg-ink/5"
           >
             ✕
           </button>
@@ -83,7 +83,7 @@ export default function CartDrawer() {
         ) : resolved.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-6 px-8 text-center">
             <p className="font-serif text-2xl italic leading-snug">
-              Tu carrito está más vacío que mesa de soltero. ¿Empezamos?
+              Tu carrito está vacío. Vamos a arreglar eso.
             </p>
             <Button to="/tienda" onClick={close}>
               Ver la tienda ✦
@@ -97,7 +97,7 @@ export default function CartDrawer() {
               ))}
             </ul>
 
-            <div className="border-t-[2.5px] border-ink p-5">
+            <div className="border-t border-ink/10 p-5">
               <dl className="space-y-1.5 font-mono text-sm tracking-wider">
                 <div className="flex justify-between">
                   <dt className="uppercase text-xs">Subtotal</dt>
@@ -107,7 +107,7 @@ export default function CartDrawer() {
                   <dt className="uppercase text-xs">Envío estimado</dt>
                   <dd>{formatPrice(SHIPPING_ESTIMATE)}</dd>
                 </div>
-                <div className="flex justify-between border-t-2 border-ink pt-2 text-base font-medium">
+                <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">
                   <dt className="uppercase">Total</dt>
                   <dd>{formatPrice(subtotal + SHIPPING_ESTIMATE)}</dd>
                 </div>

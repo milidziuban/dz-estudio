@@ -21,9 +21,9 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
         className={cn(
-          "w-full rounded-lg border-2 bg-cream px-4 py-3 font-mono text-sm placeholder:text-ink/40",
-          "focus:outline focus:outline-[3px] focus:outline-offset-2 focus:outline-pink",
-          error ? "border-orange" : "border-ink",
+          "w-full rounded-lg border bg-transparent px-4 py-3 font-mono text-sm placeholder:text-ink/40",
+          "transition-colors focus:border-ink focus:outline-none",
+          error ? "border-orange" : "border-ink/25",
         )}
         {...props}
       />

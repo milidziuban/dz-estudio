@@ -1,21 +1,19 @@
 import Button from "../components/Button";
 import Card from "../components/Card";
-import ScallopBorder from "../components/ScallopBorder";
 
 export default function CheckoutError() {
   return (
     <div className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
       <Card className="mx-auto max-w-2xl overflow-hidden text-center">
-        <div className="bg-orange pb-4 pt-10 text-cream">
+        <div className="bg-orange pb-10 pt-10 text-cream">
           <p className="text-5xl" aria-hidden="true">
             ✕
           </p>
-          <h1 className="mt-4 px-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <h1 className="mt-4 px-6 text-4xl font-bold tracking-tight sm:text-5xl">
             El pago{" "}
             <em className="font-serif font-normal italic">no salió</em>
           </h1>
         </div>
-        <ScallopBorder color="#F26430" direction="down" />
 
         <div className="px-6 pb-10 pt-6 sm:px-12">
           <p className="leading-relaxed">

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import Card from "./Card";
-import ScallopBorder from "./ScallopBorder";
 import Tag, { type TagColor } from "./Tag";
 
 type CollectionCardProps = {
@@ -24,7 +23,7 @@ export default function CollectionCard({
   to,
 }: CollectionCardProps) {
   return (
-    <Card className="flex flex-col transition-transform duration-150 hover:-translate-y-1">
+    <Card className="flex flex-col">
       <div
         className="relative flex h-48 items-center justify-center md:h-56"
         style={{ backgroundColor: colorA }}
@@ -36,9 +35,6 @@ export default function CollectionCard({
         >
           {title.charAt(0)}
         </span>
-        <div className="absolute inset-x-0 bottom-0">
-          <ScallopBorder color="#F3EFE4" direction="up" />
-        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-6">
@@ -54,7 +50,7 @@ export default function CollectionCard({
         <p className="text-sm leading-relaxed">{description}</p>
         <Link
           to={to}
-          className="mt-auto font-mono text-xs font-medium uppercase tracking-widest underline decoration-2 underline-offset-4 hover:decoration-4"
+          className="mt-auto font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink"
         >
           Ver colección ✦
         </Link>

@@ -21,7 +21,6 @@ const marqueeItems = [
   "Edición limitada",
   "Hecho en Argentina",
   "Mercado Pago + transferencia",
-  "Textiles que se ven mejor con la comida encima",
 ];
 
 export default function App() {

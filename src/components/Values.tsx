@@ -1,5 +1,3 @@
-import ScallopBorder from "./ScallopBorder";
-
 const values = [
   {
     symbol: "✦",
@@ -9,7 +7,7 @@ const values = [
   {
     symbol: "✿",
     title: "Hecho en Argentina",
-    text: "Diseño y confección locales, sin vueltas.",
+    text: "Diseño y confección locales.",
   },
   {
     symbol: "✧",
@@ -21,8 +19,7 @@ const values = [
 export default function Values() {
   return (
     <section>
-      <ScallopBorder color="#F4C542" direction="up" />
-      <div className="border-y-[2.5px] border-ink bg-amarillo px-5 py-12 sm:px-8 md:py-16 lg:px-12">
+      <div className="bg-amarillo px-5 py-14 sm:px-8 md:py-20 lg:px-12">
         <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-3 md:gap-8">
           {values.map((value) => (
             <div key={value.title}>
@@ -37,7 +34,6 @@ export default function Values() {
           ))}
         </div>
       </div>
-      <ScallopBorder color="#F4C542" direction="down" />
     </section>
   );
 }

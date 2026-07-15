@@ -13,7 +13,7 @@ export default function Accordion({ items, idPrefix }: AccordionProps) {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div className="divide-y-2 divide-ink border-y-2 border-ink">
+    <div className="divide-y divide-ink/15 border-y border-ink/15">
       {items.map((item, i) => {
         const isOpen = open === i;
         const panelId = `${idPrefix}-panel-${i}`;
@@ -33,8 +33,8 @@ export default function Accordion({ items, idPrefix }: AccordionProps) {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-ink text-lg font-bold transition-transform",
-                    isOpen ? "rotate-45 bg-pink" : "bg-cream",
+                    "shrink-0 text-xl font-normal transition-transform duration-200",
+                    isOpen && "rotate-45 text-pink",
                   )}
                 >
                   +

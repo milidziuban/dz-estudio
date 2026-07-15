@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import Card from "../components/Card";
-import ScallopBorder from "../components/ScallopBorder";
 import { useCart } from "../hooks/useCart";
 import { BANK_INFO } from "../lib/checkout";
 import { formatPrice } from "../lib/format";
@@ -45,19 +44,19 @@ export default function CheckoutExito() {
     <div className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
       <Card className="mx-auto max-w-2xl overflow-hidden text-center">
         <div
-          className="pb-4 pt-10"
+          className="pb-10 pt-10"
           style={{ backgroundColor: headerColor }}
         >
           <p className="text-5xl" aria-hidden="true">
             ✦ ✧ ✿
           </p>
           {isPending ? (
-            <h1 className="mt-4 px-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <h1 className="mt-4 px-6 text-4xl font-bold tracking-tight sm:text-5xl">
               Pago{" "}
               <em className="font-serif font-normal italic">en proceso</em>
             </h1>
           ) : (
-            <h1 className="mt-4 px-6 text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <h1 className="mt-4 px-6 text-4xl font-bold tracking-tight sm:text-5xl">
               {nombre ? `¡Listo, ${nombre}!` : "¡Listo!"}{" "}
               <em className="font-serif font-normal italic text-cream">
                 Ya es tuyo.
@@ -65,11 +64,10 @@ export default function CheckoutExito() {
             </h1>
           )}
         </div>
-        <ScallopBorder color={headerColor} direction="down" />
 
         <div className="px-6 pb-10 pt-6 sm:px-12">
           {orderNumber && (
-            <p className="inline-flex rounded-full border-2 border-ink bg-amarillo px-4 py-1.5 font-mono text-xs font-medium uppercase tracking-widest">
+            <p className="inline-flex rounded-full bg-amarillo px-4 py-1.5 font-mono text-xs font-medium uppercase tracking-widest">
               Pedido #{orderNumber}
             </p>
           )}
@@ -85,7 +83,7 @@ export default function CheckoutExito() {
               {state?.email
                 ? `Te mandamos el detalle a ${state.email}.`
                 : "Te mandamos el detalle por email."}{" "}
-              La mesa ya puede empezar a presumir.
+              Ya casi lo tenés.
             </p>
           )}
 
@@ -96,7 +94,7 @@ export default function CheckoutExito() {
           )}
 
           {pago === "transferencia" && (
-            <div className="mt-8 rounded-[14px] border-2 border-ink bg-lila p-6 text-left">
+            <div className="mt-8 rounded-2xl bg-lila p-6 text-left">
               <p className="font-mono text-xs font-medium uppercase tracking-widest">
                 ✧ Falta un paso
               </p>

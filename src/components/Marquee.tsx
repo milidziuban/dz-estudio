@@ -24,7 +24,7 @@ export default function Marquee({ items }: MarqueeProps) {
   );
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 flex overflow-hidden border-b-[2.5px] border-ink bg-ink py-2">
+    <div className="fixed inset-x-0 top-0 z-50 flex overflow-hidden bg-ink py-2.5">
       {strip(false)}
       {strip(true)}
     </div>

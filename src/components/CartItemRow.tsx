@@ -15,7 +15,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
   const { product, qty } = item;
 
   return (
-    <li className="flex gap-4 border-b-2 border-ink py-4">
+    <li className="flex gap-4 border-b border-ink/10 py-4">
       <Link
         to={`/producto/${product.slug}`}
         onClick={close}
@@ -26,7 +26,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
         <ProductImage
           image={product.images[0]}
           alt=""
-          className="aspect-square w-20 rounded-lg border-2 border-ink"
+          className="aspect-square w-20 rounded-lg"
         />
       </Link>
 
@@ -54,7 +54,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
         </p>
 
         <div className="mt-auto flex items-center justify-between pt-2">
-          <div className="flex items-center rounded-full border-2 border-ink">
+          <div className="flex items-center rounded-full border border-ink/25">
             <button
               type="button"
               aria-label={`Restar una unidad de ${product.name}`}

@@ -4,7 +4,6 @@ import Button from "../components/Button";
 import EditionBadge from "../components/EditionBadge";
 import ProductCard from "../components/ProductCard";
 import ProductImage from "../components/ProductImage";
-import ScallopBorder from "../components/ScallopBorder";
 import Seo from "../components/Seo";
 import Tag from "../components/Tag";
 import { CATEGORY_LABEL, COLLECTIONS } from "../data/products";
@@ -85,7 +84,7 @@ export default function Producto() {
       <div className="mx-auto max-w-6xl">
         <Link
           to="/tienda"
-          className="font-mono text-xs font-medium uppercase tracking-widest underline decoration-2 underline-offset-4 hover:decoration-pink"
+          className="font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink"
         >
           ← Volver a la tienda
         </Link>
@@ -93,15 +92,12 @@ export default function Producto() {
         <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-14">
           {/* Galería */}
           <div>
-            <div className="relative overflow-hidden rounded-[14px] border-[2.5px] border-ink shadow-hard-lg">
+            <div className="relative overflow-hidden rounded-2xl">
               <ProductImage
                 image={product.images[imgIdx]}
                 alt={`${product.name} — vista ${imgIdx + 1}`}
                 className="aspect-square"
               />
-              <div className="absolute inset-x-0 top-0">
-                <ScallopBorder color="#F3EFE4" direction="down" height={12} />
-              </div>
             </div>
             <div className="mt-4 flex gap-3">
               {product.images.map((image, i) => (
@@ -112,9 +108,9 @@ export default function Producto() {
                   aria-pressed={imgIdx === i}
                   onClick={() => setImgIdx(i)}
                   className={cn(
-                    "w-20 overflow-hidden rounded-lg border-2 border-ink transition-all",
+                    "w-20 overflow-hidden rounded-lg transition-all",
                     imgIdx === i
-                      ? "shadow-hard"
+                      ? "ring-1 ring-ink ring-offset-2 ring-offset-cream"
                       : "opacity-60 hover:opacity-100",
                   )}
                 >
@@ -138,7 +134,7 @@ export default function Producto() {
             </div>
 
             <div className="mt-5 flex items-start justify-between gap-4">
-              <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+              <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
                 {product.name}
               </h1>
               <EditionBadge
@@ -156,7 +152,7 @@ export default function Producto() {
 
             {/* Cantidad + carrito */}
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <div className="flex w-fit items-center rounded-full border-[2.5px] border-ink bg-cream shadow-hard">
+              <div className="flex w-fit items-center rounded-full border border-ink/25">
                 <button
                   type="button"
                   aria-label="Restar una unidad"
@@ -185,9 +181,9 @@ export default function Producto() {
               </Button>
             </div>
             {/* Detalles */}
-            <dl className="mt-10 border-t-2 border-ink">
+            <dl className="mt-10 border-t border-ink/15">
               {DETAILS.map(({ key, label }) => (
-                <div key={key} className="border-b-2 border-ink py-4">
+                <div key={key} className="border-b border-ink/15 py-4">
                   <dt className="font-mono text-xs font-medium uppercase tracking-widest">
                     ✧ {label}
                   </dt>
@@ -202,7 +198,7 @@ export default function Producto() {
 
         {/* Relacionados */}
         <section className="mt-20">
-          <h2 className="mb-8 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <h2 className="mb-8 text-3xl font-bold tracking-tight sm:text-4xl">
             Va perfecto{" "}
             <em className="font-serif font-normal italic text-pink">con</em>
           </h2>

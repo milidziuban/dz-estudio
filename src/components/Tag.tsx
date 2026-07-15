@@ -30,7 +30,7 @@ export default function Tag({ color = "cream", className, ...props }: TagProps) 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border-2 border-ink px-3 py-1",
+        "inline-flex items-center rounded-full px-3.5 py-1.5",
         "font-mono text-[11px] font-medium uppercase tracking-widest",
         colorClasses[color],
         className,

@@ -10,7 +10,7 @@ export default function NotFound() {
         <p className="font-mono text-sm font-medium uppercase tracking-widest text-ink/60">
           Error 404
         </p>
-        <h1 className="mt-4 text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl">
+        <h1 className="mt-4 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">
           Esta página se fue{" "}
           <em className="font-serif font-normal italic text-pink">
             de compras

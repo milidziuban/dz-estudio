@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Filters, {
   DEFAULT_FILTERS,
@@ -7,8 +7,15 @@ import Filters, {
 } from "../components/Filters";
 import ProductCard from "../components/ProductCard";
 import Seo from "../components/Seo";
-import { COLLECTIONS } from "../data/products";
+import { CATEGORY_LABEL, COLLECTIONS } from "../data/products";
 import { useProducts } from "../hooks/useProducts";
+import type { Product } from "../types/product";
+
+// "packs" no es una categoría de la base: agrupa los productos en set
+const isPack = (p: Product) => /\bset\b/i.test(p.name);
+
+const categoriaFromParam = (param: string | null) =>
+  param && (param in CATEGORY_LABEL || param === "packs") ? param : "all";
 
 type SortId = "novedades" | "precio-asc" | "precio-desc" | "vendidos";
 
@@ -26,11 +33,23 @@ export default function Tienda() {
 
   const [filters, setFilters] = useState<FiltersState>({
     ...DEFAULT_FILTERS,
+    categoria: categoriaFromParam(searchParams.get("categoria")),
     coleccion:
       coleccionParam && coleccionParam in COLLECTIONS ? coleccionParam : "all",
   });
   const [sort, setSort] = useState<SortId>("novedades");
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Los links de la navbar cambian la URL estando ya en /tienda:
+  // sincronizamos los params con los filtros.
+  useEffect(() => {
+    const coleccion = searchParams.get("coleccion");
+    setFilters((prev) => ({
+      ...prev,
+      categoria: categoriaFromParam(searchParams.get("categoria")),
+      coleccion: coleccion && coleccion in COLLECTIONS ? coleccion : "all",
+    }));
+  }, [searchParams]);
 
   const updateFilters = (patch: Partial<FiltersState>) =>
     setFilters((prev) => ({ ...prev, ...patch }));
@@ -40,7 +59,10 @@ export default function Tienda() {
 
     const filtered = products.filter(
       (p) =>
-        (filters.categoria === "all" || p.category === filters.categoria) &&
+        (filters.categoria === "all" ||
+          (filters.categoria === "packs"
+            ? isPack(p)
+            : p.category === filters.categoria)) &&
         (filters.coleccion === "all" || p.collection === filters.coleccion) &&
         (filters.color === "all" ||
           p.colors.includes(filters.color as (typeof p.colors)[number])) &&
@@ -70,19 +92,17 @@ export default function Tienda() {
     <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
       <Seo
         title="Tienda"
-        description="Manteles, individuales, servilletas, almohadones y mantas en edición limitada. Elegí tu dupla de color."
+        description="Almohadones, individuales y bolsos en edición limitada. Elegí tu dupla de color."
         path="/tienda"
       />
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
           ✦ Tienda
         </p>
-        <h1 className="mb-10 text-4xl font-extrabold tracking-tight sm:text-5xl">
-          Todo lo que{" "}
+        <h1 className="mb-10 text-4xl font-bold tracking-tight sm:text-5xl">
           <em className="font-serif font-normal italic text-petroleo">
-            todavía
-          </em>{" "}
-          queda
+            Tienda
+          </em>
         </h1>
 
         <div className="md:grid md:grid-cols-[260px_1fr] md:gap-10 lg:gap-14">
@@ -97,7 +117,7 @@ export default function Tienda() {
               <button
                 type="button"
                 onClick={() => setDrawerOpen(true)}
-                className="rounded-full border-2 border-ink bg-cream px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest shadow-hard transition-all hover:-translate-y-0.5 md:hidden"
+                className="rounded-full border border-ink px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest transition-colors hover:bg-ink hover:text-cream md:hidden"
               >
                 Filtrar ✦
               </button>
@@ -118,7 +138,7 @@ export default function Tienda() {
                   id="sort"
                   value={sort}
                   onChange={(e) => setSort(e.target.value as SortId)}
-                  className="rounded-lg border-2 border-ink bg-cream px-3 py-2 font-mono text-xs uppercase tracking-wider"
+                  className="rounded-lg border border-ink/25 bg-transparent px-3 py-2 font-mono text-xs uppercase tracking-wider transition-colors focus:border-ink focus:outline-none"
                 >
                   {SORT_OPTIONS.map((option) => (
                     <option key={option.id} value={option.id}>
@@ -137,7 +157,7 @@ export default function Tienda() {
                 ✦ Cargando la tienda…
               </p>
             ) : isError ? (
-              <div className="rounded-[14px] border-[2.5px] border-ink bg-orange p-10 text-center text-cream shadow-hard-lg">
+              <div className="rounded-2xl bg-orange p-10 text-center text-cream">
                 <p className="font-serif text-2xl italic">
                   Se nos corrió un punto ✧
                 </p>
@@ -148,7 +168,7 @@ export default function Tienda() {
                 <button
                   type="button"
                   onClick={() => refetch()}
-                  className="mt-6 rounded-full border-2 border-ink bg-cream px-6 py-2 font-mono text-xs font-medium uppercase tracking-widest text-ink shadow-hard"
+                  className="mt-6 rounded-full bg-cream px-6 py-2.5 font-mono text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-white"
                 >
                   Reintentar ✦
                 </button>
@@ -160,7 +180,7 @@ export default function Tienda() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[14px] border-[2.5px] border-ink bg-lila p-10 text-center shadow-hard-lg">
+              <div className="rounded-2xl bg-lila p-10 text-center">
                 <p className="font-serif text-2xl italic">
                   Nada por acá ✧
                 </p>
@@ -186,7 +206,7 @@ export default function Tienda() {
             role="dialog"
             aria-modal="true"
             aria-label="Filtros"
-            className="absolute inset-y-0 left-0 w-80 max-w-[85vw] overflow-y-auto border-r-[2.5px] border-ink bg-cream p-6"
+            className="absolute inset-y-0 left-0 w-80 max-w-[85vw] overflow-y-auto bg-cream p-6 shadow-2xl shadow-ink/20"
           >
             <div className="mb-8 flex items-center justify-between">
               <p className="font-mono text-sm font-medium uppercase tracking-widest">
@@ -196,7 +216,7 @@ export default function Tienda() {
                 type="button"
                 aria-label="Cerrar filtros"
                 onClick={() => setDrawerOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-cream text-lg shadow-hard"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-lg transition-colors hover:bg-ink/5"
               >
                 ✕
               </button>
@@ -205,7 +225,7 @@ export default function Tienda() {
             <button
               type="button"
               onClick={() => setDrawerOpen(false)}
-              className="mt-10 w-full rounded-full border-[2.5px] border-ink bg-ink px-7 py-3 font-sans text-sm font-bold uppercase tracking-wide text-cream shadow-hard"
+              className="mt-10 w-full rounded-full bg-ink px-8 py-3.5 font-mono text-xs font-medium uppercase tracking-widest text-cream transition-colors hover:bg-ink/80"
             >
               Ver {visible.length}{" "}
               {visible.length === 1 ? "producto" : "productos"}

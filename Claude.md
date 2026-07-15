@@ -3,12 +3,12 @@
 ## Marca
 
 - Nombre: [NOMBRE DE LA MARCA]
-- Rubro: textiles maximalistas y elegantes para mesa y living
-- Productos: individuales, manteles, servilletas, caminos de mesa, almohadones, mantas
-- Público: adultos jóvenes (28-45) con gusto formado, dispuestos a pagar por diseño con actitud
+- Rubro: objetos textiles maximalistas, por el momento en tres líneas de producto
+- Productos: almohadones, individuales y bolsos tipo tote bag (nada de manteles, servilletas, caminos de mesa ni mantas)
+- Público: adultos jóvenes (28-45) con gusto formado, dispuestos a pagar por diseño con criterio
 - País: Argentina — precios en ARS, envíos nacionales
-- Referencia estética: Coolhouse (thisiscoolhouse.com.ar) pero apuntando más adulto y con más humor editorial
-- Personalidad: elegante, maximalista controlado, cercana pero no cursi, con actitud e ingenio
+- Referencia estética: Coolhouse (thisiscoolhouse.com.ar) pero apuntando más adulto, más editorial y menos "hecho con IA"
+- Personalidad: elegante, maximalista controlado, con ingenio seco — no cursi, no sobreactuada
 
 ## Stack técnico
 
@@ -39,42 +39,48 @@ Reglas: cada sección/colección usa una **dupla bicolor** (rosa+naranja, celest
 
 ### Tipografía (Google Fonts)
 
-- **Bricolage Grotesque** (400, 600, 700, 800) — sans-serif para todo el contenido
+- **Lato** (400, 700, 900) — sans-serif para todo el contenido
 - **Instrument Serif** (regular + italic) — serif italic para acentos y frases destacadas
-- **DM Mono** (400, 500) — mono para etiquetas, precios, badges (uppercase)
+- **DM Mono** (400, 500) — mono para etiquetas, precios, botones y badges (uppercase + tracking)
 
-Regla de titular: sans chunky + **una palabra clave en Instrument Serif italic en color contraste**.
-Ejemplo: `Textiles con <em>carácter</em>` donde `<em>` va en Instrument Serif italic + rosa o petróleo.
+Regla de titular: sans bold + **una palabra clave en Instrument Serif italic en color contraste**.
+Ejemplo: `Maximalismo, <em>editado</em>` donde `<em>` va en Instrument Serif italic + rosa o petróleo.
 
 ### Elementos gráficos signature
 
-1. **Borde festoneado (scallop)** — es la firma de la marca. SVG escalable. Aparece en cards de producto, banners, separadores y hangtags.
-2. **Marquesina superior fija** — franja negra con texto DM Mono deslizándose horizontalmente. Separadores `✦` en rosa.
-3. **Damero clásico** — como acento secundario en algunos backgrounds.
-4. **Sello editorial circular** — badge redondo estilo timbre con "edición limitada" en Instrument Serif italic + número en DM Mono.
+1. **Marquesina superior fija** — franja negra con texto DM Mono deslizándose horizontalmente. Separadores `✦` en rosa.
+2. **Sello editorial circular** — badge redondo amarillo (sin borde) con "edición limitada" en Instrument Serif italic + número en DM Mono.
+3. **Logo extendido** (`/logo-extendido.svg`, rosa) en navbar y footer; monogramas rosa/blanco como favicon según modo claro/oscuro.
+4. El borde festoneado (`ScallopBorder.tsx`) y el damero quedan disponibles pero NO se usan en la UI — el estilo actual es limpio y flat.
 
-### Componentes UI
+### Componentes UI (estética limpia, referencia: rhodeskin.com / mosquiano.com)
 
-- **Botones primarios**: fondo `ink`, texto `cream`, borde 2.5px ink, radius 100px, box-shadow duro `4px 4px 0 var(--ink)`. Hover: se levanta 2px.
-- **Botones secundarios**: fondo `cream`, texto `ink`, borde 2.5px ink.
-- **Cards**: borde 2.5px ink, radius 14px, box-shadow duro `6px 6px 0 var(--ink)`, fondo cream.
-- **Inputs**: borde 2px ink, radius 8px, fondo cream, focus con outline en color vibrante.
-- **Tags/badges**: pill (radius 100px), borde 2px ink, colores rotativos, DM Mono uppercase 11px.
-- **Estilo general**: neobrutalismo elegante — bordes duros, shadows sin blur, mucho aire entre elementos.
+- **Sin sombras duras y sin bordes gruesos.** Nada de box-shadows `4px 4px 0` ni bordes 2/2.5px ink. Superficies flat.
+- **Botones primarios**: pill (rounded-full), fondo `ink`, texto `cream`, DM Mono 12px uppercase tracking-widest, sin borde ni sombra. Hover: `bg-ink/80`.
+- **Botones secundarios**: pill transparente con borde 1px ink; hover invierte (fondo ink, texto cream).
+- **Cards**: `rounded-2xl bg-white`, sin borde ni sombra, sobre el fondo cream.
+- **Inputs**: borde 1px `ink/25`, radius 8px, fondo transparente; focus: borde ink (sin outline grueso).
+- **Tags/badges**: pill con color de fondo pleno, sin borde, DM Mono uppercase 11px.
+- **Divisores**: 1px `ink/10`–`ink/15`.
+- **Drawers**: sin borde; separación con `shadow-2xl` suave.
+- **Estilo general**: minimalismo cálido — mucho aire, tipografía como protagonista, color de marca en bloques planos.
 
 ## Tono de voz
 
-**Sí (registro adulto con humor):**
-- "La mesa dice más de vos que tu Instagram."
-- "Para quien no le teme al color, ni a la lavandería."
-- "Textiles que se ven mejor con la comida encima."
+**Sí (registro adulto, ingenio seco, concreto):**
+- "Dos colores. Nunca cinco."
+- "Los objetos lindos se usan. No se guardan esperando la ocasión."
 - "Edición limitada. Cuando se van, se van."
+- Frases que describen algo específico y real del producto o del proceso (un material, una regla de diseño, un detalle de uso), no eslóganes genéricos ni comparaciones forzadas con redes sociales.
 
 **No:**
 - Emojis faciales (usar solo símbolos ✦ ✧ ✿)
+- Ganchos tipo "la mesa dice más de vos que tu Instagram" o "para quien no le teme a X" — fórmulas gastadas de copy genérico
+- Personificar el objeto ("el almohadón que saluda", "no pide permiso") como recurso repetido en cada pieza
 - "Amiga corré" / "es un LOOK" / "está IN"
 - Formalismos: "adquiera nuestros exclusivos productos"
 - CAPS agresivos y triples signos de exclamación
+- Repetir el mismo slogan-eje en múltiples páginas (hero, footer, about) — variar la formulación aunque la idea de fondo sea la misma
 
 ## Estructura de páginas
 
@@ -89,21 +95,21 @@ Ejemplo: `Textiles con <em>carácter</em>` donde `<em>` va en Instrument Serif i
 
 ## Productos de ejemplo (para poblar la base)
 
-Mesa:
+Individuales:
 1. Individual "Positano" set x2 — $18.000 — celeste/verde
-2. Mantel "Fiesta" 200x150 — $42.000 — rosa/naranja
-3. Servilletas "Domingo" set x4 — $12.000 — amarillo/petróleo
-4. Camino de mesa "Larga sobremesa" — $24.000 — rayas lila/petróleo
-5. Individual "Verano" set x4 — $32.000 — amarillo/tinta
+2. Individual "Verano" set x4 — $32.000 — amarillo/tinta
 
-Living:
-6. Almohadón "Hola casa" 45x45 — $22.000 — naranja
-7. Almohadón "Grid" 45x45 — $22.000 — damero petróleo/cream
-8. Almohadón "Bordado" 50x30 — $26.000 — lila
-9. Manta "Domingo largo" — $58.000 — rayas verde/cream
-10. Almohadón "Circular" 40cm redondo — $24.000 — celeste
-11. Almohadón "Editorial" set x2 — $38.000 — rosa/amarillo
-12. Manta "Nocturna" — $62.000 — petróleo/rosa
+Almohadones:
+3. Almohadón "Hola casa" 45x45 — $22.000 — naranja
+4. Almohadón "Grid" 45x45 — $22.000 — damero petróleo/cream
+5. Almohadón "Bordado" 50x30 — $26.000 — lila
+6. Almohadón "Circular" 40cm redondo — $24.000 — celeste
+7. Almohadón "Editorial" set x2 — $38.000 — rosa/amarillo
+
+Bolsos:
+8. Tote "Domingo" — $34.000 — rayas verde/cream
+9. Tote "Nocturna" — $36.000 — petróleo/rosa
+10. Tote "Mercado" — $30.000 — amarillo/petróleo
 
 Cada producto: 2-3 fotos placeholder, descripción, medidas, material, cuidados, número de edición limitada.
 
