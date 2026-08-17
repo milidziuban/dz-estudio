@@ -1,18 +1,18 @@
 const values = [
   {
     symbol: "✦",
-    title: "Edición limitada",
-    text: "Cuando se van, se van.",
-  },
-  {
-    symbol: "✿",
-    title: "Hecho en Argentina",
-    text: "Diseño y confección locales.",
+    title: "Envíos a todo el país",
+    text: "Andreani, a sucursal o a domicilio.",
   },
   {
     symbol: "✧",
-    title: "Envíos a todo el país",
-    text: "Andreani y Correo Argentino, de punta a punta.",
+    title: "3 cuotas sin interés",
+    text: "O 10% off por transferencia.",
+  },
+  {
+    symbol: "✿",
+    title: "Cambios en 30 días",
+    text: "Sin usar y con su etiqueta.",
   },
 ];
 

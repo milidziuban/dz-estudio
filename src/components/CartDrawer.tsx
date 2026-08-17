@@ -1,13 +1,11 @@
 import { useEffect } from "react";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
-import {
-  cartSubtotal,
-  resolveCartItems,
-  SHIPPING_ESTIMATE,
-} from "../lib/cart";
+import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
+import { almohadonesFaltan, bestDiscount, INSTALLMENTS } from "../lib/promos";
+import { cartWhatsappUrl } from "../lib/whatsapp";
 import Button from "./Button";
 import CartItemRow from "./CartItemRow";
 
@@ -20,6 +18,11 @@ export default function CartDrawer() {
   const resolved = resolveCartItems(items, products);
   const subtotal = cartSubtotal(resolved);
   const count = resolved.reduce((total, item) => total + item.qty, 0);
+  // En el drawer todavía no se eligió el medio de pago: mostramos solo las
+  // promos que ya están ganadas.
+  const discount = bestDiscount(resolved, subtotal, false);
+  const faltan = almohadonesFaltan(resolved);
+  const total = subtotal - (discount?.amount ?? 0);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -93,32 +96,57 @@ export default function CartDrawer() {
           <>
             <ul className="flex-1 overflow-y-auto px-5">
               {resolved.map((item) => (
-                <CartItemRow key={item.product.slug} item={item} />
+                <CartItemRow key={item.key} item={item} />
               ))}
             </ul>
 
             <div className="border-t border-ink/10 p-5">
+              {faltan > 0 && (
+                <p className="mb-4 rounded-xl bg-amarillo px-4 py-3 text-xs leading-relaxed">
+                  ✦ Sumá {faltan} almohadón más y se te aplica{" "}
+                  <strong>10% de descuento</strong>.
+                </p>
+              )}
+
               <dl className="space-y-1.5 font-mono text-sm tracking-wider">
                 <div className="flex justify-between">
                   <dt className="uppercase text-xs">Subtotal</dt>
                   <dd>{formatPrice(subtotal)}</dd>
                 </div>
+                {discount && (
+                  <div className="flex justify-between gap-3 text-verde">
+                    <dt className="text-xs uppercase">{discount.label}</dt>
+                    <dd className="whitespace-nowrap">
+                      −{formatPrice(discount.amount)}
+                    </dd>
+                  </div>
+                )}
                 <div className="flex justify-between">
-                  <dt className="uppercase text-xs">Envío estimado</dt>
-                  <dd>{formatPrice(SHIPPING_ESTIMATE)}</dd>
+                  <dt className="uppercase text-xs">Envío</dt>
+                  <dd className="text-xs">Se calcula al final</dd>
                 </div>
                 <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">
                   <dt className="uppercase">Total</dt>
-                  <dd>{formatPrice(subtotal + SHIPPING_ESTIMATE)}</dd>
+                  <dd>{formatPrice(total)}</dd>
                 </div>
               </dl>
+
               <p className="mt-2 text-xs text-ink/60">
-                El envío final se calcula en el checkout. Esto es un estimado
-                optimista.
+                Hasta {INSTALLMENTS.label}. Pagando por transferencia, 10% off.
               </p>
+
               <Button to="/checkout" onClick={close} className="mt-4 w-full">
                 Ir al checkout ✦
               </Button>
+              <a
+                href={cartWhatsappUrl(resolved, subtotal, discount)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={close}
+                className="mt-2 flex w-full items-center justify-center rounded-full border border-ink px-8 py-3 font-mono text-xs font-medium uppercase tracking-widest transition-colors hover:bg-ink hover:text-cream"
+              >
+                O comprar por WhatsApp
+              </a>
             </div>
           </>
         )}

@@ -1,21 +1,23 @@
-import type { CartItem } from "../hooks/useCart";
-import type { Product } from "../types/product";
+import { cartKey, type CartItem } from "../hooks/useCart";
+import type { Product, ProductVariant } from "../types/product";
 
 export type ResolvedCartItem = {
+  /** Clave única de la línea: mismo producto en dos variantes = dos líneas */
+  key: string;
   product: Product;
+  variant?: ProductVariant;
   qty: number;
 };
-
-/** Estimado optimista que se muestra en el drawer (Correo Argentino) */
-export const SHIPPING_ESTIMATE = 7200;
 
 export function resolveCartItems(
   items: CartItem[],
   products: Product[],
 ): ResolvedCartItem[] {
-  return items.flatMap(({ slug, qty }) => {
+  return items.flatMap(({ slug, variantId, qty }) => {
     const product = products.find((p) => p.slug === slug);
-    return product ? [{ product, qty }] : [];
+    if (!product) return [];
+    const variant = product.variants?.find((v) => v.id === variantId);
+    return [{ key: cartKey(slug, variantId), product, variant, qty }];
   });
 }
 

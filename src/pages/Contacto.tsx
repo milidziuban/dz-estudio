@@ -19,7 +19,7 @@ export default function Contacto() {
     <>
       <Seo
         title="Contacto"
-        description="Escribinos por email, WhatsApp o Instagram. También podés visitar el showroom en Palermo con cita previa."
+        description="Escribinos por email, WhatsApp o Instagram. También podés retirar tu pedido por el depósito en Santa Fe Capital."
         path="/contacto"
       />
 
@@ -106,7 +106,7 @@ export default function Contacto() {
                       rel="noopener noreferrer"
                       className="text-lg font-bold hover:text-verde hover:underline"
                     >
-                      WhatsApp
+                      WhatsApp {SITE.whatsapp}
                     </a>
                     <p className="text-sm text-ink/70">
                       Lo más rápido para dudas de pedidos
@@ -130,13 +130,14 @@ export default function Contacto() {
 
               <div className="rounded-2xl bg-amarillo p-6">
                 <h2 className="font-mono text-xs font-medium uppercase tracking-widest">
-                  ✦ Showroom
+                  ✦ Retiro por el depósito
                 </h2>
                 <p className="mt-3 font-serif text-xl italic">
-                  {SITE.showroom.barrio}
+                  {SITE.retiro.direccion}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed">
-                  {SITE.showroom.detalle}
+                  {SITE.retiro.horario}. Avisanos antes por WhatsApp así lo
+                  tenemos listo.
                 </p>
               </div>
             </div>

@@ -1,213 +1,138 @@
-import type {
-  Category,
-  CollectionId,
-  ColorToken,
-  Product,
-  ProductImage,
-} from "../types/product";
+import type { Category, Product } from "../types/product";
 
-export const COLLECTIONS: Record<
-  CollectionId,
-  { label: string; tagColor: "pink" | "celeste" | "lila" | "amarillo" }
-> = {
-  fiesta: { label: "Fiesta", tagColor: "pink" },
-  sobremesa: { label: "Sobremesa", tagColor: "celeste" },
-  nocturna: { label: "Nocturna", tagColor: "lila" },
-  editorial: { label: "Editorial", tagColor: "amarillo" },
-};
+// Catálogo espejo de Tienda Nube (tienda dzestudio, sincronizado 17/08/2026).
+// Los ids son los de Tienda Nube; las fotos son las mismas, descargadas a
+// /public/productos. Al dar de alta un producto allá, replicarlo acá.
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   almohadones: "Almohadones",
   individuales: "Individuales",
-  bolsos: "Bolsos",
 };
 
-const imgs = (slug: string, tints: ColorToken[]): ProductImage[] =>
-  tints.map((tint, i) => ({ seed: `dz-${slug}-${i + 1}`, tint }));
+/** Copy y foto de portada de cada categoría para la home. */
+export const CATEGORY_INTRO: Record<
+  Category,
+  {
+    colorB: string;
+    tagLabel: string;
+    description: string;
+    image: string;
+    imageAlt: string;
+    imageFit: "cover" | "contain";
+  }
+> = {
+  almohadones: {
+    colorB: "#2F5D62",
+    tagLabel: "3 modelos · $23.000",
+    description:
+      "Fundas de 40x40 en rombos y rayas de dos colores. Llevando 2 o más, 10% de descuento.",
+    image: "/productos/almohadon-rayas-blanco-negro.webp",
+    imageAlt: "Almohadón de rayas blanco y negro",
+    imageFit: "contain",
+  },
+  individuales: {
+    colorB: "#F26430",
+    tagLabel: "2 packs · desde $5.100",
+    description:
+      "Packs de dos individuales de 30x42. La versión doble es reversible: rayas de un lado, formas orgánicas del otro.",
+    image: "/productos/individuales-simple-pack.webp",
+    imageAlt: "Individuales de rayas blanco y negro puestos en la mesa",
+    imageFit: "cover",
+  },
+};
+
+const ALMOHADON_DESC =
+  "Almohadón decorativo, textura suave y diseño versátil que combina con distintos ambientes.";
 
 export const products: Product[] = [
-  // ✦ Individuales
-  {
-    id: 1,
-    slug: "individual-positano",
-    name: 'Individual "Positano" set x2',
-    category: "individuales",
-    collection: "sobremesa",
-    colors: ["celeste", "verde"],
-    price: 18000,
-    description:
-      "Estampado a mano en algodón panamá, celeste y verde. Para desayunos que terminan siendo almuerzo y sobreviven al café derramado.",
-    medidas: "45 x 33 cm cada uno · set x2",
-    material: "Algodón panamá 100%, estampado a mano",
-    cuidados:
-      "Lavar a máquina con agua fría, ciclo suave. Planchar del revés. No usar lavandina.",
-    edition: { number: 12, total: 80 },
-    images: imgs("individual-positano", ["celeste", "verde", "celeste"]),
-    sales: 34,
-    createdAt: "2026-06-10",
-  },
-  {
-    id: 2,
-    slug: "individual-verano",
-    name: 'Individual "Verano" set x4',
-    category: "individuales",
-    collection: "editorial",
-    colors: ["amarillo", "ink"],
-    price: 32000,
-    description:
-      "Cuatro individuales en amarillo y tinta, estampado serigráfico sobre algodón panamá. La base para cualquier vajilla, sin pedir nada a cambio.",
-    medidas: "45 x 33 cm cada uno · set x4",
-    material: "Algodón panamá 100%, estampado serigráfico",
-    cuidados: "Lavar a máquina con agua fría. Planchar del revés.",
-    edition: { number: 4, total: 70 },
-    images: imgs("individual-verano", ["amarillo", "ink", "amarillo"]),
-    sales: 15,
-    createdAt: "2026-07-01",
-  },
   // ✧ Almohadones
   {
-    id: 3,
-    slug: "almohadon-hola-casa",
-    name: 'Almohadón "Hola casa" 45x45',
+    id: 356622826,
+    slug: "almohadones-rombo-rosa",
+    name: "Almohadones Rombo Rosa",
     category: "almohadones",
-    collection: "fiesta",
-    colors: ["orange"],
-    price: 22000,
-    description:
-      "Naranja pleno, sin estampado ni excusas. Funda de algodón y lino con cierre invisible, pensada para sillones que necesitan un empujón.",
-    medidas: "45 x 45 cm · incluye relleno",
-    material: "Funda de algodón y lino, cierre invisible",
-    cuidados: "Funda lavable a máquina. Relleno: solo aire y cariño.",
-    edition: { number: 31, total: 90 },
-    images: imgs("almohadon-hola-casa", ["orange", "orange", "cream"]),
-    sales: 44,
-    createdAt: "2026-05-20",
+    colors: ["pink", "orange"],
+    price: 23000,
+    description: ALMOHADON_DESC,
+    medidas: "40 x 40 cm (aprox.)",
+    peso: "350 g (aprox.)",
+    images: [
+      {
+        src: "/productos/almohadon-rombo-rosa.webp",
+        fit: "contain",
+        background: "cream",
+      },
+    ],
+    inStock: true,
   },
   {
-    id: 4,
-    slug: "almohadon-grid",
-    name: 'Almohadón "Grid" 45x45',
+    id: 361309976,
+    slug: "almohadones-rayas-blanco-y-negro",
+    name: "Almohadones Rayas Blanco y Negro",
     category: "almohadones",
-    collection: "nocturna",
-    colors: ["petroleo", "cream"],
-    price: 22000,
-    description:
-      "Jacquard de algodón en damero petróleo y crema. El almohadón que combina con lo que ya tenés, sin intentarlo.",
-    medidas: "45 x 45 cm · incluye relleno",
-    material: "Tejido jacquard de algodón",
-    cuidados: "Funda lavable a máquina con agua fría. Secar a la sombra.",
-    edition: { number: 18, total: 75 },
-    images: imgs("almohadon-grid", ["petroleo", "cream", "petroleo"]),
-    sales: 39,
-    createdAt: "2026-06-05",
+    colors: ["ink", "cream"],
+    price: 23000,
+    description: ALMOHADON_DESC,
+    medidas: "40 x 40 cm (aprox.)",
+    peso: "350 g (aprox.)",
+    images: [
+      {
+        src: "/productos/almohadon-rayas-blanco-negro.webp",
+        fit: "contain",
+        background: "cream",
+      },
+    ],
+    inStock: true,
   },
   {
-    id: 5,
-    slug: "almohadon-bordado",
-    name: 'Almohadón "Bordado" 50x30',
+    id: 361310010,
+    slug: "almohadones-rombo-celeste",
+    name: "Almohadones Rombo Celeste",
     category: "almohadones",
-    collection: "nocturna",
-    colors: ["lila"],
-    price: 26000,
+    colors: ["celeste", "orange"],
+    price: 23000,
+    description: ALMOHADON_DESC,
+    medidas: "40 x 40 cm (aprox.)",
+    peso: "350 g (aprox.)",
+    images: [
+      {
+        src: "/productos/almohadon-rombo-celeste.webp",
+        fit: "contain",
+        background: "cream",
+      },
+    ],
+    inStock: true,
+  },
+  // ✦ Individuales
+  {
+    id: 357072093,
+    slug: "individuales-doble-pack-x2",
+    name: "Individuales Doble Pack x2",
+    category: "individuales",
+    colors: ["pink", "celeste"],
+    price: 7100,
     description:
-      "Bordado a mano sobre lino lila, formato apaisado. Horas de aguja para una pieza que no se apura.",
-    medidas: "50 x 30 cm · incluye relleno",
-    material: "Lino bordado a mano con hilos de algodón",
-    cuidados: "Lavar a mano con agua fría. El bordado agradece la delicadeza.",
-    edition: { number: 9, total: 40 },
-    images: imgs("almohadon-bordado", ["lila", "lila", "cream"]),
-    sales: 18,
-    createdAt: "2026-06-30",
+      "Pack de 2 individuales reversibles: de un lado diseño de rayas, del otro un diseño más orgánico, mismo color en ambas caras.",
+    medidas: "30 x 42 cm cada uno · pack x2",
+    peso: "400 g el pack (aprox.)",
+    variants: [
+      { id: "1564845157", label: "Celeste", color: "celeste" },
+      { id: "1564845158", label: "Rosa", color: "pink" },
+    ],
+    images: [{ src: "/productos/individuales-doble-pack.webp", fit: "cover" }],
+    inStock: true,
   },
   {
-    id: 6,
-    slug: "almohadon-circular",
-    name: 'Almohadón "Circular" 40cm redondo',
-    category: "almohadones",
-    collection: "sobremesa",
-    colors: ["celeste"],
-    price: 24000,
+    id: 358182239,
+    slug: "individuales-simple-pack-x2",
+    name: "Individuales Simple Pack x2",
+    category: "individuales",
+    colors: ["ink", "cream"],
+    price: 5100,
     description:
-      "Redondo, celeste, con vivo a contraste. No es imprescindible hasta que lo tenés en el sillón.",
-    medidas: "40 cm de diámetro · incluye relleno",
-    material: "Algodón panamá con vivo a contraste",
-    cuidados: "Funda lavable a máquina. Planchar con vapor suave.",
-    edition: { number: 26, total: 65 },
-    images: imgs("almohadon-circular", ["celeste", "celeste", "cream"]),
-    sales: 31,
-    createdAt: "2026-06-18",
-  },
-  {
-    id: 7,
-    slug: "almohadon-editorial",
-    name: 'Almohadón "Editorial" set x2',
-    category: "almohadones",
-    collection: "editorial",
-    colors: ["pink", "amarillo"],
-    price: 38000,
-    description:
-      "Rosa y amarillo en estampado serigráfico sobre algodón y lino. Un set pensado como tapa de revista, para sillones que no necesitan ayuda.",
-    medidas: "45 x 45 cm cada uno · set x2 · incluyen relleno",
-    material: "Algodón y lino, estampado serigráfico",
-    cuidados: "Fundas lavables a máquina con agua fría.",
-    edition: { number: 3, total: 35 },
-    images: imgs("almohadon-editorial", ["pink", "amarillo", "pink"]),
-    sales: 12,
-    createdAt: "2026-07-08",
-  },
-  // ✿ Bolsos
-  {
-    id: 8,
-    slug: "bolso-domingo",
-    name: 'Tote "Domingo"',
-    category: "bolsos",
-    collection: "sobremesa",
-    colors: ["verde", "cream"],
-    price: 34000,
-    description:
-      "Lona de algodón gruesa, rayas verde y crema. Entra el súper de la semana y el libro que no vas a leer.",
-    medidas: "40 x 45 cm · asas 60 cm",
-    material: "Lona de algodón 100%, asas reforzadas",
-    cuidados: "Lavar a mano o en bolsa de lavado, ciclo suave. No retorcer las asas.",
-    edition: { number: 11, total: 45 },
-    images: imgs("bolso-domingo", ["verde", "cream", "verde"]),
-    sales: 27,
-    createdAt: "2026-05-12",
-  },
-  {
-    id: 9,
-    slug: "bolso-nocturna",
-    name: 'Tote "Nocturna"',
-    category: "bolsos",
-    collection: "nocturna",
-    colors: ["petroleo", "pink"],
-    price: 36000,
-    description:
-      "Lona reforzada en petróleo con detalle rosa. Asas largas, fondo ancho, ninguna urgencia por combinar con el resto.",
-    medidas: "42 x 48 cm · asas 65 cm",
-    material: "Lona de algodón 100%, asas de cuero reciclado",
-    cuidados: "Lavar a mano con agua fría. Secar en plano a la sombra.",
-    edition: { number: 6, total: 30 },
-    images: imgs("bolso-nocturna", ["petroleo", "pink", "petroleo"]),
-    sales: 49,
-    createdAt: "2026-04-30",
-  },
-  {
-    id: 10,
-    slug: "bolso-mercado",
-    name: 'Tote "Mercado"',
-    category: "bolsos",
-    collection: "editorial",
-    colors: ["amarillo", "petroleo"],
-    price: 30000,
-    description:
-      "Amarillo y petróleo en lona de algodón resistente. Para la feria del sábado y todo lo demás.",
-    medidas: "38 x 42 cm · asas 55 cm",
-    material: "Lona de algodón 100%, base reforzada",
-    cuidados: "Lavar a máquina con agua fría. Aguanta todo, incluso el tuco.",
-    edition: { number: 23, total: 100 },
-    images: imgs("bolso-mercado", ["amarillo", "petroleo", "amarillo"]),
-    sales: 71,
-    createdAt: "2026-04-18",
+      "Pack de 2 individuales de una sola cara, en rayas blanco y negro. La base neutra para cualquier vajilla.",
+    medidas: "30 x 42 cm cada uno · pack x2",
+    images: [{ src: "/productos/individuales-simple-pack.webp", fit: "cover" }],
+    inStock: true,
   },
 ];

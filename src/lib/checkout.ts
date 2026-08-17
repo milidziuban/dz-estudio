@@ -27,35 +27,39 @@ export const PROVINCIAS = [
   "Tucumán",
 ] as const;
 
+// Métodos de envío tal como están configurados en Tienda Nube (Envío Nube).
+// ⚠️ Los costos son estimados fijos: Tienda Nube los cotiza por código postal.
 export const SHIPPING_OPTIONS = [
   {
-    id: "showroom",
-    label: "Retiro en showroom",
-    detail: "Palermo, CABA · coordinamos por WhatsApp",
+    id: "retiro",
+    label: "Retiro en el depósito",
+    detail: "Tacuarí 7618, Guadalupe · Santa Fe Capital · lun a vie de 9 a 18",
     cost: 0,
   },
   {
-    id: "andreani",
+    id: "andreani-sucursal",
+    label: "Andreani a sucursal",
+    detail: "3 a 6 días hábiles",
+    cost: 7200,
+  },
+  {
+    id: "andreani-domicilio",
     label: "Andreani a domicilio",
     detail: "3 a 6 días hábiles",
     cost: 9500,
-  },
-  {
-    id: "correo",
-    label: "Correo Argentino",
-    detail: "4 a 8 días hábiles",
-    cost: 7200,
   },
 ] as const;
 
 export type ShippingId = (typeof SHIPPING_OPTIONS)[number]["id"];
 
+// El CUIT es el que publica la tienda de Tienda Nube; el resto son
+// ⚠️ placeholders: reemplazar por los datos bancarios reales antes de producción.
 export const BANK_INFO = {
-  banco: "Banco Galicia",
-  titular: "DZ Estudio S.R.L.",
-  cuit: "30-12345678-9",
-  cbu: "0070999030000012345678",
-  alias: "DZ.ESTUDIO.TEXTIL",
+  banco: "[TU BANCO]",
+  titular: "[TITULAR DE LA CUENTA]",
+  cuit: "27-41860878-7",
+  cbu: "[CBU]",
+  alias: "[ALIAS]",
 };
 
 export const checkoutSchema = z.object({
@@ -74,7 +78,7 @@ export const checkoutSchema = z.object({
       "Elegí tu provincia",
     ),
   cp: z.string().min(4, "Código postal inválido"),
-  envio: z.enum(["showroom", "andreani", "correo"], {
+  envio: z.enum(["retiro", "andreani-sucursal", "andreani-domicilio"], {
     required_error: "Elegí cómo lo recibís",
     invalid_type_error: "Elegí cómo lo recibís",
   }),

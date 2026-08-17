@@ -9,34 +9,41 @@ export type ColorToken =
   | "ink"
   | "cream";
 
-export type Category = "almohadones" | "individuales" | "bolsos";
-
-export type CollectionId = "fiesta" | "sobremesa" | "nocturna" | "editorial";
+/** Las dos categorías que existen en Tienda Nube. */
+export type Category = "almohadones" | "individuales";
 
 export type ProductImage = {
-  /** Seed para picsum.photos */
-  seed: string;
-  /** Color de la paleta usado como overlay/tinte */
-  tint: ColorToken;
+  /** Foto real del catálogo, servida desde /public/productos */
+  src: string;
+  /** `contain` para los recortes sobre fondo blanco, `cover` para las fotos ambientadas */
+  fit: "cover" | "contain";
+  /** Color de fondo detrás de la foto (solo tiene efecto con `contain`) */
+  background?: ColorToken;
+};
+
+/** Opción de un producto con variantes (ej. color), tal como está cargada en Tienda Nube. */
+export type ProductVariant = {
+  id: string;
+  label: string;
+  color: ColorToken;
 };
 
 export type Product = {
+  /** ID de Tienda Nube. Es creciente en el tiempo: sirve para ordenar por novedades. */
   id: number;
   slug: string;
   name: string;
   category: Category;
-  collection: CollectionId;
   colors: ColorToken[];
   /** Precio en ARS */
   price: number;
   description: string;
   medidas: string;
-  material: string;
-  cuidados: string;
-  edition: { number: number; total: number };
+  peso?: string;
+  material?: string;
+  cuidados?: string;
+  /** Solo en los productos que tienen variantes cargadas en Tienda Nube */
+  variants?: ProductVariant[];
   images: ProductImage[];
-  /** Unidades vendidas (para ordenar por más vendidos) */
-  sales: number;
-  /** Fecha de alta (para ordenar por novedades) */
-  createdAt: string;
+  inStock: boolean;
 };

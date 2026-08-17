@@ -17,10 +17,11 @@ import SobreNosotros from "./pages/SobreNosotros";
 import Tienda from "./pages/Tienda";
 
 const marqueeItems = [
+  "3 cuotas sin interés",
+  "10% off pagando por transferencia",
+  "10% llevando 2 almohadones",
   "Envíos a todo el país",
-  "Edición limitada",
-  "Hecho en Argentina",
-  "Mercado Pago + transferencia",
+  "Retiro gratis en Santa Fe Capital",
 ];
 
 export default function App() {

@@ -5,7 +5,7 @@ export default function SobreNosotros() {
     <>
       <Seo
         title="Sobre nosotros"
-        description="La historia y la filosofía de DZ Estudio: almohadones, individuales y bolsos en ediciones limitadas, diseñados y hechos en Argentina."
+        description="La historia y la filosofía de DZ Estudio: almohadones e individuales estampados, diseñados y hechos en Argentina."
         path="/sobre-nosotros"
       />
 
@@ -24,8 +24,8 @@ export default function SobreNosotros() {
               improvisación.
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed">
-              Hacemos almohadones, individuales y bolsos en ediciones cortas,
-              para gente a la que le importa lo que tiene en su casa.
+              Hacemos almohadones e individuales en tiradas cortas, para gente
+              a la que le importa lo que tiene en su casa.
             </p>
           </div>
         </header>
@@ -34,17 +34,17 @@ export default function SobreNosotros() {
         <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
           <div
             className="mx-auto aspect-[16/9] max-w-5xl overflow-hidden rounded-2xl"
-            style={{ backgroundColor: "#F26D9E" }}
+            style={{ backgroundColor: "#F3EFE4" }}
           >
             <img
-              src="https://picsum.photos/seed/dz-estudio-taller/1200/675"
-              alt="El taller de DZ Estudio"
+              src="/productos/individuales-doble-pack.webp"
+              alt="Individual reversible de DZ Estudio en rosa y azul"
               loading="lazy"
-              className="h-full w-full object-cover opacity-80 mix-blend-multiply grayscale"
+              className="h-full w-full object-cover"
             />
           </div>
           <p className="mx-auto mt-3 max-w-5xl text-center font-mono text-[11px] uppercase tracking-widest text-ink/60">
-            Nuestro taller en Buenos Aires ✧
+            Individual reversible, cara de rayas ✧
           </p>
         </div>
 
@@ -59,10 +59,10 @@ export default function SobreNosotros() {
             </h2>
             <p className="leading-relaxed">
               Empezamos por hartazgo de recorrer locales enteros y encontrar
-              siempre lo mismo: almohadones lisos, individuales sin gracia y
-              bolsos de tela que parecían todos el mismo bolso. Queríamos
-              objetos con una paleta definida y un proceso cuidado detrás.
-              Como no existían, los hicimos nosotros.
+              siempre lo mismo: almohadones lisos e individuales sin gracia,
+              todos variaciones del mismo beige. Queríamos objetos con una
+              paleta definida y un proceso cuidado detrás. Como no existían,
+              los hicimos nosotros.
             </p>
             <p className="mt-4 leading-relaxed">
               La primera colección fueron ocho almohadones cosidos en un
@@ -81,10 +81,10 @@ export default function SobreNosotros() {
             </h2>
             <p className="leading-relaxed">
               Creemos en el maximalismo con criterio: dos colores que se
-              eligen, nunca cinco que se acumulan. En que un bolso puede
-              cargar la compra del súper y seguir siendo una pieza de diseño.
-              En que las cosas lindas se usan — nuestros almohadones se ven
-              mejor gastados de uso que nuevos en la caja.
+              eligen, nunca cinco que se acumulan. En que un individual puede
+              aguantar la mesa de todos los días y seguir siendo una pieza de
+              diseño. En que las cosas lindas se usan — nuestros almohadones se
+              ven mejor gastados de uso que nuevos en la caja.
             </p>
             <p className="mt-4 leading-relaxed">
               Y creemos, sobre todo, en no producir de más. Por eso trabajamos
@@ -104,8 +104,8 @@ export default function SobreNosotros() {
             <p className="leading-relaxed">
               Todo se diseña y se confecciona en Argentina, con talleres con los
               que trabajamos hace años y a los que les pagamos lo que
-              corresponde. Elegimos algodones, linos y lonas que aguanten uso
-              diario, lavados frecuentes y el paso del tiempo.
+              corresponde. Elegimos algodones y linos que aguanten uso diario,
+              lavados frecuentes y el paso del tiempo.
             </p>
           </section>
 

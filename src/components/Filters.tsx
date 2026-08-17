@@ -5,43 +5,34 @@ import type { ColorToken } from "../types/product";
 
 export type FiltersState = {
   categoria: string;
-  coleccion: string;
   color: string;
   precio: string;
 };
 
 export const PRICE_RANGES = [
   { id: "all", label: "Todos", min: 0, max: Infinity },
-  { id: "under20", label: "Hasta $20.000", min: 0, max: 20000 },
-  { id: "20to40", label: "$20.000 a $40.000", min: 20000, max: 40000 },
-  { id: "over40", label: "Más de $40.000", min: 40000, max: Infinity },
+  { id: "under10", label: "Hasta $10.000", min: 0, max: 10000 },
+  { id: "over10", label: "Más de $10.000", min: 10000, max: Infinity },
 ];
 
 export const DEFAULT_FILTERS: FiltersState = {
   categoria: "all",
-  coleccion: "all",
   color: "all",
   precio: "all",
 };
 
-const COLOR_OPTIONS: ColorToken[] = [
-  "pink",
-  "orange",
-  "celeste",
-  "verde",
-  "lila",
-  "petroleo",
-  "amarillo",
-  "ink",
-  "cream",
-];
-
 type FiltersProps = {
   value: FiltersState;
   onChange: (patch: Partial<FiltersState>) => void;
+  /** Colores presentes en el catálogo: evitamos ofrecer filtros vacíos */
+  colorOptions: ColorToken[];
 };
 
-export default function Filters({ value, onChange }: FiltersProps) {
+export default function Filters({
+  value,
+  onChange,
+  colorOptions,
+}: FiltersProps) {
   const pill = (selected: boolean) =>
     cn(
       "rounded-full border px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
@@ -52,7 +43,6 @@ export default function Filters({ value, onChange }: FiltersProps) {
 
   const isDefault =
     value.categoria === "all" &&
-    value.coleccion === "all" &&
     value.color === "all" &&
     value.precio === "all";
 
@@ -82,13 +72,6 @@ export default function Filters({ value, onChange }: FiltersProps) {
               </button>
             ),
           )}
-          <button
-            type="button"
-            className={pill(value.categoria === "packs")}
-            onClick={() => onChange({ categoria: "packs" })}
-          >
-            Packs
-          </button>
         </div>
       </fieldset>
 
@@ -104,7 +87,7 @@ export default function Filters({ value, onChange }: FiltersProps) {
           >
             Todos
           </button>
-          {COLOR_OPTIONS.map((token) => (
+          {colorOptions.map((token) => (
             <button
               key={token}
               type="button"
@@ -121,6 +104,24 @@ export default function Filters({ value, onChange }: FiltersProps) {
               )}
               style={{ backgroundColor: COLOR_HEX[token] }}
             />
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
+          ✧ Precio
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {PRICE_RANGES.map((range) => (
+            <button
+              key={range.id}
+              type="button"
+              className={pill(value.precio === range.id)}
+              onClick={() => onChange({ precio: range.id })}
+            >
+              {range.label}
+            </button>
           ))}
         </div>
       </fieldset>

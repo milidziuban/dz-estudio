@@ -5,8 +5,12 @@ import Tag, { type TagColor } from "./Tag";
 type CollectionCardProps = {
   title: string;
   description: string;
-  /** Dupla bicolor: colorA manda en el bloque visual, colorB acentúa */
-  colorA: string;
+  /** Foto de un producto de la categoría */
+  image: string;
+  imageAlt: string;
+  /** `contain` para los recortes sobre fondo blanco */
+  imageFit: "cover" | "contain";
+  /** Color de acento de la dupla */
   colorB: string;
   tagColor: TagColor;
   tagLabel: string;
@@ -16,34 +20,36 @@ type CollectionCardProps = {
 export default function CollectionCard({
   title,
   description,
-  colorA,
+  image,
+  imageAlt,
+  imageFit,
   colorB,
   tagColor,
   tagLabel,
   to,
 }: CollectionCardProps) {
   return (
-    <Card className="flex flex-col">
-      <div
-        className="relative flex h-48 items-center justify-center md:h-56"
-        style={{ backgroundColor: colorA }}
-      >
-        <span
-          className="font-serif text-7xl italic md:text-8xl"
-          style={{ color: colorB }}
-          aria-hidden="true"
-        >
-          {title.charAt(0)}
-        </span>
-      </div>
+    <Card className="group flex flex-col">
+      <Link to={to} className="block overflow-hidden bg-cream" tabIndex={-1}>
+        <img
+          src={image}
+          alt={imageAlt}
+          loading="lazy"
+          className={`h-56 w-full transition-transform duration-500 group-hover:scale-[1.03] md:h-64 ${
+            imageFit === "contain" ? "object-contain p-6" : "object-cover"
+          }`}
+        />
+      </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-6">
         <Tag color={tagColor} className="self-start">
           {tagLabel}
         </Tag>
         <h3 className="text-2xl font-bold">
-          Colección{" "}
-          <em className="font-serif font-normal italic" style={{ color: colorB }}>
+          <em
+            className="font-serif font-normal italic"
+            style={{ color: colorB }}
+          >
             {title}
           </em>
         </h3>
@@ -52,7 +58,7 @@ export default function CollectionCard({
           to={to}
           className="mt-auto font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink"
         >
-          Ver colección ✦
+          Ver {title.toLowerCase()} ✦
         </Link>
       </div>
     </Card>

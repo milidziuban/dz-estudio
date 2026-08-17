@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { products as localCatalog } from "../data/products";
 import { supabase } from "../lib/supabase";
 import type {
   Category,
-  CollectionId,
   ColorToken,
   Product,
   ProductImage,
+  ProductVariant,
 } from "../types/product";
 
 type ProductRow = {
@@ -13,18 +14,16 @@ type ProductRow = {
   slug: string;
   name: string;
   category: Category;
-  collection: CollectionId;
   colors: ColorToken[];
   price: number;
   description: string;
   medidas: string;
-  material: string;
-  cuidados: string;
-  edition_number: number;
-  edition_total: number;
+  peso: string | null;
+  material: string | null;
+  cuidados: string | null;
+  variants: ProductVariant[] | null;
   images: ProductImage[];
-  sales: number;
-  created_at: string;
+  in_stock: boolean;
 };
 
 function mapRow(row: ProductRow): Product {
@@ -33,17 +32,16 @@ function mapRow(row: ProductRow): Product {
     slug: row.slug,
     name: row.name,
     category: row.category,
-    collection: row.collection,
     colors: row.colors,
     price: row.price,
     description: row.description,
     medidas: row.medidas,
-    material: row.material,
-    cuidados: row.cuidados,
-    edition: { number: row.edition_number, total: row.edition_total },
+    peso: row.peso ?? undefined,
+    material: row.material ?? undefined,
+    cuidados: row.cuidados ?? undefined,
+    variants: row.variants?.length ? row.variants : undefined,
     images: row.images,
-    sales: row.sales,
-    createdAt: row.created_at,
+    inStock: row.in_stock,
   };
 }
 
@@ -51,13 +49,24 @@ export function useProducts() {
   return useQuery({
     queryKey: ["products"],
     queryFn: async (): Promise<Product[]> => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("id");
-      if (error) throw error;
-      return (data as ProductRow[]).map(mapRow);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("id");
+        if (error) throw error;
+        if (data?.length) return (data as ProductRow[]).map(mapRow);
+      } catch (error) {
+        // Sin Supabase configurado (o sin la migración corrida) la tienda
+        // igual muestra el catálogo espejo de Tienda Nube.
+        console.warn(
+          "No se pudo leer products de Supabase, uso el catálogo local:",
+          error,
+        );
+      }
+      return localCatalog;
     },
+    retry: false,
     staleTime: 5 * 60 * 1000,
   });
 }

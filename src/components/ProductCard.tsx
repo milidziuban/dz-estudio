@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { COLLECTIONS } from "../data/products";
+import { CATEGORY_LABEL } from "../data/products";
 import { formatPrice } from "../lib/format";
+import { ALMOHADONES_PROMO } from "../lib/promos";
 import type { Product } from "../types/product";
 import Card from "./Card";
 import ProductImage from "./ProductImage";
@@ -10,8 +11,12 @@ type ProductCardProps = {
   product: Product;
 };
 
+const CATEGORY_TAG = {
+  almohadones: "pink",
+  individuales: "celeste",
+} as const;
+
 export default function ProductCard({ product }: ProductCardProps) {
-  const collection = COLLECTIONS[product.collection];
   const [primary, secondary] = product.images;
 
   return (
@@ -34,17 +39,35 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             />
           )}
+          {product.category === "almohadones" && (
+            <Tag
+              color="amarillo"
+              className="absolute left-3 top-3 text-[10px]"
+            >
+              {ALMOHADONES_PROMO.short}
+            </Tag>
+          )}
+          {!product.inStock && (
+            <span className="absolute inset-0 flex items-center justify-center bg-cream/80 font-mono text-xs font-medium uppercase tracking-widest">
+              Sin stock
+            </span>
+          )}
         </div>
       </Card>
 
       <div className="flex flex-col gap-1.5 pt-4">
-        <Tag color={collection.tagColor} className="self-start">
-          {collection.label}
+        <Tag color={CATEGORY_TAG[product.category]} className="self-start">
+          {CATEGORY_LABEL[product.category]}
         </Tag>
         <h3 className="text-base font-bold leading-snug">{product.name}</h3>
         <p className="font-mono text-sm uppercase tracking-wider text-ink/70">
           {formatPrice(product.price)}
         </p>
+        {product.variants && (
+          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">
+            {product.variants.map((v) => v.label).join(" · ")}
+          </p>
+        )}
       </div>
     </Link>
   );

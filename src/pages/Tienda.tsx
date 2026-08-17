@@ -7,35 +7,28 @@ import Filters, {
 } from "../components/Filters";
 import ProductCard from "../components/ProductCard";
 import Seo from "../components/Seo";
-import { CATEGORY_LABEL, COLLECTIONS } from "../data/products";
+import { CATEGORY_LABEL } from "../data/products";
 import { useProducts } from "../hooks/useProducts";
-import type { Product } from "../types/product";
-
-// "packs" no es una categoría de la base: agrupa los productos en set
-const isPack = (p: Product) => /\bset\b/i.test(p.name);
+import type { ColorToken } from "../types/product";
 
 const categoriaFromParam = (param: string | null) =>
-  param && (param in CATEGORY_LABEL || param === "packs") ? param : "all";
+  param && param in CATEGORY_LABEL ? param : "all";
 
-type SortId = "novedades" | "precio-asc" | "precio-desc" | "vendidos";
+type SortId = "novedades" | "precio-asc" | "precio-desc";
 
 const SORT_OPTIONS: { id: SortId; label: string }[] = [
   { id: "novedades", label: "Novedades" },
   { id: "precio-asc", label: "Precio: menor a mayor" },
   { id: "precio-desc", label: "Precio: mayor a menor" },
-  { id: "vendidos", label: "Más vendidos" },
 ];
 
 export default function Tienda() {
   const { data: products = [], isLoading, isError, refetch } = useProducts();
   const [searchParams] = useSearchParams();
-  const coleccionParam = searchParams.get("coleccion");
 
   const [filters, setFilters] = useState<FiltersState>({
     ...DEFAULT_FILTERS,
     categoria: categoriaFromParam(searchParams.get("categoria")),
-    coleccion:
-      coleccionParam && coleccionParam in COLLECTIONS ? coleccionParam : "all",
   });
   const [sort, setSort] = useState<SortId>("novedades");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -43,29 +36,29 @@ export default function Tienda() {
   // Los links de la navbar cambian la URL estando ya en /tienda:
   // sincronizamos los params con los filtros.
   useEffect(() => {
-    const coleccion = searchParams.get("coleccion");
     setFilters((prev) => ({
       ...prev,
       categoria: categoriaFromParam(searchParams.get("categoria")),
-      coleccion: coleccion && coleccion in COLLECTIONS ? coleccion : "all",
     }));
   }, [searchParams]);
 
   const updateFilters = (patch: Partial<FiltersState>) =>
     setFilters((prev) => ({ ...prev, ...patch }));
 
+  const colorOptions = useMemo(() => {
+    const seen = new Set<ColorToken>();
+    products.forEach((p) => p.colors.forEach((c) => seen.add(c)));
+    return [...seen];
+  }, [products]);
+
   const visible = useMemo(() => {
     const range = PRICE_RANGES.find((r) => r.id === filters.precio)!;
 
     const filtered = products.filter(
       (p) =>
-        (filters.categoria === "all" ||
-          (filters.categoria === "packs"
-            ? isPack(p)
-            : p.category === filters.categoria)) &&
-        (filters.coleccion === "all" || p.collection === filters.coleccion) &&
+        (filters.categoria === "all" || p.category === filters.categoria) &&
         (filters.color === "all" ||
-          p.colors.includes(filters.color as (typeof p.colors)[number])) &&
+          p.colors.includes(filters.color as ColorToken)) &&
         p.price >= range.min &&
         p.price < range.max,
     );
@@ -73,16 +66,14 @@ export default function Tienda() {
     const sorted = [...filtered];
     switch (sort) {
       case "novedades":
-        sorted.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        // El id de Tienda Nube crece con el alta: mayor id = más nuevo
+        sorted.sort((a, b) => b.id - a.id);
         break;
       case "precio-asc":
         sorted.sort((a, b) => a.price - b.price);
         break;
       case "precio-desc":
         sorted.sort((a, b) => b.price - a.price);
-        break;
-      case "vendidos":
-        sorted.sort((a, b) => b.sales - a.sales);
         break;
     }
     return sorted;
@@ -92,7 +83,7 @@ export default function Tienda() {
     <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
       <Seo
         title="Tienda"
-        description="Almohadones, individuales y bolsos en edición limitada. Elegí tu dupla de color."
+        description="Almohadones e individuales estampados, hechos en Argentina. Elegí tu dupla de color."
         path="/tienda"
       />
       <div className="mx-auto max-w-6xl">
@@ -108,7 +99,11 @@ export default function Tienda() {
         <div className="md:grid md:grid-cols-[260px_1fr] md:gap-10 lg:gap-14">
           {/* Sidebar desktop */}
           <aside className="hidden md:block" aria-label="Filtros">
-            <Filters value={filters} onChange={updateFilters} />
+            <Filters
+              value={filters}
+              onChange={updateFilters}
+              colorOptions={colorOptions}
+            />
           </aside>
 
           <div>
@@ -221,7 +216,11 @@ export default function Tienda() {
                 ✕
               </button>
             </div>
-            <Filters value={filters} onChange={updateFilters} />
+            <Filters
+              value={filters}
+              onChange={updateFilters}
+              colorOptions={colorOptions}
+            />
             <button
               type="button"
               onClick={() => setDrawerOpen(false)}

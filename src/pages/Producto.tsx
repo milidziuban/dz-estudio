@@ -1,19 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Button from "../components/Button";
-import EditionBadge from "../components/EditionBadge";
 import ProductCard from "../components/ProductCard";
 import ProductImage from "../components/ProductImage";
 import Seo from "../components/Seo";
 import Tag from "../components/Tag";
-import { CATEGORY_LABEL, COLLECTIONS } from "../data/products";
+import { CATEGORY_LABEL } from "../data/products";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
 import { cn } from "../lib/cn";
+import { COLOR_HEX } from "../lib/colors";
 import { formatPrice } from "../lib/format";
+import { INSTALLMENTS } from "../lib/promos";
+import { SITE } from "../lib/site";
 
 const DETAILS = [
   { key: "medidas", label: "Medidas" },
+  { key: "peso", label: "Peso" },
   { key: "material", label: "Material" },
   { key: "cuidados", label: "Cuidados" },
 ] as const;
@@ -24,10 +27,18 @@ export default function Producto() {
 
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
+  const [variantId, setVariantId] = useState<string | undefined>();
   const addToCart = useCart((s) => s.add);
   const openCart = useCart((s) => s.open);
 
   const product = products.find((p) => p.slug === slug);
+
+  // Al cambiar de producto, arrancamos con la primera variante seleccionada
+  useEffect(() => {
+    setVariantId(product?.variants?.[0]?.id);
+    setImgIdx(0);
+    setQty(1);
+  }, [product?.slug, product?.variants]);
 
   if (isLoading) {
     return (
@@ -57,19 +68,18 @@ export default function Producto() {
     );
   }
 
-  const collection = COLLECTIONS[product.collection];
+  // Primero los de la misma categoría, después el resto
   const related = [...products]
     .filter((p) => p.slug !== product.slug)
-    .sort((a, b) => {
-      const score = (p: (typeof products)[number]) =>
-        (p.collection === product.collection ? 2 : 0) +
-        (p.category === product.category ? 1 : 0);
-      return score(b) - score(a);
-    })
+    .sort(
+      (a, b) =>
+        Number(b.category === product.category) -
+        Number(a.category === product.category),
+    )
     .slice(0, 3);
 
   const handleAdd = () => {
-    addToCart(product.slug, qty);
+    addToCart(product.slug, variantId, qty);
     openCart();
   };
 
@@ -78,7 +88,7 @@ export default function Producto() {
       <Seo
         title={product.name}
         description={product.description}
-        image={`https://picsum.photos/seed/${product.images[0].seed}/1200/630`}
+        image={`${SITE.url}${product.images[0].src}`}
         path={`/producto/${product.slug}`}
       />
       <div className="mx-auto max-w-6xl">
@@ -99,56 +109,90 @@ export default function Producto() {
                 className="aspect-square"
               />
             </div>
-            <div className="mt-4 flex gap-3">
-              {product.images.map((image, i) => (
-                <button
-                  key={image.seed}
-                  type="button"
-                  aria-label={`Ver foto ${i + 1}`}
-                  aria-pressed={imgIdx === i}
-                  onClick={() => setImgIdx(i)}
-                  className={cn(
-                    "w-20 overflow-hidden rounded-lg transition-all",
-                    imgIdx === i
-                      ? "ring-1 ring-ink ring-offset-2 ring-offset-cream"
-                      : "opacity-60 hover:opacity-100",
-                  )}
-                >
-                  <ProductImage
-                    image={image}
-                    alt=""
-                    className="aspect-square"
-                  />
-                </button>
-              ))}
-            </div>
+            {product.images.length > 1 && (
+              <div className="mt-4 flex gap-3">
+                {product.images.map((image, i) => (
+                  <button
+                    key={image.src}
+                    type="button"
+                    aria-label={`Ver foto ${i + 1}`}
+                    aria-pressed={imgIdx === i}
+                    onClick={() => setImgIdx(i)}
+                    className={cn(
+                      "w-20 overflow-hidden rounded-lg transition-all",
+                      imgIdx === i
+                        ? "ring-1 ring-ink ring-offset-2 ring-offset-cream"
+                        : "opacity-60 hover:opacity-100",
+                    )}
+                  >
+                    <ProductImage
+                      image={image}
+                      alt=""
+                      className="aspect-square"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Info */}
           <div>
-            <div className="flex flex-wrap gap-2">
-              <Tag>{CATEGORY_LABEL[product.category]}</Tag>
-              <Tag color={collection.tagColor}>
-                Colección {collection.label}
-              </Tag>
-            </div>
+            <Tag>{CATEGORY_LABEL[product.category]}</Tag>
 
-            <div className="mt-5 flex items-start justify-between gap-4">
-              <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-                {product.name}
-              </h1>
-              <EditionBadge
-                number={product.edition.number}
-                total={product.edition.total}
-                className="shrink-0"
-              />
-            </div>
+            <h1 className="mt-5 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+              {product.name}
+            </h1>
 
             <p className="mt-4 font-mono text-2xl font-medium tracking-wider">
               {formatPrice(product.price)}
             </p>
+            <p className="mt-1.5 font-mono text-xs uppercase tracking-widest text-ink/60">
+              Hasta {INSTALLMENTS.label} ✦ 10% off por transferencia
+            </p>
 
-            <p className="mt-6 leading-relaxed">{product.description}</p>
+            {product.category === "almohadones" && (
+              <p className="mt-5 rounded-xl bg-amarillo px-4 py-3 text-sm leading-relaxed">
+                ✦ Llevando 2 almohadones o más,{" "}
+                <strong>10% de descuento</strong> en toda la categoría.
+              </p>
+            )}
+
+            {product.description && (
+              <p className="mt-6 leading-relaxed">{product.description}</p>
+            )}
+
+            {/* Variantes */}
+            {product.variants && (
+              <fieldset className="mt-8">
+                <legend className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
+                  ✿ Color
+                </legend>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      aria-pressed={variantId === variant.id}
+                      onClick={() => setVariantId(variant.id)}
+                      className={cn(
+                        "flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
+                        variantId === variant.id
+                          ? "border-ink bg-ink text-cream"
+                          : "border-ink/25 hover:border-ink",
+                      )}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="h-3.5 w-3.5 rounded-full border border-ink/20"
+                        style={{ backgroundColor: COLOR_HEX[variant.color] }}
+                      />
+                      {variant.label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            )}
 
             {/* Cantidad + carrito */}
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -176,22 +220,53 @@ export default function Producto() {
                   +
                 </button>
               </div>
-              <Button onClick={handleAdd} className="flex-1 py-4 text-base">
-                Agregar al carrito ✦
+              <Button
+                onClick={handleAdd}
+                disabled={!product.inStock}
+                className="flex-1 py-4 text-base disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {product.inStock ? "Agregar al carrito ✦" : "Sin stock"}
               </Button>
             </div>
+
+            {/* Envío y pago: lo que el cliente pregunta antes de comprar */}
+            <ul className="mt-6 space-y-2 text-sm">
+              <li className="flex gap-2.5">
+                <span aria-hidden="true">✦</span>
+                <span>
+                  Envíos a todo el país con Andreani, a sucursal o a domicilio.
+                </span>
+              </li>
+              <li className="flex gap-2.5">
+                <span aria-hidden="true">✧</span>
+                <span>
+                  Retiro gratis en {SITE.retiro.direccion}.{" "}
+                  {SITE.retiro.horario}.
+                </span>
+              </li>
+              <li className="flex gap-2.5">
+                <span aria-hidden="true">✿</span>
+                <span>
+                  Tarjeta de crédito, débito, efectivo o transferencia. Cambios
+                  dentro de 30 días.
+                </span>
+              </li>
+            </ul>
+
             {/* Detalles */}
             <dl className="mt-10 border-t border-ink/15">
-              {DETAILS.map(({ key, label }) => (
-                <div key={key} className="border-b border-ink/15 py-4">
-                  <dt className="font-mono text-xs font-medium uppercase tracking-widest">
-                    ✧ {label}
-                  </dt>
-                  <dd className="mt-1.5 text-sm leading-relaxed">
-                    {product[key]}
-                  </dd>
-                </div>
-              ))}
+              {DETAILS.filter(({ key }) => product[key]).map(
+                ({ key, label }) => (
+                  <div key={key} className="border-b border-ink/15 py-4">
+                    <dt className="font-mono text-xs font-medium uppercase tracking-widest">
+                      ✧ {label}
+                    </dt>
+                    <dd className="mt-1.5 text-sm leading-relaxed">
+                      {product[key]}
+                    </dd>
+                  </div>
+                ),
+              )}
             </dl>
           </div>
         </div>

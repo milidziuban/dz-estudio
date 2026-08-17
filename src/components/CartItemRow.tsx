@@ -12,7 +12,8 @@ export default function CartItemRow({ item }: CartItemRowProps) {
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const close = useCart((s) => s.close);
-  const { product, qty } = item;
+  const { key, product, variant, qty } = item;
+  const label = variant ? `${product.name} — ${variant.label}` : product.name;
 
   return (
     <li className="flex gap-4 border-b border-ink/10 py-4">
@@ -41,13 +42,19 @@ export default function CartItemRow({ item }: CartItemRowProps) {
           </Link>
           <button
             type="button"
-            aria-label={`Eliminar ${product.name} del carrito`}
-            onClick={() => remove(product.slug)}
+            aria-label={`Eliminar ${label} del carrito`}
+            onClick={() => remove(key)}
             className="text-lg leading-none hover:text-orange"
           >
             ✕
           </button>
         </div>
+
+        {variant && (
+          <p className="mt-0.5 font-mono text-[11px] uppercase tracking-widest text-ink/60">
+            {variant.label}
+          </p>
+        )}
 
         <p className="mt-1 font-mono text-xs tracking-wider text-ink/70">
           {formatPrice(product.price)} c/u
@@ -57,8 +64,8 @@ export default function CartItemRow({ item }: CartItemRowProps) {
           <div className="flex items-center rounded-full border border-ink/25">
             <button
               type="button"
-              aria-label={`Restar una unidad de ${product.name}`}
-              onClick={() => setQty(product.slug, qty - 1)}
+              aria-label={`Restar una unidad de ${label}`}
+              onClick={() => setQty(key, qty - 1)}
               className="px-3 py-1 font-bold hover:text-pink"
             >
               −
@@ -68,8 +75,8 @@ export default function CartItemRow({ item }: CartItemRowProps) {
             </span>
             <button
               type="button"
-              aria-label={`Sumar una unidad de ${product.name}`}
-              onClick={() => setQty(product.slug, qty + 1)}
+              aria-label={`Sumar una unidad de ${label}`}
+              onClick={() => setQty(key, qty + 1)}
               className="px-3 py-1 font-bold hover:text-pink"
             >
               +

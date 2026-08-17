@@ -53,6 +53,33 @@ Deno.serve(async (req) => {
       }),
     );
 
+    // Mercado Pago no acepta ítems negativos, así que el descuento se reparte
+    // proporcionalmente entre los productos. El redondeo que sobra se ajusta
+    // en el primer ítem para que la suma sea exactamente order.total.
+    const discount = Number(order.discount ?? 0);
+    if (discount > 0 && items.length > 0) {
+      const productsTotal = items.reduce(
+        (sum, it) => sum + it.unit_price * it.quantity,
+        0,
+      );
+      if (productsTotal > discount) {
+        const factor = (productsTotal - discount) / productsTotal;
+        items.forEach((it) => {
+          it.unit_price = Math.round(it.unit_price * factor * 100) / 100;
+        });
+        const afterDiscount = items.reduce(
+          (sum, it) => sum + it.unit_price * it.quantity,
+          0,
+        );
+        const drift = productsTotal - discount - afterDiscount;
+        if (drift !== 0) {
+          items[0].unit_price =
+            Math.round((items[0].unit_price + drift / items[0].quantity) * 100) /
+            100;
+        }
+      }
+    }
+
     // El envío va como ítem para que el total de MP coincida con order.total
     if (order.shipping_cost > 0) {
       items.push({

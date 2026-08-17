@@ -2,11 +2,18 @@ import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { cartCount } from "../lib/cart";
 
-const NAV_LINKS = [
+const NAV_LINKS: { label: string; short?: string; to: string }[] = [
   { label: "Todo", to: "/tienda" },
-  { label: "Individuales", to: "/tienda?categoria=individuales" },
-  { label: "Packs", to: "/tienda?categoria=packs" },
-  { label: "Almohadones", to: "/tienda?categoria=almohadones" },
+  {
+    label: "Almohadones",
+    short: "Almohadones",
+    to: "/tienda?categoria=almohadones",
+  },
+  {
+    label: "Individuales",
+    short: "Individuales",
+    to: "/tienda?categoria=individuales",
+  },
 ];
 
 export default function Header() {
@@ -25,17 +32,10 @@ export default function Header() {
           />
         </Link>
 
-        <div className="flex items-center gap-6">
-          <nav aria-label="Navegación principal">
-            {/* Mobile: un solo acceso a la tienda */}
-            <Link
-              to="/tienda"
-              className="font-mono text-xs font-medium uppercase tracking-widest transition-colors hover:text-pink md:hidden"
-            >
-              Tienda ✦
-            </Link>
-            {/* Desktop: categorías */}
-            <div className="hidden items-center gap-6 md:flex">
+        <div className="flex items-center gap-4 sm:gap-6">
+          {/* Desktop: las categorías van al lado del logo */}
+          <nav aria-label="Navegación principal" className="hidden md:block">
+            <div className="flex items-center gap-6">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.label}
@@ -79,6 +79,22 @@ export default function Header() {
           </button>
         </div>
       </div>
+
+      {/* Mobile: las categorías en una segunda fila, así entran completas */}
+      <nav
+        aria-label="Categorías"
+        className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-0.5 md:hidden"
+      >
+        {NAV_LINKS.map((link) => (
+          <Link
+            key={link.label}
+            to={link.to}
+            className="shrink-0 rounded-full border border-ink/25 px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors hover:border-ink"
+          >
+            {link.short ?? link.label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }

@@ -10,15 +10,15 @@ const CATEGORIES: { id: string; symbol: string; title: string; items: QA[] }[] =
       items: [
         {
           q: "¿A dónde envían?",
-          a: "A todo el país, con Andreani y Correo Argentino. En CABA y GBA también podés retirar en el showroom sin costo, coordinando por WhatsApp.",
+          a: "A todo el país con Andreani, a sucursal o a domicilio. Si estás en Santa Fe Capital podés retirar sin costo por el depósito de Tacuarí 7618, Guadalupe, de lunes a viernes de 9 a 18.",
         },
         {
           q: "¿Cuánto tarda?",
-          a: "Andreani, entre 3 y 6 días hábiles. Correo Argentino, entre 4 y 8. Los pedidos se despachan dentro de las 48 horas de acreditado el pago.",
+          a: "Andreani entrega entre 3 y 6 días hábiles, según la provincia. Los pedidos se despachan dentro de las 48 horas de acreditado el pago.",
         },
         {
           q: "¿Cuánto cuesta el envío?",
-          a: "El costo se calcula en el checkout según el método y tu código postal. El retiro en showroom es siempre gratis.",
+          a: "El costo se calcula en el checkout según el método y tu código postal. El retiro por el depósito es siempre gratis.",
         },
         {
           q: "¿Puedo seguir mi pedido?",
@@ -27,8 +27,27 @@ const CATEGORIES: { id: string; symbol: string; title: string; items: QA[] }[] =
       ],
     },
     {
-      id: "cambios",
+      id: "pagos",
       symbol: "✧",
+      title: "Medios de pago",
+      items: [
+        {
+          q: "¿Con qué puedo pagar?",
+          a: "Con Mercado Pago (tarjeta de crédito, débito o efectivo en puntos de pago) y con tarjeta de crédito o débito directo en el checkout. También aceptamos transferencia bancaria.",
+        },
+        {
+          q: "¿Cómo pago por transferencia?",
+          a: "Elegís transferencia en el checkout, te mostramos los datos de la cuenta y nos mandás el comprobante por WhatsApp. Te reservamos el pedido por 48 horas.",
+        },
+        {
+          q: "¿Guardan los datos de mi tarjeta?",
+          a: "No. El pago con tarjeta lo procesa la pasarela; nosotros solo recibimos la confirmación de que se acreditó.",
+        },
+      ],
+    },
+    {
+      id: "cambios",
+      symbol: "✿",
       title: "Cambios y devoluciones",
       items: [
         {
@@ -52,7 +71,7 @@ const CATEGORIES: { id: string; symbol: string; title: string; items: QA[] }[] =
       items: [
         {
           q: "¿Cómo las lavo?",
-          a: "La mayoría va a máquina con agua fría y ciclo suave. Cada pieza trae su etiqueta con las indicaciones exactas, y también están en la ficha de cada producto. Los almohadones bordados y los bolsos de lona piden lavado a mano.",
+          a: "A máquina con agua fría y ciclo suave. Cada pieza trae su etiqueta con las indicaciones exactas. Las fundas de almohadón se lavan por separado del relleno.",
         },
         {
           q: "¿Destiñen?",

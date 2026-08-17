@@ -1,26 +1,27 @@
 -- ============================================================
 -- DZ Estudio — Setup inicial de base de datos
+-- Espejo del catálogo de Tienda Nube (dzestudio.mitiendanube.com).
 -- Pegar completo en Supabase → SQL Editor → Run
 -- ============================================================
 
 -- ✦ Tabla de productos
+-- El id es el id de producto de Tienda Nube: crece con el alta, así que
+-- ordenar por id descendente equivale a ordenar por novedades.
 create table public.products (
   id bigint primary key,
   slug text unique not null,
   name text not null,
-  category text not null check (category in ('almohadones', 'individuales', 'bolsos')),
-  collection text not null check (collection in ('fiesta', 'sobremesa', 'nocturna', 'editorial')),
+  category text not null check (category in ('almohadones', 'individuales')),
   colors text[] not null default '{}',
   price integer not null,
   description text not null default '',
   medidas text not null default '',
-  material text not null default '',
-  cuidados text not null default '',
-  edition_number integer not null default 1,
-  edition_total integer not null default 1,
+  peso text,
+  material text,
+  cuidados text,
+  variants jsonb not null default '[]',
   images jsonb not null default '[]',
-  sales integer not null default 0,
-  created_at timestamptz not null default now()
+  in_stock boolean not null default true
 );
 
 alter table public.products enable row level security;
@@ -37,9 +38,13 @@ create table public.orders (
   customer_name text not null,
   customer_phone text,
   shipping_address jsonb not null,
-  shipping_method text not null check (shipping_method in ('showroom', 'andreani', 'correo')),
+  shipping_method text not null
+    check (shipping_method in ('retiro', 'andreani-sucursal', 'andreani-domicilio')),
   items jsonb not null,
   subtotal integer not null,
+  -- Promociones de Tienda Nube (10% llevando 2 almohadones / 10% transferencia)
+  discount integer not null default 0,
+  discount_label text,
   shipping_cost integer not null,
   total integer not null,
   payment_method text not null check (payment_method in ('mp', 'transferencia')),
@@ -56,86 +61,43 @@ create policy "Cualquiera puede crear una orden"
   on public.orders for insert
   with check (true);
 
--- ✿ Seed: los 10 productos
+-- ✿ Seed: catálogo de Tienda Nube (sincronizado 17/08/2026)
 insert into public.products
-  (id, slug, name, category, collection, colors, price, description, medidas, material, cuidados, edition_number, edition_total, images, sales, created_at)
+  (id, slug, name, category, colors, price, description, medidas, peso,
+   material, cuidados, variants, images, in_stock)
 values
-(1, 'individual-positano', 'Individual "Positano" set x2', 'individuales', 'sobremesa', array['celeste','verde'], 18000,
- 'Estampado a mano en algodón panamá, celeste y verde. Para desayunos que terminan siendo almuerzo y sobreviven al café derramado.',
- '45 x 33 cm cada uno · set x2', 'Algodón panamá 100%, estampado a mano',
- 'Lavar a máquina con agua fría, ciclo suave. Planchar del revés. No usar lavandina.',
- 12, 80,
- '[{"seed":"dz-individual-positano-1","tint":"celeste"},{"seed":"dz-individual-positano-2","tint":"verde"},{"seed":"dz-individual-positano-3","tint":"celeste"}]'::jsonb,
- 34, '2026-06-10'),
+(356622826, 'almohadones-rombo-rosa', 'Almohadones Rombo Rosa',
+ 'almohadones', array['pink','orange'], 23000,
+ 'Almohadón decorativo, textura suave y diseño versátil que combina con distintos ambientes.',
+ '40 x 40 cm (aprox.)', '350 g (aprox.)', null, null, '[]'::jsonb,
+ '[{"src":"/productos/almohadon-rombo-rosa.webp","fit":"contain","background":"cream"}]'::jsonb,
+ true),
 
-(2, 'individual-verano', 'Individual "Verano" set x4', 'individuales', 'editorial', array['amarillo','ink'], 32000,
- 'Cuatro individuales en amarillo y tinta, estampado serigráfico sobre algodón panamá. La base para cualquier vajilla, sin pedir nada a cambio.',
- '45 x 33 cm cada uno · set x4', 'Algodón panamá 100%, estampado serigráfico',
- 'Lavar a máquina con agua fría. Planchar del revés.',
- 4, 70,
- '[{"seed":"dz-individual-verano-1","tint":"amarillo"},{"seed":"dz-individual-verano-2","tint":"ink"},{"seed":"dz-individual-verano-3","tint":"amarillo"}]'::jsonb,
- 15, '2026-07-01'),
+(361309976, 'almohadones-rayas-blanco-y-negro', 'Almohadones Rayas Blanco y Negro',
+ 'almohadones', array['ink','cream'], 23000,
+ 'Almohadón decorativo, textura suave y diseño versátil que combina con distintos ambientes.',
+ '40 x 40 cm (aprox.)', '350 g (aprox.)', null, null, '[]'::jsonb,
+ '[{"src":"/productos/almohadon-rayas-blanco-negro.webp","fit":"contain","background":"cream"}]'::jsonb,
+ true),
 
-(3, 'almohadon-hola-casa', 'Almohadón "Hola casa" 45x45', 'almohadones', 'fiesta', array['orange'], 22000,
- 'Naranja pleno, sin estampado ni excusas. Funda de algodón y lino con cierre invisible, pensada para sillones que necesitan un empujón.',
- '45 x 45 cm · incluye relleno', 'Funda de algodón y lino, cierre invisible',
- 'Funda lavable a máquina. Relleno: solo aire y cariño.',
- 31, 90,
- '[{"seed":"dz-almohadon-hola-casa-1","tint":"orange"},{"seed":"dz-almohadon-hola-casa-2","tint":"orange"},{"seed":"dz-almohadon-hola-casa-3","tint":"cream"}]'::jsonb,
- 44, '2026-05-20'),
+(361310010, 'almohadones-rombo-celeste', 'Almohadones Rombo Celeste',
+ 'almohadones', array['celeste','orange'], 23000,
+ 'Almohadón decorativo, textura suave y diseño versátil que combina con distintos ambientes.',
+ '40 x 40 cm (aprox.)', '350 g (aprox.)', null, null, '[]'::jsonb,
+ '[{"src":"/productos/almohadon-rombo-celeste.webp","fit":"contain","background":"cream"}]'::jsonb,
+ true),
 
-(4, 'almohadon-grid', 'Almohadón "Grid" 45x45', 'almohadones', 'nocturna', array['petroleo','cream'], 22000,
- 'Jacquard de algodón en damero petróleo y crema. El almohadón que combina con lo que ya tenés, sin intentarlo.',
- '45 x 45 cm · incluye relleno', 'Tejido jacquard de algodón',
- 'Funda lavable a máquina con agua fría. Secar a la sombra.',
- 18, 75,
- '[{"seed":"dz-almohadon-grid-1","tint":"petroleo"},{"seed":"dz-almohadon-grid-2","tint":"cream"},{"seed":"dz-almohadon-grid-3","tint":"petroleo"}]'::jsonb,
- 39, '2026-06-05'),
+(357072093, 'individuales-doble-pack-x2', 'Individuales Doble Pack x2',
+ 'individuales', array['pink','celeste'], 7100,
+ 'Pack de 2 individuales reversibles: de un lado diseño de rayas, del otro un diseño más orgánico, mismo color en ambas caras.',
+ '30 x 42 cm cada uno · pack x2', '400 g el pack (aprox.)', null, null,
+ '[{"id":"1564845157","label":"Celeste","color":"celeste"},{"id":"1564845158","label":"Rosa","color":"pink"}]'::jsonb,
+ '[{"src":"/productos/individuales-doble-pack.webp","fit":"cover"}]'::jsonb,
+ true),
 
-(5, 'almohadon-bordado', 'Almohadón "Bordado" 50x30', 'almohadones', 'nocturna', array['lila'], 26000,
- 'Bordado a mano sobre lino lila, formato apaisado. Horas de aguja para una pieza que no se apura.',
- '50 x 30 cm · incluye relleno', 'Lino bordado a mano con hilos de algodón',
- 'Lavar a mano con agua fría. El bordado agradece la delicadeza.',
- 9, 40,
- '[{"seed":"dz-almohadon-bordado-1","tint":"lila"},{"seed":"dz-almohadon-bordado-2","tint":"lila"},{"seed":"dz-almohadon-bordado-3","tint":"cream"}]'::jsonb,
- 18, '2026-06-30'),
-
-(6, 'almohadon-circular', 'Almohadón "Circular" 40cm redondo', 'almohadones', 'sobremesa', array['celeste'], 24000,
- 'Redondo, celeste, con vivo a contraste. No es imprescindible hasta que lo tenés en el sillón.',
- '40 cm de diámetro · incluye relleno', 'Algodón panamá con vivo a contraste',
- 'Funda lavable a máquina. Planchar con vapor suave.',
- 26, 65,
- '[{"seed":"dz-almohadon-circular-1","tint":"celeste"},{"seed":"dz-almohadon-circular-2","tint":"celeste"},{"seed":"dz-almohadon-circular-3","tint":"cream"}]'::jsonb,
- 31, '2026-06-18'),
-
-(7, 'almohadon-editorial', 'Almohadón "Editorial" set x2', 'almohadones', 'editorial', array['pink','amarillo'], 38000,
- 'Rosa y amarillo en estampado serigráfico sobre algodón y lino. Un set pensado como tapa de revista, para sillones que no necesitan ayuda.',
- '45 x 45 cm cada uno · set x2 · incluyen relleno', 'Algodón y lino, estampado serigráfico',
- 'Fundas lavables a máquina con agua fría.',
- 3, 35,
- '[{"seed":"dz-almohadon-editorial-1","tint":"pink"},{"seed":"dz-almohadon-editorial-2","tint":"amarillo"},{"seed":"dz-almohadon-editorial-3","tint":"pink"}]'::jsonb,
- 12, '2026-07-08'),
-
-(8, 'bolso-domingo', 'Tote "Domingo"', 'bolsos', 'sobremesa', array['verde','cream'], 34000,
- 'Lona de algodón gruesa, rayas verde y crema. Entra el súper de la semana y el libro que no vas a leer.',
- '40 x 45 cm · asas 60 cm', 'Lona de algodón 100%, asas reforzadas',
- 'Lavar a mano o en bolsa de lavado, ciclo suave. No retorcer las asas.',
- 11, 45,
- '[{"seed":"dz-bolso-domingo-1","tint":"verde"},{"seed":"dz-bolso-domingo-2","tint":"cream"},{"seed":"dz-bolso-domingo-3","tint":"verde"}]'::jsonb,
- 27, '2026-05-12'),
-
-(9, 'bolso-nocturna', 'Tote "Nocturna"', 'bolsos', 'nocturna', array['petroleo','pink'], 36000,
- 'Lona reforzada en petróleo con detalle rosa. Asas largas, fondo ancho, ninguna urgencia por combinar con el resto.',
- '42 x 48 cm · asas 65 cm', 'Lona de algodón 100%, asas de cuero reciclado',
- 'Lavar a mano con agua fría. Secar en plano a la sombra.',
- 6, 30,
- '[{"seed":"dz-bolso-nocturna-1","tint":"petroleo"},{"seed":"dz-bolso-nocturna-2","tint":"pink"},{"seed":"dz-bolso-nocturna-3","tint":"petroleo"}]'::jsonb,
- 49, '2026-04-30'),
-
-(10, 'bolso-mercado', 'Tote "Mercado"', 'bolsos', 'editorial', array['amarillo','petroleo'], 30000,
- 'Amarillo y petróleo en lona de algodón resistente. Para la feria del sábado y todo lo demás.',
- '38 x 42 cm · asas 55 cm', 'Lona de algodón 100%, base reforzada',
- 'Lavar a máquina con agua fría. Aguanta todo, incluso el tuco.',
- 23, 100,
- '[{"seed":"dz-bolso-mercado-1","tint":"amarillo"},{"seed":"dz-bolso-mercado-2","tint":"petroleo"},{"seed":"dz-bolso-mercado-3","tint":"amarillo"}]'::jsonb,
- 71, '2026-04-18');
+(358182239, 'individuales-simple-pack-x2', 'Individuales Simple Pack x2',
+ 'individuales', array['ink','cream'], 5100,
+ 'Pack de 2 individuales de una sola cara, en rayas blanco y negro. La base neutra para cualquier vajilla.',
+ '30 x 42 cm cada uno · pack x2', null, null, null, '[]'::jsonb,
+ '[{"src":"/productos/individuales-simple-pack.webp","fit":"cover"}]'::jsonb,
+ true);

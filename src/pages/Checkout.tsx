@@ -19,7 +19,9 @@ import {
 } from "../lib/checkout";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
+import { bestDiscount, INSTALLMENTS } from "../lib/promos";
 import { supabase } from "../lib/supabase";
+import { checkoutWhatsappUrl } from "../lib/whatsapp";
 
 const STEPS = [
   { number: 1, label: "Contacto" },
@@ -58,7 +60,9 @@ export default function Checkout() {
   const envioSel = watch("envio");
   const pagoSel = watch("pago");
   const shippingCost = SHIPPING_OPTIONS.find((o) => o.id === envioSel)?.cost;
-  const total = subtotal + (shippingCost ?? 0);
+  // Las promos de Tienda Nube no se combinan: se aplica la más conveniente
+  const discount = bestDiscount(resolved, subtotal, pagoSel === "transferencia");
+  const total = subtotal - (discount?.amount ?? 0) + (shippingCost ?? 0);
 
   if (isLoading) {
     return (
@@ -103,9 +107,11 @@ export default function Checkout() {
     // id generado en el cliente: la anon key puede insertar órdenes
     // pero no leerlas (RLS), así que no podemos pedir el id de vuelta
     const orderId = crypto.randomUUID();
-    const orderItems = resolved.map(({ product, qty }) => ({
+    const orderItems = resolved.map(({ product, variant, qty }) => ({
       slug: product.slug,
       name: product.name,
+      variant: variant?.label ?? null,
+      variant_id: variant?.id ?? null,
       price: product.price,
       qty,
     }));
@@ -124,6 +130,8 @@ export default function Checkout() {
       shipping_method: data.envio,
       items: orderItems,
       subtotal,
+      discount: discount?.amount ?? 0,
+      discount_label: discount?.label ?? null,
       shipping_cost: shippingCost ?? 0,
       total,
       payment_method: data.pago,
@@ -419,7 +427,8 @@ export default function Checkout() {
                   <div className="mt-6 rounded-2xl bg-celeste p-6">
                     <p className="text-sm leading-relaxed">
                       Te llevamos a Mercado Pago para pagar con tarjeta de
-                      crédito, débito o efectivo. Volvés acá con todo resuelto.
+                      crédito, débito o efectivo en puntos de pago. Volvés acá
+                      con todo resuelto.
                     </p>
                     <Button
                       type="submit"
@@ -474,12 +483,31 @@ export default function Checkout() {
                 )}
 
                 {submitError && (
-                  <p
-                    className="mt-4 rounded-lg bg-orange p-3 text-sm font-semibold text-cream"
+                  <div
+                    className="mt-4 rounded-2xl bg-orange p-5 text-cream"
                     role="alert"
                   >
-                    ✕ {submitError}
-                  </p>
+                    <p className="text-sm font-semibold">✕ {submitError}</p>
+                    <p className="mt-2 text-sm leading-relaxed">
+                      No te quedes sin el pedido: mandanos el detalle por
+                      WhatsApp y lo cerramos a mano.
+                    </p>
+                    <a
+                      href={checkoutWhatsappUrl(
+                        watch(),
+                        resolved,
+                        subtotal,
+                        discount,
+                        shippingCost,
+                        total,
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex rounded-full bg-cream px-6 py-2.5 font-mono text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-white"
+                    >
+                      Seguir por WhatsApp ✦
+                    </a>
+                  </div>
                 )}
 
                 <Button
@@ -501,8 +529,8 @@ export default function Checkout() {
                 ✦ Tu pedido
               </h2>
               <ul className="mt-4 space-y-3">
-                {resolved.map(({ product, qty }) => (
-                  <li key={product.slug} className="flex items-center gap-3">
+                {resolved.map(({ key, product, variant, qty }) => (
+                  <li key={key} className="flex items-center gap-3">
                     <ProductImage
                       image={product.images[0]}
                       alt=""
@@ -511,7 +539,7 @@ export default function Checkout() {
                     <span className="flex-1 text-xs font-bold leading-snug">
                       {product.name}
                       <span className="block font-mono font-normal text-ink/60">
-                        x{qty}
+                        {variant ? `${variant.label} · x${qty}` : `x${qty}`}
                       </span>
                     </span>
                     <span className="font-mono text-xs tracking-wider">
@@ -525,6 +553,14 @@ export default function Checkout() {
                   <dt className="text-xs uppercase">Subtotal</dt>
                   <dd>{formatPrice(subtotal)}</dd>
                 </div>
+                {discount && (
+                  <div className="flex justify-between gap-3 text-verde">
+                    <dt className="text-xs uppercase">{discount.label}</dt>
+                    <dd className="whitespace-nowrap">
+                      −{formatPrice(discount.amount)}
+                    </dd>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <dt className="text-xs uppercase">Envío</dt>
                   <dd>
@@ -540,6 +576,29 @@ export default function Checkout() {
                   <dd>{formatPrice(total)}</dd>
                 </div>
               </dl>
+
+              {pagoSel !== "transferencia" && (
+                <p className="mt-4 text-xs leading-relaxed text-ink/60">
+                  Hasta {INSTALLMENTS.label} con tarjeta de crédito. Pagando por
+                  transferencia se te aplica 10% off.
+                </p>
+              )}
+
+              <a
+                href={checkoutWhatsappUrl(
+                  watch(),
+                  resolved,
+                  subtotal,
+                  discount,
+                  shippingCost,
+                  total,
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 flex w-full items-center justify-center rounded-full border border-ink px-6 py-3 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors hover:bg-ink hover:text-cream"
+              >
+                ¿Dudas? Cerrá el pedido por WhatsApp
+              </a>
             </Card>
           </aside>
         </div>

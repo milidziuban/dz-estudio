@@ -1,35 +1,62 @@
+import { INSTALLMENTS } from "../lib/promos";
 import Button from "./Button";
 import Tag from "./Tag";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden px-5 pb-20 pt-16 sm:px-8 md:pb-28 md:pt-24 lg:px-12">
-      <div className="mx-auto max-w-6xl">
-        <Tag color="amarillo" className="mb-6">
-          ✦ Lanzamiento invierno 2026
-        </Tag>
+    <section className="px-5 pb-12 pt-10 sm:px-8 md:pb-16 md:pt-14 lg:px-12">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-14">
+        <div>
+          <Tag color="amarillo" className="mb-6">
+            ✦ {INSTALLMENTS.label}
+          </Tag>
 
-        <h1 className="max-w-4xl text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-          Diseños para casas con{" "}
-          <em className="font-serif font-normal italic text-pink">opinión</em>.
-        </h1>
+          <h1 className="text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+            Diseños para casas con{" "}
+            <em className="font-serif font-normal italic text-pink">opinión</em>.
+          </h1>
 
-        <p className="mt-8 max-w-xl text-lg leading-relaxed md:text-xl">
-          Manteles, individuales, almohadones y mantas en ediciones limitadas.
-          Creá espacios tuyos y con personalidad.
-        </p>
+          <p className="mt-6 max-w-md text-lg leading-relaxed">
+            Almohadones e individuales estampados, en duplas de dos colores.
+            Rombos y rayas, nada de beige.
+          </p>
 
-        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <Button to="/tienda">Ver la tienda</Button>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button to="/tienda">Ver los productos</Button>
+            <Button variant="secondary" to="/tienda?categoria=almohadones">
+              Almohadones desde $23.000
+            </Button>
+          </div>
+
+          <p className="mt-6 font-mono text-[11px] uppercase tracking-widest text-ink/60">
+            Envíos a todo el país ✦ Retiro gratis en Santa Fe Capital
+          </p>
+        </div>
+
+        {/* Dupla de producto: lo primero que se ve es lo que se vende */}
+        <div className="grid grid-cols-2 gap-4">
+          <img
+            src="/productos/almohadon-rombo-rosa.webp"
+            alt="Almohadón con rombos en rosa y bordó"
+            className="aspect-square w-full rounded-2xl bg-cream object-contain p-3"
+          />
+          <img
+            src="/productos/individuales-doble-pack.webp"
+            alt="Individual reversible en rosa y azul"
+            className="aspect-square w-full rounded-2xl object-cover"
+          />
+          <img
+            src="/productos/individuales-simple-pack.webp"
+            alt="Individuales de rayas blanco y negro puestos en la mesa"
+            className="aspect-square w-full rounded-2xl object-cover"
+          />
+          <img
+            src="/productos/almohadon-rombo-celeste.webp"
+            alt="Almohadón con rombos en celeste y terracota"
+            className="aspect-square w-full rounded-2xl bg-cream object-contain p-3"
+          />
         </div>
       </div>
-
-      <p
-        className="pointer-events-none absolute -right-6 top-10 hidden rotate-12 font-serif text-2xl italic text-petroleo lg:block"
-        aria-hidden="true"
-      >
-        ✿ hecho en Argentina
-      </p>
     </section>
   );
 }

@@ -26,10 +26,9 @@ export default function About() {
             </em>
           </h2>
           <p className="mt-6 leading-relaxed">
-            Esa es la única regla. Cada almohadón, individual o bolso sale de
-            acá con una paleta elegida con la misma atención con la que se
-            arma una tapa de revista, y en tiradas que no se reponen cuando se
-            terminan.
+            Esa es la única regla. Cada almohadón y cada individual sale de acá
+            con una paleta elegida con la misma atención con la que se arma una
+            tapa de revista, y en tiradas que no se reponen cuando se terminan.
           </p>
           <Button variant="secondary" className="mt-8" to="/sobre-nosotros">
             Conocé el estudio

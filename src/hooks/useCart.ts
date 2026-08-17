@@ -3,17 +3,25 @@ import { persist } from "zustand/middleware";
 
 export type CartItem = {
   slug: string;
+  /** id de variante de Tienda Nube; ausente si el producto no tiene variantes */
+  variantId?: string;
   qty: number;
 };
+
+/** Un producto con dos variantes son dos líneas distintas del carrito. */
+export const cartKey = (slug: string, variantId?: string) =>
+  `${slug}::${variantId ?? ""}`;
+
+const itemKey = (item: CartItem) => cartKey(item.slug, item.variantId);
 
 type CartState = {
   items: CartItem[];
   isOpen: boolean;
   open: () => void;
   close: () => void;
-  add: (slug: string, qty?: number) => void;
-  setQty: (slug: string, qty: number) => void;
-  remove: (slug: string) => void;
+  add: (slug: string, variantId?: string, qty?: number) => void;
+  setQty: (key: string, qty: number) => void;
+  remove: (key: string) => void;
   clear: () => void;
 };
 
@@ -24,34 +32,36 @@ export const useCart = create<CartState>()(
       isOpen: false,
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),
-      add: (slug, qty = 1) =>
+      add: (slug, variantId, qty = 1) =>
         set((state) => {
-          const existing = state.items.find((item) => item.slug === slug);
+          const key = cartKey(slug, variantId);
+          const existing = state.items.find((item) => itemKey(item) === key);
           return {
             items: existing
               ? state.items.map((item) =>
-                  item.slug === slug ? { ...item, qty: item.qty + qty } : item,
+                  itemKey(item) === key ? { ...item, qty: item.qty + qty } : item,
                 )
-              : [...state.items, { slug, qty }],
+              : [...state.items, { slug, variantId, qty }],
           };
         }),
-      setQty: (slug, qty) =>
+      setQty: (key, qty) =>
         set((state) => ({
           items:
             qty < 1
-              ? state.items.filter((item) => item.slug !== slug)
+              ? state.items.filter((item) => itemKey(item) !== key)
               : state.items.map((item) =>
-                  item.slug === slug ? { ...item, qty } : item,
+                  itemKey(item) === key ? { ...item, qty } : item,
                 ),
         })),
-      remove: (slug) =>
+      remove: (key) =>
         set((state) => ({
-          items: state.items.filter((item) => item.slug !== slug),
+          items: state.items.filter((item) => itemKey(item) !== key),
         })),
       clear: () => set({ items: [] }),
     }),
     {
-      name: "dz-cart",
+      // v2: los items pasaron a tener variantId, el carrito viejo ya no aplica
+      name: "dz-cart-v2",
       partialize: (state) => ({ items: state.items }),
     },
   ),

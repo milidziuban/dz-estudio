@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { SITE } from "../lib/site";
+import PaymentMethods from "./PaymentMethods";
 
 const navItems = [
   { label: "Tienda", to: "/tienda" },
@@ -19,8 +20,7 @@ export default function Footer() {
             className="h-6 w-auto"
           />
           <p className="mt-3 text-sm leading-relaxed text-cream/80">
-            Almohadones, individuales y bolsos en ediciones limitadas, hechos
-            en Argentina.
+            Almohadones e individuales estampados, hechos en Argentina.
           </p>
         </div>
 
@@ -77,14 +77,18 @@ export default function Footer() {
             </li>
           </ul>
           <p className="mt-6 text-xs text-cream/60">
-            Envíos: Andreani y Correo Argentino · Pagos: Mercado Pago +
-            transferencia
+            Envíos: Andreani a sucursal o domicilio · Retiro gratis en{" "}
+            {SITE.retiro.direccion}
           </p>
         </div>
       </div>
 
+      <div className="mx-auto max-w-6xl border-t border-cream/20 px-5 py-10 sm:px-8 lg:px-12">
+        <PaymentMethods tone="dark" />
+      </div>
+
       <p className="border-t border-cream/20 px-5 py-5 text-center font-mono text-[11px] uppercase tracking-widest text-cream/60">
-        © 2026 DZ Estudio ✦ Maximalismo con criterio
+        © 2026 DZ Estudio ✦ CUIT {SITE.cuit} ✦ Maximalismo con criterio
       </p>
     </footer>
   );

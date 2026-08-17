@@ -1,5 +1,6 @@
 import About from "../components/About";
 import Collections from "../components/Collections";
+import FeaturedProducts from "../components/FeaturedProducts";
 import Hero from "../components/Hero";
 import Newsletter from "../components/Newsletter";
 import Seo from "../components/Seo";
@@ -10,6 +11,8 @@ export default function Home() {
     <>
       <Seo path="/" />
       <Hero />
+      {/* El catálogo va antes que cualquier texto de marca */}
+      <FeaturedProducts />
       <Collections />
       <Values />
       <About />
