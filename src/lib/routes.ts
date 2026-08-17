@@ -16,6 +16,22 @@ export const pageLoaders = {
   notFound: () => import("../pages/NotFound"),
 };
 
+/** El panel va en chunks aparte y nunca se precarga: lo abre una sola persona
+ *  y no tiene sentido que el visitante de la tienda baje ese código. */
+export const adminLoaders = {
+  layout: () => import("../components/admin/AdminLayout"),
+  inicio: () => import("../pages/admin/Inicio"),
+  estadisticas: () => import("../pages/admin/Estadisticas"),
+  productos: () => import("../pages/admin/Productos"),
+  ventas: () => import("../pages/admin/Ventas"),
+  clientes: () => import("../pages/admin/Clientes"),
+  descuentos: () => import("../pages/admin/Descuentos"),
+  marketing: () => import("../pages/admin/Marketing"),
+  pagos: () => import("../pages/admin/MetodosPago"),
+  envios: () => import("../pages/admin/MetodosEnvio"),
+  distribucion: () => import("../pages/admin/Distribucion"),
+};
+
 type PageKey = keyof typeof pageLoaders;
 
 /** Qué página atiende un pathname. `/` no está: Home va en el bundle

@@ -41,6 +41,19 @@ Deno.serve(async (req) => {
 
     if (error || !order) return json({ error: "Orden no encontrada" }, 404);
 
+    // Tope de cuotas: lo edita el panel (Métodos de pago). Si la fila no existe
+    // todavía, caemos en los mismos valores que anuncia la tienda.
+    const { data: pagos } = await supabase
+      .from("store_settings")
+      .select("value")
+      .eq("key", "pagos")
+      .maybeSingle();
+
+    const mpSettings = (pagos?.value as { mercadopago?: Record<string, number> })
+      ?.mercadopago;
+    const maxInstallments = Number(mpSettings?.maxInstallments) || 6;
+    const defaultInstallments = Number(mpSettings?.installments) || 3;
+
     const accessToken = Deno.env.get("MP_ACCESS_TOKEN")!;
     const siteUrl = Deno.env.get("SITE_URL") ?? "http://localhost:5173";
 
@@ -104,6 +117,13 @@ Deno.serve(async (req) => {
       },
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`,
       statement_descriptor: "DZ ESTUDIO",
+      payment_methods: {
+        // Fuera "Cuotas sin tarjeta" (Mercado Crédito): las cuotas que queremos
+        // ofrecer son las del banco emisor, no las que financia Mercado Pago.
+        excluded_payment_types: [{ id: "consumer_credits" }],
+        installments: maxInstallments,
+        default_installments: Math.min(defaultInstallments, maxInstallments),
+      },
     };
 
     // auto_return solo con https: MP lo rechaza si la back_url es localhost

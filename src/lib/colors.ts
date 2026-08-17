@@ -12,6 +12,19 @@ export const COLOR_HEX: Record<ColorToken, string> = {
   cream: "#F3EFE4",
 };
 
+/** Orden en el que se ofrecen los colores en el panel. */
+export const COLOR_TOKENS: ColorToken[] = [
+  "pink",
+  "orange",
+  "celeste",
+  "verde",
+  "lila",
+  "petroleo",
+  "amarillo",
+  "ink",
+  "cream",
+];
+
 export const COLOR_LABEL: Record<ColorToken, string> = {
   pink: "Rosa",
   orange: "Naranja",

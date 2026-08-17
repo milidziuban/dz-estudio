@@ -148,7 +148,7 @@ export default function Producto() {
               {formatPrice(product.price)}
             </p>
             <p className="mt-1.5 font-mono text-xs uppercase tracking-widest text-ink/60">
-              Hasta {INSTALLMENTS.label} ✦ 10% off por transferencia
+              {INSTALLMENTS.label} ✦ 10% off por transferencia
             </p>
 
             {product.category === "almohadones" && (

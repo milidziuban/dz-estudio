@@ -7,7 +7,7 @@ const values = [
   {
     symbol: "✧",
     title: "3 cuotas sin interés",
-    text: "O 10% off por transferencia.",
+    text: "Hasta 6 con Cuotas Simples, o 10% off por transferencia.",
   },
   {
     symbol: "✿",

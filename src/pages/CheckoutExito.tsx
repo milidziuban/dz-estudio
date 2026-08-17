@@ -3,7 +3,10 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import { useCart } from "../hooks/useCart";
-import { BANK_INFO } from "../lib/checkout";
+import {
+  SETTINGS_DEFAULTS,
+  useStoreSettings,
+} from "../hooks/useStoreSettings";
 import { formatPrice } from "../lib/format";
 
 type OrderState = {
@@ -18,6 +21,10 @@ export default function CheckoutExito() {
   const { state } = useLocation() as { state: OrderState | null };
   const [searchParams] = useSearchParams();
   const clearCart = useCart((s) => s.clear);
+  // El alias bancario se edita en /admin/pagos
+  const { data: settings } = useStoreSettings();
+  const alias = (settings?.pagos ?? SETTINGS_DEFAULTS.pagos).transferencia
+    .alias;
 
   // Regreso de Mercado Pago: llega por query params, sin router state
   const mpStatus =
@@ -100,7 +107,7 @@ export default function CheckoutExito() {
               </p>
               <p className="mt-2 text-sm leading-relaxed">
                 Transferí el total a{" "}
-                <span className="font-mono">{BANK_INFO.alias}</span> y mandanos
+                <span className="font-mono">{alias}</span> y mandanos
                 el comprobante por WhatsApp. Te reservamos todo por 48 horas —
                 después vuelve a la tienda y ya sabés cómo es esto de las
                 ediciones limitadas.

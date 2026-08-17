@@ -10,16 +10,14 @@ import TextField from "../components/TextField";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
-import {
-  BANK_INFO,
-  checkoutSchema,
-  PROVINCIAS,
-  SHIPPING_OPTIONS,
-  type CheckoutData,
-} from "../lib/checkout";
+import { checkoutSchema, PROVINCIAS, type CheckoutData } from "../lib/checkout";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
-import { bestDiscount, INSTALLMENTS } from "../lib/promos";
+import { bestDiscount, DEFAULT_PROMOS, INSTALLMENTS } from "../lib/promos";
+import {
+  SETTINGS_DEFAULTS,
+  useStoreSettings,
+} from "../hooks/useStoreSettings";
 import { supabase } from "../lib/supabase";
 import { checkoutWhatsappUrl } from "../lib/whatsapp";
 
@@ -55,13 +53,34 @@ export default function Checkout() {
     mode: "onTouched",
   });
 
+  // Costos de envío, datos bancarios y promos salen de store_settings, que se
+  // edita en /admin. Mientras la query carga, valen los del código.
+  const { data: settings } = useStoreSettings();
+  const envios = settings?.envios ?? SETTINGS_DEFAULTS.envios;
+  const banco = (settings?.pagos ?? SETTINGS_DEFAULTS.pagos).transferencia;
+  const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
+  const shippingOptions = envios.options.filter((option) => option.enabled);
+
   const resolved = resolveCartItems(items, products);
   const subtotal = cartSubtotal(resolved);
   const envioSel = watch("envio");
   const pagoSel = watch("pago");
-  const shippingCost = SHIPPING_OPTIONS.find((o) => o.id === envioSel)?.cost;
+
+  // Envío gratis a partir del monto configurado (null = sin envío gratis)
+  const envioGratis =
+    envios.freeShippingFrom !== null && subtotal >= envios.freeShippingFrom;
+  const costFor = (cost: number) => (envioGratis ? 0 : cost);
+  const shippingCost = shippingOptions.find((o) => o.id === envioSel)
+    ? costFor(shippingOptions.find((o) => o.id === envioSel)!.cost)
+    : undefined;
+
   // Las promos de Tienda Nube no se combinan: se aplica la más conveniente
-  const discount = bestDiscount(resolved, subtotal, pagoSel === "transferencia");
+  const discount = bestDiscount(
+    resolved,
+    subtotal,
+    pagoSel === "transferencia",
+    promos,
+  );
   const total = subtotal - (discount?.amount ?? 0) + (shippingCost ?? 0);
 
   if (isLoading) {
@@ -330,8 +349,13 @@ export default function Checkout() {
                 <p className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-widest">
                   ✧ ¿Cómo lo recibís?
                 </p>
+                {envioGratis && (
+                  <p className="mb-3 rounded-xl bg-verde/20 px-4 py-3 text-xs leading-relaxed">
+                    ✦ Tu compra tiene <strong>envío gratis</strong>.
+                  </p>
+                )}
                 <div className="space-y-3">
-                  {SHIPPING_OPTIONS.map((option) => (
+                  {shippingOptions.map((option) => (
                     <label
                       key={option.id}
                       className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-ink/20 p-4 transition-colors hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-amarillo/40"
@@ -353,7 +377,9 @@ export default function Checkout() {
                         </span>
                       </span>
                       <span className="font-mono text-sm font-medium tracking-wider">
-                        {option.cost === 0 ? "Gratis" : formatPrice(option.cost)}
+                        {costFor(option.cost) === 0
+                          ? "Gratis"
+                          : formatPrice(option.cost)}
                       </span>
                     </label>
                   ))}
@@ -453,23 +479,23 @@ export default function Checkout() {
                     <dl className="mt-4 space-y-1.5 font-mono text-xs tracking-wider">
                       <div className="flex justify-between gap-4">
                         <dt className="uppercase text-ink/70">Banco</dt>
-                        <dd>{BANK_INFO.banco}</dd>
+                        <dd>{banco.banco}</dd>
                       </div>
                       <div className="flex justify-between gap-4">
                         <dt className="uppercase text-ink/70">Titular</dt>
-                        <dd>{BANK_INFO.titular}</dd>
+                        <dd>{banco.titular}</dd>
                       </div>
                       <div className="flex justify-between gap-4">
                         <dt className="uppercase text-ink/70">CUIT</dt>
-                        <dd>{BANK_INFO.cuit}</dd>
+                        <dd>{banco.cuit}</dd>
                       </div>
                       <div className="flex justify-between gap-4">
                         <dt className="uppercase text-ink/70">CBU</dt>
-                        <dd className="break-all">{BANK_INFO.cbu}</dd>
+                        <dd className="break-all">{banco.cbu}</dd>
                       </div>
                       <div className="flex justify-between gap-4">
                         <dt className="uppercase text-ink/70">Alias</dt>
-                        <dd>{BANK_INFO.alias}</dd>
+                        <dd>{banco.alias}</dd>
                       </div>
                     </dl>
                     <Button
@@ -579,7 +605,7 @@ export default function Checkout() {
 
               {pagoSel !== "transferencia" && (
                 <p className="mt-4 text-xs leading-relaxed text-ink/60">
-                  Hasta {INSTALLMENTS.label} con tarjeta de crédito. Pagando por
+                  {INSTALLMENTS.detail}, con tarjeta de crédito. Pagando por
                   transferencia se te aplica 10% off.
                 </p>
               )}

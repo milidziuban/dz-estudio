@@ -38,7 +38,7 @@ export default function PaymentMethods({
           tone === "dark" ? "text-cream" : "text-petroleo",
         )}
       >
-        Hasta {INSTALLMENTS.label}
+        {INSTALLMENTS.detail}
       </p>
       <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {GROUPS.map((group) => (

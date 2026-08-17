@@ -4,7 +4,13 @@ import { useProducts } from "../hooks/useProducts";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
-import { almohadonesFaltan, bestDiscount, INSTALLMENTS } from "../lib/promos";
+import {
+  almohadonesFaltan,
+  bestDiscount,
+  DEFAULT_PROMOS,
+  INSTALLMENTS,
+} from "../lib/promos";
+import { useStoreSettings } from "../hooks/useStoreSettings";
 import { cartWhatsappUrl } from "../lib/whatsapp";
 import Button from "./Button";
 import CartItemRow from "./CartItemRow";
@@ -14,14 +20,16 @@ export default function CartDrawer() {
   const close = useCart((s) => s.close);
   const items = useCart((s) => s.items);
   const { data: products = [], isLoading } = useProducts();
+  const { data: settings } = useStoreSettings();
+  const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
 
   const resolved = resolveCartItems(items, products);
   const subtotal = cartSubtotal(resolved);
   const count = resolved.reduce((total, item) => total + item.qty, 0);
   // En el drawer todavía no se eligió el medio de pago: mostramos solo las
   // promos que ya están ganadas.
-  const discount = bestDiscount(resolved, subtotal, false);
-  const faltan = almohadonesFaltan(resolved);
+  const discount = bestDiscount(resolved, subtotal, false, promos);
+  const faltan = almohadonesFaltan(resolved, promos);
   const total = subtotal - (discount?.amount ?? 0);
 
   useEffect(() => {
@@ -104,7 +112,7 @@ export default function CartDrawer() {
               {faltan > 0 && (
                 <p className="mb-4 rounded-xl bg-amarillo px-4 py-3 text-xs leading-relaxed">
                   ✦ Sumá {faltan} almohadón más y se te aplica{" "}
-                  <strong>10% de descuento</strong>.
+                  <strong>{promos.almohadones.percent}% de descuento</strong>.
                 </p>
               )}
 
@@ -132,7 +140,8 @@ export default function CartDrawer() {
               </dl>
 
               <p className="mt-2 text-xs text-ink/60">
-                Hasta {INSTALLMENTS.label}. Pagando por transferencia, 10% off.
+                {INSTALLMENTS.detail}. Pagando por transferencia,{" "}
+                {promos.transferencia.percent}% off.
               </p>
 
               <Button to="/checkout" onClick={close} className="mt-4 w-full">

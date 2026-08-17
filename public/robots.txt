@@ -2,5 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /checkout
 Disallow: /checkout/
+Disallow: /admin
+Disallow: /admin/
 
 Sitemap: https://dz-estudio.vercel.app/sitemap.xml

@@ -1,14 +1,12 @@
-import { Suspense, lazy } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { lazy } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Analytics from "./components/Analytics";
-import CartDrawer from "./components/CartDrawer";
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import Marquee from "./components/Marquee";
-import PageLoader from "./components/PageLoader";
 import RoutePrefetch from "./components/RoutePrefetch";
 import ScrollToTop from "./components/ScrollToTop";
-import { pageLoaders } from "./lib/routes";
+import StoreLayout from "./components/StoreLayout";
+import AdminAuthProvider from "./components/admin/AdminAuthProvider";
+import RequireAdmin from "./components/admin/RequireAdmin";
+import { adminLoaders, pageLoaders } from "./lib/routes";
 import Home from "./pages/Home";
 
 // Home va en el bundle inicial: es la landing y la que más tráfico recibe,
@@ -24,13 +22,18 @@ const Faq = lazy(pageLoaders.faq);
 const Contacto = lazy(pageLoaders.contacto);
 const NotFound = lazy(pageLoaders.notFound);
 
-const marqueeItems = [
-  "3 cuotas sin interés",
-  "10% off pagando por transferencia",
-  "10% llevando 2 almohadones",
-  "Envíos a todo el país",
-  "Retiro gratis en Santa Fe Capital",
-];
+// Panel de administración: mismo criterio, pero además nunca se precarga.
+const AdminLayout = lazy(adminLoaders.layout);
+const AdminInicio = lazy(adminLoaders.inicio);
+const AdminEstadisticas = lazy(adminLoaders.estadisticas);
+const AdminProductos = lazy(adminLoaders.productos);
+const AdminVentas = lazy(adminLoaders.ventas);
+const AdminClientes = lazy(adminLoaders.clientes);
+const AdminDescuentos = lazy(adminLoaders.descuentos);
+const AdminMarketing = lazy(adminLoaders.marketing);
+const AdminPagos = lazy(adminLoaders.pagos);
+const AdminEnvios = lazy(adminLoaders.envios);
+const AdminDistribucion = lazy(adminLoaders.distribucion);
 
 export default function App() {
   return (
@@ -38,29 +41,46 @@ export default function App() {
       <ScrollToTop />
       <Analytics />
       <RoutePrefetch />
-      <Marquee items={marqueeItems} />
-      {/* offset por la marquesina fija */}
-      <div className="pt-9">
-        <Header />
-        <main>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/tienda" element={<Tienda />} />
-              <Route path="/producto/:slug" element={<Producto />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/checkout/exito" element={<CheckoutExito />} />
-              <Route path="/checkout/error" element={<CheckoutError />} />
-              <Route path="/sobre-nosotros" element={<SobreNosotros />} />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/contacto" element={<Contacto />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </main>
-        <Footer />
-      </div>
-      <CartDrawer />
+      <Routes>
+        {/* ✦ Tienda */}
+        <Route element={<StoreLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/tienda" element={<Tienda />} />
+          <Route path="/producto/:slug" element={<Producto />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/exito" element={<CheckoutExito />} />
+          <Route path="/checkout/error" element={<CheckoutError />} />
+          <Route path="/sobre-nosotros" element={<SobreNosotros />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/contacto" element={<Contacto />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* ✧ Panel privado. El guard es la UI; los datos los cuida la RLS. */}
+        <Route
+          path="/admin"
+          element={
+            <AdminAuthProvider>
+              <RequireAdmin>
+                <AdminLayout />
+              </RequireAdmin>
+            </AdminAuthProvider>
+          }
+        >
+          <Route index element={<AdminInicio />} />
+          <Route path="estadisticas" element={<AdminEstadisticas />} />
+          <Route path="productos" element={<AdminProductos />} />
+          <Route path="ventas" element={<AdminVentas />} />
+          <Route path="clientes" element={<AdminClientes />} />
+          <Route path="descuentos" element={<AdminDescuentos />} />
+          <Route path="marketing" element={<AdminMarketing />} />
+          <Route path="pagos" element={<AdminPagos />} />
+          <Route path="envios" element={<AdminEnvios />} />
+          <Route path="distribucion" element={<AdminDistribucion />} />
+          {/* Cualquier otra ruta de /admin vuelve al inicio del panel */}
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

@@ -93,6 +93,24 @@ Ejemplo: `Maximalismo, <em>editado</em>` donde `<em>` va en Instrument Serif ita
 7. **FAQ** — acordeón con envíos, cambios, cuidados, mayoristas
 8. **Contacto** — form + Instagram + WhatsApp + email
 
+## Panel de administración (`/admin`)
+
+Privado, fuera de la navegación de la tienda y con `noindex`. El acceso es
+Supabase Auth + whitelist en la tabla `admins`; lo que protege los datos son las
+policies de RLS que pasan por `public.is_admin()`, no el guard del front.
+
+Secciones: Inicio (KPIs, gráficos, top productos, últimas ventas), Estadísticas
+(tráfico propio y conversión), Ventas, Clientes, Productos, Centro de
+distribución (depósitos y stock), Descuentos, Marketing, Métodos de pago,
+Métodos de envío.
+
+- Layout propio (sidebar `ink`, contenido sobre `cream`), fuera de `StoreLayout`.
+- Cada pantalla en su chunk lazy y **nunca** se precarga.
+- La configuración editable vive en `store_settings` (una fila jsonb por
+  sección) y la lee la tienda con `useStoreSettings`, siempre con fallback a las
+  constantes del código.
+- Puesta en marcha y qué está conectado de verdad: `PANEL-ADMIN.md`.
+
 ## Productos de ejemplo (para poblar la base)
 
 Individuales:
