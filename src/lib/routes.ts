@@ -1,0 +1,57 @@
+/** Registro único de imports dinámicos de páginas.
+ *
+ *  Lo consumen `React.lazy` en App y el prefetch en hover. Tienen que ser
+ *  las mismas funciones en los dos lados: si el prefetch importara por otro
+ *  camino, Vite emitiría un chunk aparte y precargaríamos un archivo que
+ *  después nadie usa. */
+export const pageLoaders = {
+  tienda: () => import("../pages/Tienda"),
+  producto: () => import("../pages/Producto"),
+  checkout: () => import("../pages/Checkout"),
+  checkoutExito: () => import("../pages/CheckoutExito"),
+  checkoutError: () => import("../pages/CheckoutError"),
+  sobreNosotros: () => import("../pages/SobreNosotros"),
+  faq: () => import("../pages/Faq"),
+  contacto: () => import("../pages/Contacto"),
+  notFound: () => import("../pages/NotFound"),
+};
+
+type PageKey = keyof typeof pageLoaders;
+
+/** Qué página atiende un pathname. `/` no está: Home va en el bundle
+ *  inicial, no hay nada que precargar. */
+function pageFor(pathname: string): PageKey | null {
+  if (pathname.startsWith("/producto/")) return "producto";
+  switch (pathname) {
+    case "/tienda":
+      return "tienda";
+    case "/checkout":
+      return "checkout";
+    case "/checkout/exito":
+      return "checkoutExito";
+    case "/checkout/error":
+      return "checkoutError";
+    case "/sobre-nosotros":
+      return "sobreNosotros";
+    case "/faq":
+      return "faq";
+    case "/contacto":
+      return "contacto";
+    default:
+      return null;
+  }
+}
+
+const started = new Set<PageKey>();
+
+/** Baja el chunk de la página que atiende `pathname`, una sola vez.
+ *  Si falla (sin conexión, o un deploy que cambió los hashes) se olvida el
+ *  intento: al navegar de verdad, React.lazy lo vuelve a pedir. */
+export function prefetchPath(pathname: string): void {
+  const key = pageFor(pathname);
+  if (!key || started.has(key)) return;
+  started.add(key);
+  void pageLoaders[key]().catch(() => {
+    started.delete(key);
+  });
+}

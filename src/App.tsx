@@ -6,20 +6,23 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Marquee from "./components/Marquee";
 import PageLoader from "./components/PageLoader";
+import RoutePrefetch from "./components/RoutePrefetch";
 import ScrollToTop from "./components/ScrollToTop";
+import { pageLoaders } from "./lib/routes";
 import Home from "./pages/Home";
 
 // Home va en el bundle inicial: es la landing y la que más tráfico recibe,
-// así que no conviene cobrarle un request extra. El resto baja on demand.
-const Tienda = lazy(() => import("./pages/Tienda"));
-const Producto = lazy(() => import("./pages/Producto"));
-const Checkout = lazy(() => import("./pages/Checkout"));
-const CheckoutExito = lazy(() => import("./pages/CheckoutExito"));
-const CheckoutError = lazy(() => import("./pages/CheckoutError"));
-const SobreNosotros = lazy(() => import("./pages/SobreNosotros"));
-const Faq = lazy(() => import("./pages/Faq"));
-const Contacto = lazy(() => import("./pages/Contacto"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+// así que no conviene cobrarle un request extra. El resto baja on demand,
+// y RoutePrefetch se adelanta cuando el visitante hace hover sobre el link.
+const Tienda = lazy(pageLoaders.tienda);
+const Producto = lazy(pageLoaders.producto);
+const Checkout = lazy(pageLoaders.checkout);
+const CheckoutExito = lazy(pageLoaders.checkoutExito);
+const CheckoutError = lazy(pageLoaders.checkoutError);
+const SobreNosotros = lazy(pageLoaders.sobreNosotros);
+const Faq = lazy(pageLoaders.faq);
+const Contacto = lazy(pageLoaders.contacto);
+const NotFound = lazy(pageLoaders.notFound);
 
 const marqueeItems = [
   "3 cuotas sin interés",
@@ -34,6 +37,7 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Analytics />
+      <RoutePrefetch />
       <Marquee items={marqueeItems} />
       {/* offset por la marquesina fija */}
       <div className="pt-9">
