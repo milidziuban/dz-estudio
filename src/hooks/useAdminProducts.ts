@@ -1,12 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
-import type { AdminProduct, ProductDraft } from "../types/admin";
-import type {
-  Category,
-  ColorToken,
-  ProductImage,
-  ProductVariant,
-} from "../types/product";
+import type { AdminProduct, AdminProductVariant, ProductDraft } from "../types/admin";
+import type { Category, ColorToken, ProductImage } from "../types/product";
+
+/** Variantes viejas, cargadas antes de que existiera el stock por variante,
+ *  no van a traer la clave `stock` — se completa en null (sin control). */
+type AdminProductVariantRow = {
+  id: string;
+  label: string;
+  color: ColorToken;
+  stock?: number | null;
+};
+
+function mapVariant(row: AdminProductVariantRow): AdminProductVariant {
+  return {
+    id: row.id,
+    label: row.label,
+    color: row.color,
+    stock: row.stock ?? null,
+  };
+}
 
 type AdminProductRow = {
   id: number;
@@ -21,7 +34,7 @@ type AdminProductRow = {
   peso_gramos: number | null;
   material: string | null;
   cuidados: string | null;
-  variants: ProductVariant[] | null;
+  variants: AdminProductVariantRow[] | null;
   images: ProductImage[] | null;
   in_stock: boolean;
   stock: number | null;
@@ -44,7 +57,7 @@ function mapProduct(row: AdminProductRow): AdminProduct {
     pesoGramos: row.peso_gramos ?? undefined,
     material: row.material ?? undefined,
     cuidados: row.cuidados ?? undefined,
-    variants: row.variants?.length ? row.variants : undefined,
+    variants: row.variants?.length ? row.variants.map(mapVariant) : undefined,
     images: row.images ?? [],
     inStock: row.in_stock,
     stock: row.stock,
@@ -206,6 +219,44 @@ export function useQuickUpdateProduct() {
       if (patch.isBundle !== undefined) row.is_bundle = patch.isBundle;
 
       const { error } = await supabase.from("products").update(row).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+/** Ajusta el stock de una sola variante, desde el listado o distribución.
+ *  Como `variants` es una columna jsonb, hay que reescribir el array
+ *  entero: se parte del que ya está en cache, no hace falta pedirlo. */
+export function useQuickUpdateVariantStock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      productId,
+      variantId,
+      stock,
+    }: {
+      productId: number;
+      variantId: string;
+      stock: number;
+    }) => {
+      const products =
+        queryClient.getQueryData<AdminProduct[]>(["admin", "products"]) ?? [];
+      const product = products.find((p) => p.id === productId);
+      if (!product?.variants) {
+        throw new Error("Ese producto no tiene variantes cargadas.");
+      }
+      const variants = product.variants.map((variant) =>
+        variant.id === variantId ? { ...variant, stock } : variant,
+      );
+      const { error } = await supabase
+        .from("products")
+        .update({ variants })
+        .eq("id", productId);
       if (error) throw error;
     },
     onSuccess: () => {

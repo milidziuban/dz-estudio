@@ -4,6 +4,8 @@ import AdminTable from "../../components/admin/AdminTable";
 import PageHeading from "../../components/admin/PageHeading";
 import ProductForm from "../../components/admin/ProductForm";
 import QueryError from "../../components/admin/QueryError";
+import StockCell from "../../components/admin/StockCell";
+import { ToggleSwitch } from "../../components/admin/Toggle";
 import Button from "../../components/Button";
 import {
   draftFromProduct,
@@ -22,43 +24,54 @@ import type { AdminProduct, ProductDraft } from "../../types/admin";
 
 type Filtro = "todos" | "almohadones" | "individuales";
 
+/** true si algo de este producto está en o debajo del umbral de poco stock,
+ *  ya sea el stock del producto entero o el de alguna de sus variantes. */
+function isLowStock(product: AdminProduct, threshold: number): boolean {
+  if (product.variants?.length) {
+    return product.variants.some(
+      (variant) => variant.stock !== null && variant.stock <= threshold,
+    );
+  }
+  return product.stock !== null && product.stock <= threshold;
+}
+
 /** Celda de stock editable en el listado: el caso más frecuente es corregir
- *  un número, no abrir la ficha completa. */
-function StockCell({ product }: { product: AdminProduct }) {
+ *  un número, no abrir la ficha completa. Con variantes no se edita acá —
+ *  cada una tiene su propio número y eso se hace en la ficha o en
+ *  Distribución — así que solo se muestra un resumen. */
+function ProductStockCell({ product }: { product: AdminProduct }) {
   const quickUpdate = useQuickUpdateProduct();
-  const [value, setValue] = useState<string>(
-    product.stock === null ? "" : String(product.stock),
-  );
+
+  if (product.variants?.length) {
+    const controlado = product.variants.every(
+      (variant) => variant.stock !== null,
+    );
+    const total = product.variants.reduce(
+      (sum, variant) => sum + (variant.stock ?? 0),
+      0,
+    );
+    return (
+      <span className="font-mono text-xs text-ink/50">
+        {controlado ? total : <span className="text-ink/40">Sin control</span>}
+        <span className="ml-1 text-[10px] text-ink/35">
+          ({product.variants.length} var.)
+        </span>
+      </span>
+    );
+  }
 
   if (product.stock === null) {
     return <span className="font-mono text-xs text-ink/40">Sin control</span>;
   }
 
-  const commit = () => {
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed) || parsed < 0) {
-      setValue(String(product.stock));
-      return;
-    }
-    if (parsed === product.stock) return;
-    quickUpdate.mutate({ id: product.id, patch: { stock: parsed } });
-  };
-
   return (
-    <input
-      type="number"
-      min={0}
-      aria-label={`Stock de ${product.name}`}
-      value={value}
-      onChange={(event) => setValue(event.target.value)}
-      onBlur={commit}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") event.currentTarget.blur();
-      }}
-      className={cn(
-        "w-16 rounded-lg border bg-transparent px-2 py-1 text-right font-mono text-xs focus:border-ink focus:outline-none",
-        quickUpdate.isPending ? "border-celeste" : "border-ink/20",
-      )}
+    <StockCell
+      value={product.stock}
+      ariaLabel={`Stock de ${product.name}`}
+      pending={quickUpdate.isPending}
+      onCommit={(stock) =>
+        quickUpdate.mutate({ id: product.id, patch: { stock } })
+      }
     />
   );
 }
@@ -276,43 +289,32 @@ export default function AdminProductos() {
 
             <td className="px-4 py-3 text-right">
               <div className="flex items-center justify-end gap-2">
-                <StockCell product={product} />
-                {product.stock !== null && product.stock <= lowStock && (
-                  <span
-                    title="Poco stock"
-                    className="font-mono text-[10px] uppercase tracking-widest text-orange"
-                  >
-                    bajo
-                  </span>
-                )}
+                <ProductStockCell product={product} />
+                <span
+                  title="Poco stock"
+                  className={cn(
+                    "w-9 font-mono text-[10px] uppercase tracking-widest text-orange",
+                    !isLowStock(product, lowStock) && "invisible",
+                  )}
+                >
+                  bajo
+                </span>
               </div>
             </td>
 
             <td className="px-4 py-3 text-center">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={product.inStock}
-                aria-label={`${product.name} a la venta`}
-                onClick={() =>
+              <ToggleSwitch
+                compact
+                checked={product.inStock}
+                label={`${product.name} a la venta`}
+                onChange={(inStock) =>
                   quickUpdate.mutate({
                     id: product.id,
-                    patch: { inStock: !product.inStock },
+                    patch: { inStock },
                   })
                 }
-                className={cn(
-                  "relative inline-block h-5 w-9 rounded-full transition-colors",
-                  product.inStock ? "bg-verde" : "bg-ink/20",
-                )}
-              >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute top-1 h-3 w-3 rounded-full bg-white transition-transform",
-                    product.inStock ? "translate-x-5" : "translate-x-1",
-                  )}
-                />
-              </button>
+                className="inline-flex"
+              />
             </td>
 
             <td className="whitespace-nowrap px-4 py-3 text-right">

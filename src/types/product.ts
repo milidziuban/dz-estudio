@@ -26,6 +26,9 @@ export type ProductVariant = {
   id: string;
   label: string;
   color: ColorToken;
+  /** false = esta variante puntual no tiene stock. Ausente = disponible.
+   *  El número real de unidades es un dato del panel, no viaja acá. */
+  inStock?: boolean;
 };
 
 export type Product = {

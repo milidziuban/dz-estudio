@@ -1,9 +1,22 @@
 import type { ShippingId } from "../lib/checkout";
 import type { ColorToken, Product } from "./product";
 
+/** Variante con el número real de unidades: eso solo lo ve el panel — la
+ *  tienda solo recibe `inStock` (boolean) por variante, calculado a partir
+ *  de este número. */
+export type AdminProductVariant = {
+  id: string;
+  label: string;
+  color: ColorToken;
+  /** null = sin control de stock para esta variante puntual */
+  stock: number | null;
+};
+
 /** Producto con los campos que solo interesan en el panel. */
-export type AdminProduct = Product & {
-  /** null = sin control de stock */
+export type AdminProduct = Omit<Product, "variants"> & {
+  variants?: AdminProductVariant[];
+  /** Stock del producto cuando NO tiene variantes. Con variantes, el stock
+   *  se controla por variante y este campo se ignora. null = sin control. */
   stock: number | null;
   sku: string | null;
   /** Costo unitario en ARS. null = todavía no se cargó. */
@@ -244,5 +257,5 @@ export type ProductDraft = {
   cuidados: string;
   inStock: boolean;
   images: { src: string; fit: "cover" | "contain"; background?: ColorToken }[];
-  variants: { id: string; label: string; color: ColorToken }[];
+  variants: AdminProductVariant[];
 };

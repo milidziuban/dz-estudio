@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { products as localCatalog } from "../data/products";
+import { inStockFromCount } from "../lib/stock";
 import { supabase } from "../lib/supabase";
 import type {
   Category,
@@ -8,6 +9,16 @@ import type {
   ProductImage,
   ProductVariant,
 } from "../types/product";
+
+/** Tal como llega de la base: trae `stock` (número real), que acá se
+ *  reduce a `inStock` (boolean) — el número de unidades es un dato del
+ *  panel, no de la tienda. */
+type ProductVariantRow = {
+  id: string;
+  label: string;
+  color: ColorToken;
+  stock?: number | null;
+};
 
 type ProductRow = {
   id: number;
@@ -22,10 +33,19 @@ type ProductRow = {
   peso_gramos: number | null;
   material: string | null;
   cuidados: string | null;
-  variants: ProductVariant[] | null;
+  variants: ProductVariantRow[] | null;
   images: ProductImage[];
   in_stock: boolean;
 };
+
+function mapVariant(row: ProductVariantRow): ProductVariant {
+  return {
+    id: row.id,
+    label: row.label,
+    color: row.color,
+    inStock: inStockFromCount(row.stock),
+  };
+}
 
 function mapRow(row: ProductRow): Product {
   return {
@@ -41,7 +61,7 @@ function mapRow(row: ProductRow): Product {
     pesoGramos: row.peso_gramos ?? undefined,
     material: row.material ?? undefined,
     cuidados: row.cuidados ?? undefined,
-    variants: row.variants?.length ? row.variants : undefined,
+    variants: row.variants?.length ? row.variants.map(mapVariant) : undefined,
     images: row.images,
     inStock: row.in_stock,
   };

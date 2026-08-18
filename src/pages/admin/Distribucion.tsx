@@ -5,15 +5,18 @@ import QueryError from "../../components/admin/QueryError";
 import SaveBar from "../../components/admin/SaveBar";
 import SettingsSection from "../../components/admin/SettingsSection";
 import StatCard from "../../components/admin/StatCard";
+import StockCell from "../../components/admin/StockCell";
 import Toggle from "../../components/admin/Toggle";
 import TextField from "../../components/TextField";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
 import {
   useAdminProducts,
   useQuickUpdateProduct,
+  useQuickUpdateVariantStock,
 } from "../../hooks/useAdminProducts";
 import { useSettingsDraft } from "../../hooks/useStoreSettings";
 import { isPaid } from "../../lib/admin";
+import { stockLineKey, stockLines } from "../../lib/admin-stats";
 import { cn } from "../../lib/cn";
 import type { DistributionLocation } from "../../types/admin";
 
@@ -22,10 +25,12 @@ export default function AdminDistribucion() {
   const products = useAdminProducts();
   const orders = useAdminOrders();
   const quickUpdate = useQuickUpdateProduct();
+  const quickUpdateVariant = useQuickUpdateVariantStock();
 
   const { locations, lowStockThreshold } = distribucion.value;
 
-  /** Unidades cobradas que todavía no salieron del depósito. */
+  /** Unidades cobradas que todavía no salieron del depósito, por línea
+   *  (producto simple, o producto+variante si el producto tiene variantes). */
   const comprometido = useMemo(() => {
     const map = new Map<string, number>();
     for (const order of (orders.data ?? []).filter(
@@ -34,22 +39,24 @@ export default function AdminDistribucion() {
         (o.shippingStatus === "pendiente" || o.shippingStatus === "preparando"),
     )) {
       for (const item of order.items) {
-        map.set(item.slug, (map.get(item.slug) ?? 0) + item.qty);
+        const key = stockLineKey(item.slug, item.variant_id);
+        map.set(key, (map.get(key) ?? 0) + item.qty);
       }
     }
     return map;
   }, [orders.data]);
 
   const catalogo = products.data ?? [];
-  const conControl = catalogo.filter((product) => product.stock !== null);
+  const lineas = useMemo(() => stockLines(catalogo), [catalogo]);
+  const conControl = lineas.filter((line) => line.stock !== null);
   const bajos = conControl.filter(
-    (product) => (product.stock ?? 0) <= lowStockThreshold,
+    (line) => (line.stock ?? 0) <= lowStockThreshold,
   );
-  const sinStock = catalogo.filter(
-    (product) => !product.inStock || product.stock === 0,
+  const sinStock = lineas.filter(
+    (line) => !line.productInStock || line.stock === 0,
   );
   const unidadesTotales = conControl.reduce(
-    (total, product) => total + (product.stock ?? 0),
+    (total, line) => total + (line.stock ?? 0),
     0,
   );
 
@@ -262,39 +269,83 @@ export default function AdminDistribucion() {
             { label: "En stock", align: "right" },
             { label: "Comprometido", align: "right" },
             { label: "Disponible", align: "right" },
-            { label: "", align: "right" },
           ]}
           isLoading={products.isLoading}
-          isEmpty={catalogo.length === 0}
+          isEmpty={lineas.length === 0}
           empty="No hay productos cargados."
         >
-          {catalogo.map((product) => {
-            const reservado = comprometido.get(product.slug) ?? 0;
+          {lineas.map((line, index) => {
+            const reservado = comprometido.get(line.key) ?? 0;
             const disponible =
-              product.stock === null ? null : product.stock - reservado;
+              line.stock === null ? null : line.stock - reservado;
+            const mismoProductoQueAnterior =
+              lineas[index - 1]?.productId === line.productId;
+            const pendiente =
+              (line.variantId
+                ? quickUpdateVariant.isPending
+                : quickUpdate.isPending) || false;
+
+            const commitStock = (next: number) => {
+              if (line.variantId) {
+                quickUpdateVariant.mutate({
+                  productId: line.productId,
+                  variantId: line.variantId,
+                  stock: next,
+                });
+              } else {
+                quickUpdate.mutate({
+                  id: line.productId,
+                  patch: { stock: next },
+                });
+              }
+            };
 
             return (
               <tr
-                key={product.id}
+                key={line.key}
                 className="border-b border-ink/[0.06] last:border-0"
               >
                 <td className="px-4 py-3">
-                  <span className="block max-w-[16rem] truncate text-sm">
-                    {product.name}
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
-                    {product.category}
-                    {!product.inStock && " · apagado"}
-                  </span>
+                  {line.variantId ? (
+                    <>
+                      {!mismoProductoQueAnterior && (
+                        <span className="block max-w-[16rem] truncate text-sm">
+                          {line.productName}
+                        </span>
+                      )}
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                        {mismoProductoQueAnterior ? "↳ " : ""}
+                        {line.variantLabel}
+                        {!line.productInStock && " · apagado"}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="block max-w-[16rem] truncate text-sm">
+                        {line.productName}
+                      </span>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                        {line.category}
+                        {!line.productInStock && " · apagado"}
+                      </span>
+                    </>
+                  )}
                 </td>
                 <td className="hidden px-4 py-3 font-mono text-[11px] text-ink/55 sm:table-cell">
-                  {product.sku ?? "—"}
+                  {line.sku ?? "—"}
                 </td>
-                <td className="px-4 py-3 text-right font-mono text-xs">
-                  {product.stock === null ? (
-                    <span className="text-ink/40">Sin control</span>
+                <td className="px-4 py-3 text-right">
+                  {line.stock === null ? (
+                    <span className="font-mono text-xs text-ink/40">
+                      Sin control
+                    </span>
                   ) : (
-                    product.stock
+                    <StockCell
+                      value={line.stock}
+                      pending={pendiente}
+                      ariaLabel={`Stock de ${line.variantLabel ?? line.productName}`}
+                      onCommit={commitStock}
+                    />
                   )}
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-xs text-ink/55">
@@ -309,42 +360,6 @@ export default function AdminDistribucion() {
                   )}
                 >
                   {disponible === null ? "—" : disponible}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-right">
-                  {product.stock !== null && (
-                    <>
-                      <button
-                        type="button"
-                        aria-label={`Sumar una unidad a ${product.name}`}
-                        disabled={quickUpdate.isPending}
-                        onClick={() =>
-                          quickUpdate.mutate({
-                            id: product.id,
-                            patch: { stock: (product.stock ?? 0) + 1 },
-                          })
-                        }
-                        className="rounded-full border border-ink/20 px-2.5 py-1 font-mono text-xs transition-colors hover:border-ink disabled:opacity-40"
-                      >
-                        +1
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Restar una unidad a ${product.name}`}
-                        disabled={quickUpdate.isPending || product.stock === 0}
-                        onClick={() =>
-                          quickUpdate.mutate({
-                            id: product.id,
-                            patch: {
-                              stock: Math.max(0, (product.stock ?? 0) - 1),
-                            },
-                          })
-                        }
-                        className="ml-1.5 rounded-full border border-ink/20 px-2.5 py-1 font-mono text-xs transition-colors hover:border-ink disabled:opacity-40"
-                      >
-                        −1
-                      </button>
-                    </>
-                  )}
                 </td>
               </tr>
             );

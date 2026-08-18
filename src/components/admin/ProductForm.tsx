@@ -138,22 +138,33 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
             onChange={(checked) => set("inStock", checked)}
           />
 
-          <Toggle
-            label="Controlar stock"
-            hint="Con el control apagado se vende sin límite de unidades."
-            checked={draft.stock !== null}
-            onChange={(checked) => set("stock", checked ? 0 : null)}
-          />
+          {draft.variants.length > 0 ? (
+            <p className="rounded-xl bg-cream p-4 text-[11px] leading-relaxed text-ink/55">
+              Este producto tiene variantes: el stock se controla una por una,
+              más abajo en "Variantes".
+            </p>
+          ) : (
+            <>
+              <Toggle
+                label="Controlar stock"
+                hint="Con el control apagado se vende sin límite de unidades."
+                checked={draft.stock !== null}
+                onChange={(checked) => set("stock", checked ? 0 : null)}
+              />
 
-          {draft.stock !== null && (
-            <TextField
-              id="p-stock"
-              label="Unidades disponibles"
-              type="number"
-              min={0}
-              value={draft.stock}
-              onChange={(event) => set("stock", Number(event.target.value) || 0)}
-            />
+              {draft.stock !== null && (
+                <TextField
+                  id="p-stock"
+                  label="Unidades disponibles"
+                  type="number"
+                  min={0}
+                  value={draft.stock}
+                  onChange={(event) =>
+                    set("stock", Number(event.target.value) || 0)
+                  }
+                />
+              )}
+            </>
           )}
 
           <TextField
@@ -414,13 +425,16 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
         {draft.variants.length === 0 && (
           <p className="mb-4 text-[11px] leading-relaxed text-ink/50">
             Sin variantes: el producto se vende en una sola versión. Agregá una
-            por cada color que el cliente pueda elegir.
+            por cada color que el cliente pueda elegir, con su propio stock.
           </p>
         )}
 
         <ul className="space-y-2">
           {draft.variants.map((variant, index) => (
-            <li key={variant.id} className="flex flex-wrap items-center gap-2">
+            <li
+              key={variant.id}
+              className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-3"
+            >
               <input
                 aria-label={`Nombre de la variante ${index + 1}`}
                 value={variant.label}
@@ -451,6 +465,25 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   </option>
                 ))}
               </select>
+              <input
+                aria-label={`Stock de la variante ${index + 1}`}
+                type="number"
+                min={0}
+                value={variant.stock ?? ""}
+                onChange={(event) => {
+                  const variants = [...draft.variants];
+                  variants[index] = {
+                    ...variant,
+                    stock:
+                      event.target.value === ""
+                        ? null
+                        : Math.max(0, Number(event.target.value) || 0),
+                  };
+                  set("variants", variants);
+                }}
+                placeholder="Sin control"
+                className="w-28 rounded-lg border border-ink/20 bg-transparent px-3 py-2 text-right font-mono text-xs placeholder:text-ink/40 focus:border-ink focus:outline-none"
+              />
               <button
                 type="button"
                 onClick={() =>
@@ -466,20 +499,32 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
             </li>
           ))}
         </ul>
+        {draft.variants.length > 0 && (
+          <p className="mt-2 text-[11px] leading-relaxed text-ink/45">
+            Stock vacío = sin control, se vende sin límite de unidades.
+          </p>
+        )}
 
         <button
           type="button"
           onClick={() =>
-            set("variants", [
-              ...draft.variants,
-              {
-                // Los ids de Tienda Nube son numéricos; para las variantes
-                // nuevas alcanza cualquier id estable.
-                id: `v-${Date.now()}`,
-                label: "",
-                color: draft.colors[0] ?? "pink",
-              },
-            ])
+            onChange({
+              ...draft,
+              variants: [
+                ...draft.variants,
+                {
+                  // Los ids de Tienda Nube son numéricos; para las variantes
+                  // nuevas alcanza cualquier id estable.
+                  id: `v-${Date.now()}`,
+                  label: "",
+                  color: draft.colors[0] ?? "pink",
+                  stock: null,
+                },
+              ],
+              // A partir de acá el stock se controla por variante: el
+              // número del producto entero queda obsoleto.
+              stock: draft.variants.length === 0 ? null : draft.stock,
+            })
           }
           className="mt-4 font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
         >
