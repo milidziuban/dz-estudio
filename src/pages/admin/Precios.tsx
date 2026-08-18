@@ -4,7 +4,7 @@ import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
 import SaveBar from "../../components/admin/SaveBar";
 import SettingsSection from "../../components/admin/SettingsSection";
-import Toggle from "../../components/admin/Toggle";
+import Toggle, { ToggleSwitch } from "../../components/admin/Toggle";
 import TextField from "../../components/TextField";
 import {
   useAdminProducts,
@@ -282,31 +282,19 @@ export default function AdminPrecios() {
               </td>
 
               <td className="hidden px-4 py-3 text-center sm:table-cell">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={product.isBundle}
-                  aria-label={`${product.name} es paquete`}
+                <ToggleSwitch
+                  compact
+                  checked={product.isBundle}
+                  label={`${product.name} es paquete`}
                   title="Ya se vende empaquetado (ej. pack x2): el descuento por combo se le aplica directo al precio de lista."
-                  onClick={() =>
+                  onChange={(isBundle) =>
                     quickUpdate.mutate({
                       id: product.id,
-                      patch: { isBundle: !product.isBundle },
+                      patch: { isBundle },
                     })
                   }
-                  className={cn(
-                    "relative inline-block h-5 w-9 rounded-full transition-colors",
-                    product.isBundle ? "bg-verde" : "bg-ink/20",
-                  )}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      "absolute top-1 h-3 w-3 rounded-full bg-white transition-transform",
-                      product.isBundle ? "translate-x-5" : "translate-x-1",
-                    )}
-                  />
-                </button>
+                  className="inline-flex"
+                />
               </td>
 
               <td className="px-4 py-3 text-right">

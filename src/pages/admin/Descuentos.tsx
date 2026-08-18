@@ -3,7 +3,7 @@ import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
-import Toggle from "../../components/admin/Toggle";
+import Toggle, { ToggleSwitch } from "../../components/admin/Toggle";
 import Button from "../../components/Button";
 import SelectField from "../../components/SelectField";
 import TextField from "../../components/TextField";
@@ -17,7 +17,6 @@ import {
   type DiscountDraft,
 } from "../../hooks/useDiscounts";
 import { errorMessage, formatDate } from "../../lib/admin";
-import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import type { Discount, DiscountKind } from "../../types/admin";
 
@@ -108,7 +107,7 @@ export default function AdminDescuentos() {
             Cupones con código
           </h2>
           <p className="mt-2 max-w-xl text-xs leading-relaxed text-ink/55">
-            ⚠️ Los cupones se guardan y se administran acá, pero el checkout
+            ✧ Los cupones se guardan y se administran acá, pero el checkout
             todavía no tiene el campo para canjearlos: por ahora sirven para
             tenerlos definidos y aplicarlos a mano sobre el total.
           </p>
@@ -186,30 +185,15 @@ export default function AdminDescuentos() {
                 )}
               </td>
               <td className="px-4 py-3 text-center">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={discount.active}
-                  aria-label={`Cupón ${discount.code} activo`}
-                  onClick={() =>
-                    toggleDiscount.mutate({
-                      id: discount.id,
-                      active: !discount.active,
-                    })
+                <ToggleSwitch
+                  compact
+                  checked={discount.active}
+                  label={`Cupón ${discount.code} activo`}
+                  onChange={(active) =>
+                    toggleDiscount.mutate({ id: discount.id, active })
                   }
-                  className={cn(
-                    "relative inline-block h-5 w-9 rounded-full transition-colors",
-                    discount.active ? "bg-verde" : "bg-ink/20",
-                  )}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      "absolute top-1 h-3 w-3 rounded-full bg-white transition-transform",
-                      discount.active ? "translate-x-5" : "translate-x-1",
-                    )}
-                  />
-                </button>
+                  className="inline-flex"
+                />
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-right">
                 <button

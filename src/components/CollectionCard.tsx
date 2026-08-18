@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { COLOR_HEX } from "../lib/colors";
+import type { ColorToken } from "../types/product";
 import Card from "./Card";
 import Tag, { type TagColor } from "./Tag";
 
@@ -11,7 +13,7 @@ type CollectionCardProps = {
   /** `contain` para los recortes sobre fondo blanco */
   imageFit: "cover" | "contain";
   /** Color de acento de la dupla */
-  colorB: string;
+  colorB: ColorToken;
   tagColor: TagColor;
   tagLabel: string;
   to: string;
@@ -48,7 +50,7 @@ export default function CollectionCard({
         <h3 className="text-2xl font-bold">
           <em
             className="font-serif font-normal italic"
-            style={{ color: colorB }}
+            style={{ color: COLOR_HEX[colorB] }}
           >
             {title}
           </em>

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import { useCart } from "../hooks/useCart";
@@ -7,6 +7,7 @@ import {
   SETTINGS_DEFAULTS,
   useStoreSettings,
 } from "../hooks/useStoreSettings";
+import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
 
 type OrderState = {
@@ -45,14 +46,11 @@ export default function CheckoutExito() {
     state?.orderNumber ??
     (externalRef ? externalRef.slice(0, 8).toUpperCase() : undefined);
 
-  const headerColor = isPending ? "#F4C542" : "#7CB562";
-
   return (
     <div className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
       <Card className="mx-auto max-w-2xl overflow-hidden text-center">
         <div
-          className="pb-10 pt-10"
-          style={{ backgroundColor: headerColor }}
+          className={cn("pb-10 pt-10", isPending ? "bg-amarillo" : "bg-verde")}
         >
           <p className="text-5xl" aria-hidden="true">
             ✦ ✧ ✿
@@ -121,6 +119,18 @@ export default function CheckoutExito() {
               Volver al inicio
             </Button>
           </div>
+
+          {orderNumber && (
+            <p className="mt-6 text-xs text-ink/55">
+              <Link
+                to="/pedido"
+                state={{ orderNumber }}
+                className="font-semibold text-ink underline"
+              >
+                Seguí el estado de tu pedido ↗
+              </Link>
+            </p>
+          )}
         </div>
       </Card>
     </div>

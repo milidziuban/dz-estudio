@@ -13,6 +13,7 @@ export const pageLoaders = {
   sobreNosotros: () => import("../pages/SobreNosotros"),
   faq: () => import("../pages/Faq"),
   contacto: () => import("../pages/Contacto"),
+  pedido: () => import("../pages/Pedido"),
   notFound: () => import("../pages/NotFound"),
 };
 
@@ -54,6 +55,8 @@ function pageFor(pathname: string): PageKey | null {
       return "faq";
     case "/contacto":
       return "contacto";
+    case "/pedido":
+      return "pedido";
     default:
       return null;
   }

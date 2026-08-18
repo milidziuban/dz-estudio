@@ -33,27 +33,12 @@ export default function Hero() {
           </p>
         </div>
 
-        {/* Dupla de producto: lo primero que se ve es lo que se vende */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Lo primero que se ve es lo que se vende */}
+        <div className="flex items-center justify-center">
           <img
-            src="/productos/almohadon-rombo-rosa.webp"
-            alt="Almohadón con rombos en rosa y bordó"
-            className="aspect-square w-full rounded-2xl bg-cream object-contain p-3"
-          />
-          <img
-            src="/productos/individuales-doble-pack.webp"
-            alt="Individual reversible en rosa y azul"
-            className="aspect-square w-full rounded-2xl object-cover"
-          />
-          <img
-            src="/productos/individuales-simple-pack.webp"
-            alt="Individuales de rayas blanco y negro puestos en la mesa"
-            className="aspect-square w-full rounded-2xl object-cover"
-          />
-          <img
-            src="/productos/almohadon-rombo-celeste.webp"
-            alt="Almohadón con rombos en celeste y terracota"
-            className="aspect-square w-full rounded-2xl bg-cream object-contain p-3"
+            src="/productos/hero-almohadones-trio.webp"
+            alt="Tres almohadones DZ Estudio: rombos bordó y rosa, rombos celeste y marrón, y rayas blanco y negro"
+            className="w-full max-w-md md:max-w-none"
           />
         </div>
       </div>

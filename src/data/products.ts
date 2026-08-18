@@ -1,4 +1,4 @@
-import type { Category, Product } from "../types/product";
+import type { Category, ColorToken, Product } from "../types/product";
 
 // Catálogo espejo de Tienda Nube (tienda dzestudio, sincronizado 17/08/2026).
 // Los ids son los de Tienda Nube; las fotos son las mismas, descargadas a
@@ -13,7 +13,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
 export const CATEGORY_INTRO: Record<
   Category,
   {
-    colorB: string;
+    colorB: ColorToken;
     tagLabel: string;
     description: string;
     image: string;
@@ -22,7 +22,7 @@ export const CATEGORY_INTRO: Record<
   }
 > = {
   almohadones: {
-    colorB: "#2F5D62",
+    colorB: "petroleo",
     tagLabel: "3 modelos · $23.000",
     description:
       "Fundas de 40x40 en rombos y rayas de dos colores. Llevando 2 o más, 10% de descuento.",
@@ -31,7 +31,7 @@ export const CATEGORY_INTRO: Record<
     imageFit: "contain",
   },
   individuales: {
-    colorB: "#F26430",
+    colorB: "orange",
     tagLabel: "2 packs · desde $5.100",
     description:
       "Packs de dos individuales de 30x42. La versión doble es reversible: rayas de un lado, formas orgánicas del otro.",

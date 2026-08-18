@@ -78,10 +78,14 @@ export default function AdminInicio() {
 
   const { actual, anterior } = stats;
 
-  const bajoStock = (products.data ?? []).filter(
-    (product) =>
-      product.stock !== null &&
-      product.stock <= (settings?.distribucion.lowStockThreshold ?? 3),
+  const lowStockThreshold = settings?.distribucion.lowStockThreshold ?? 3;
+  const bajoStock = (products.data ?? []).filter((product) =>
+    product.variants?.length
+      ? product.variants.some(
+          (variant) =>
+            variant.stock !== null && variant.stock <= lowStockThreshold,
+        )
+      : product.stock !== null && product.stock <= lowStockThreshold,
   );
 
   const bucketLabel =

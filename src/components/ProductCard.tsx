@@ -18,6 +18,11 @@ const CATEGORY_TAG = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [primary, secondary] = product.images;
+  const soldOut =
+    !product.inStock ||
+    (product.variants?.length
+      ? product.variants.every((v) => v.inStock === false)
+      : false);
 
   return (
     <Link
@@ -42,7 +47,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Tag color="amarillo" className="absolute left-3 top-3 text-[10px]">
             {COMBO_PROMO.short}
           </Tag>
-          {!product.inStock && (
+          {soldOut && (
             <span className="absolute inset-0 flex items-center justify-center bg-cream/80 font-mono text-xs font-medium uppercase tracking-widest">
               Sin stock
             </span>

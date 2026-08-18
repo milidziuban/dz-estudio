@@ -32,10 +32,7 @@ export default function SobreNosotros() {
 
         {/* Foto grande */}
         <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
-          <div
-            className="mx-auto aspect-[16/9] max-w-5xl overflow-hidden rounded-2xl"
-            style={{ backgroundColor: "#F3EFE4" }}
-          >
+          <div className="mx-auto aspect-[16/9] max-w-5xl overflow-hidden rounded-2xl bg-cream">
             <img
               src="/productos/individuales-doble-pack.webp"
               alt="Individual reversible de DZ Estudio en rosa y azul"

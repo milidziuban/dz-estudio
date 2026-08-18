@@ -6,11 +6,14 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary";
   /** Si se pasa, renderiza un Link de react-router con estilo de botón */
   to?: string;
+  /** State del Link, para pasar datos sin que viajen por la URL */
+  state?: unknown;
 };
 
 export default function Button({
   variant = "primary",
   to,
+  state,
   className,
   children,
   onClick,
@@ -30,6 +33,7 @@ export default function Button({
     return (
       <Link
         to={to}
+        state={state}
         className={classes}
         onClick={onClick as MouseEventHandler | undefined}
       >

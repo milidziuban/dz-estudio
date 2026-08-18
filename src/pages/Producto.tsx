@@ -33,9 +33,13 @@ export default function Producto() {
 
   const product = products.find((p) => p.slug === slug);
 
-  // Al cambiar de producto, arrancamos con la primera variante seleccionada
+  // Al cambiar de producto, arrancamos con la primera variante que tenga
+  // stock — si todas están agotadas, con la primera nomás.
   useEffect(() => {
-    setVariantId(product?.variants?.[0]?.id);
+    const variants = product?.variants;
+    setVariantId(
+      variants?.find((v) => v.inStock !== false)?.id ?? variants?.[0]?.id,
+    );
     setImgIdx(0);
     setQty(1);
   }, [product?.slug, product?.variants]);
@@ -77,6 +81,10 @@ export default function Producto() {
         Number(a.category === product.category),
     )
     .slice(0, 3);
+
+  const selectedVariant = product.variants?.find((v) => v.id === variantId);
+  const variantSoldOut = selectedVariant?.inStock === false;
+  const canAdd = product.inStock && !variantSoldOut;
 
   const handleAdd = () => {
     addToCart(product.slug, variantId, qty);
@@ -169,27 +177,38 @@ export default function Producto() {
                   ✿ Color
                 </legend>
                 <div className="flex flex-wrap gap-2">
-                  {product.variants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      type="button"
-                      aria-pressed={variantId === variant.id}
-                      onClick={() => setVariantId(variant.id)}
-                      className={cn(
-                        "flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
-                        variantId === variant.id
-                          ? "border-ink bg-ink text-cream"
-                          : "border-ink/25 hover:border-ink",
-                      )}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="h-3.5 w-3.5 rounded-full border border-ink/20"
-                        style={{ backgroundColor: COLOR_HEX[variant.color] }}
-                      />
-                      {variant.label}
-                    </button>
-                  ))}
+                  {product.variants.map((variant) => {
+                    const soldOut = variant.inStock === false;
+                    return (
+                      <button
+                        key={variant.id}
+                        type="button"
+                        aria-pressed={variantId === variant.id}
+                        disabled={soldOut}
+                        onClick={() => setVariantId(variant.id)}
+                        title={soldOut ? "Sin stock" : undefined}
+                        className={cn(
+                          "flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
+                          soldOut
+                            ? "cursor-not-allowed border-ink/15 text-ink/35"
+                            : variantId === variant.id
+                              ? "border-ink bg-ink text-cream"
+                              : "border-ink/25 hover:border-ink",
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "h-3.5 w-3.5 rounded-full border border-ink/20",
+                            soldOut && "opacity-40",
+                          )}
+                          style={{ backgroundColor: COLOR_HEX[variant.color] }}
+                        />
+                        {variant.label}
+                        {soldOut && " · sin stock"}
+                      </button>
+                    );
+                  })}
                 </div>
               </fieldset>
             )}
@@ -222,10 +241,10 @@ export default function Producto() {
               </div>
               <Button
                 onClick={handleAdd}
-                disabled={!product.inStock}
+                disabled={!canAdd}
                 className="flex-1 py-4 text-base disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {product.inStock ? "Agregar al carrito ✦" : "Sin stock"}
+                {canAdd ? "Agregar al carrito ✦" : "Sin stock"}
               </Button>
             </div>
 

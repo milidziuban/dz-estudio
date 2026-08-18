@@ -7,7 +7,7 @@ import {
   rangeStart,
   type RangeId,
 } from "./admin";
-import type { Customer, Order, PageView } from "../types/admin";
+import type { AdminProduct, Customer, Order, PageView } from "../types/admin";
 
 // ── Períodos ──────────────────────────────────────────────────
 
@@ -248,6 +248,67 @@ export function customersFromOrders(orders: Order[]): Customer[] {
   }
 
   return [...map.values()].sort((a, b) => b.totalSpent - a.totalSpent);
+}
+
+// ── Stock ─────────────────────────────────────────────────────
+
+/** Misma forma que `cartKey` en useCart: así el stock reservado de una
+ *  orden (que guarda `slug` + `variant_id`) se cruza con la línea correcta. */
+export function stockLineKey(slug: string, variantId?: string | null): string {
+  return `${slug}::${variantId ?? ""}`;
+}
+
+/** Una fila de stock: el producto entero si no tiene variantes, o una fila
+ *  por cada variante — así el panel controla y muestra el stock al nivel
+ *  en el que realmente se vende. */
+export type StockLine = {
+  key: string;
+  productId: number;
+  productSlug: string;
+  productName: string;
+  category: string;
+  sku: string | null;
+  /** El toggle "a la venta" es del producto entero, no de la variante. */
+  productInStock: boolean;
+  variantId: string | null;
+  variantLabel: string | null;
+  stock: number | null;
+};
+
+export function stockLines(products: AdminProduct[]): StockLine[] {
+  const lines: StockLine[] = [];
+  for (const product of products) {
+    if (product.variants?.length) {
+      for (const variant of product.variants) {
+        lines.push({
+          key: stockLineKey(product.slug, variant.id),
+          productId: product.id,
+          productSlug: product.slug,
+          productName: product.name,
+          category: product.category,
+          sku: product.sku,
+          productInStock: product.inStock,
+          variantId: variant.id,
+          variantLabel: variant.label,
+          stock: variant.stock,
+        });
+      }
+    } else {
+      lines.push({
+        key: stockLineKey(product.slug),
+        productId: product.id,
+        productSlug: product.slug,
+        productName: product.name,
+        category: product.category,
+        sku: product.sku,
+        productInStock: product.inStock,
+        variantId: null,
+        variantLabel: null,
+        stock: product.stock,
+      });
+    }
+  }
+  return lines;
 }
 
 // ── Tráfico ───────────────────────────────────────────────────

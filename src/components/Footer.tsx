@@ -7,6 +7,7 @@ const navItems = [
   { label: "Sobre nosotros", to: "/sobre-nosotros" },
   { label: "FAQ", to: "/faq" },
   { label: "Contacto", to: "/contacto" },
+  { label: "Seguí tu pedido", to: "/pedido" },
 ];
 
 export default function Footer() {

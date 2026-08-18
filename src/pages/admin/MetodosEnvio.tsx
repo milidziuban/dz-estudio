@@ -122,7 +122,7 @@ export default function AdminMetodosEnvio() {
               paso está en <code>PANEL-ADMIN.md</code>.
             </p>
             <p>
-              ⚠️ <strong>Andreani</strong> todavía cotiza con costo fijo: su
+              ✧ <strong>Andreani</strong> todavía cotiza con costo fijo: su
               API no se autogestiona, las credenciales las da tu comercial de
               cuenta. Cuando las tengas, avisá para conectar la cotización
               real igual que con Correo Argentino.
