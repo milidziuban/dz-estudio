@@ -15,7 +15,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-3 md:py-20 lg:px-12">
         <div>
           <img
-            src="/logo-extendido.svg"
+            src="/logo-extendido-cream.svg"
             alt="DZ Estudio"
             className="h-6 w-auto"
           />

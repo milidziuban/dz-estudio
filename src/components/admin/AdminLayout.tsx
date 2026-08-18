@@ -26,7 +26,7 @@ export default function AdminLayout() {
     <div className="flex h-full flex-col gap-8 overflow-y-auto bg-ink px-4 py-6">
       <Link to="/admin" className="px-3">
         <img
-          src="/logo-extendido.svg"
+          src="/logo-extendido-cream.svg"
           alt="DZ Estudio"
           className="h-6 w-auto"
         />
