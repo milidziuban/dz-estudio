@@ -9,8 +9,14 @@ import SelectField from "../components/SelectField";
 import TextField from "../components/TextField";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
+import { useShippingQuote } from "../hooks/useShippingQuote";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
-import { checkoutSchema, PROVINCIAS, type CheckoutData } from "../lib/checkout";
+import {
+  checkoutSchema,
+  PESO_GRAMOS_DEFAULT,
+  PROVINCIAS,
+  type CheckoutData,
+} from "../lib/checkout";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
 import { bestDiscount, DEFAULT_PROMOS, INSTALLMENTS } from "../lib/promos";
@@ -65,14 +71,42 @@ export default function Checkout() {
   const subtotal = cartSubtotal(resolved);
   const envioSel = watch("envio");
   const pagoSel = watch("pago");
+  const cpWatched = watch("cp") ?? "";
+
+  // Peso real del carrito, para cotizar con la transportista.
+  const cartWeightGrams = resolved.reduce(
+    (total, { product, qty }) =>
+      total + (product.pesoGramos ?? PESO_GRAMOS_DEFAULT) * qty,
+    0,
+  );
+  const hasLiveOptions = shippingOptions.some((o) => o.mode === "vivo");
+  const quote = useShippingQuote(
+    hasLiveOptions ? cpWatched : "",
+    cartWeightGrams,
+  );
+  const correo = quote.data?.correoArgentino;
+
+  /** Costo en vivo si ya lo cotizamos; null si todavía no hay respuesta útil. */
+  const liveCostFor = (option: (typeof shippingOptions)[number]) => {
+    if (option.mode !== "vivo" || option.provider !== "correo-argentino") {
+      return null;
+    }
+    if (!correo?.configured) return null;
+    return option.service === "sucursal" ? correo.sucursal : correo.domicilio;
+  };
+
+  const isQuoting = (option: (typeof shippingOptions)[number]) =>
+    option.mode === "vivo" &&
+    cpWatched.trim().length >= 4 &&
+    (quote.isLoading || quote.isFetching);
 
   // Envío gratis a partir del monto configurado (null = sin envío gratis)
   const envioGratis =
     envios.freeShippingFrom !== null && subtotal >= envios.freeShippingFrom;
-  const costFor = (cost: number) => (envioGratis ? 0 : cost);
-  const shippingCost = shippingOptions.find((o) => o.id === envioSel)
-    ? costFor(shippingOptions.find((o) => o.id === envioSel)!.cost)
-    : undefined;
+  const costFor = (option: (typeof shippingOptions)[number]) =>
+    envioGratis ? 0 : (liveCostFor(option) ?? option.cost);
+  const selectedOption = shippingOptions.find((o) => o.id === envioSel);
+  const shippingCost = selectedOption ? costFor(selectedOption) : undefined;
 
   // Las promos de Tienda Nube no se combinan: se aplica la más conveniente
   const discount = bestDiscount(
@@ -377,13 +411,21 @@ export default function Checkout() {
                         </span>
                       </span>
                       <span className="font-mono text-sm font-medium tracking-wider">
-                        {costFor(option.cost) === 0
-                          ? "Gratis"
-                          : formatPrice(option.cost)}
+                        {isQuoting(option)
+                          ? "Calculando…"
+                          : costFor(option) === 0
+                            ? "Gratis"
+                            : formatPrice(costFor(option))}
                       </span>
                     </label>
                   ))}
                 </div>
+                {hasLiveOptions && cpWatched.trim().length < 4 && (
+                    <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+                      Cargá el código postal para que Correo Argentino cotice
+                      el envío.
+                    </p>
+                  )}
                 {errors.envio && (
                   <p className="mt-2 text-xs font-semibold text-orange">
                     ✕ {errors.envio.message}

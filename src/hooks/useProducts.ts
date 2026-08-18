@@ -19,6 +19,7 @@ type ProductRow = {
   description: string;
   medidas: string;
   peso: string | null;
+  peso_gramos: number | null;
   material: string | null;
   cuidados: string | null;
   variants: ProductVariant[] | null;
@@ -37,6 +38,7 @@ function mapRow(row: ProductRow): Product {
     description: row.description,
     medidas: row.medidas,
     peso: row.peso ?? undefined,
+    pesoGramos: row.peso_gramos ?? undefined,
     material: row.material ?? undefined,
     cuidados: row.cuidados ?? undefined,
     variants: row.variants?.length ? row.variants : undefined,

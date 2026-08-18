@@ -1,3 +1,5 @@
+import { errorMessage } from "../../lib/admin";
+
 type QueryErrorProps = {
   error: unknown;
   /** Qué se estaba tratando de leer o guardar */
@@ -8,12 +10,7 @@ type QueryErrorProps = {
  *  que falta. Mostramos el mensaje crudo además del texto amable: cuando algo
  *  se rompe, el código de Postgres es la pista útil. */
 export default function QueryError({ error, what }: QueryErrorProps) {
-  const message =
-    error instanceof Error
-      ? error.message
-      : typeof error === "string"
-        ? error
-        : "Error desconocido";
+  const message = errorMessage(error, "Error desconocido");
 
   return (
     <div

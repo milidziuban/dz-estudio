@@ -31,6 +31,8 @@ export const SHIPPING_METHOD_LABEL: Record<string, string> = {
   retiro: "Retiro en depósito",
   "andreani-sucursal": "Andreani sucursal",
   "andreani-domicilio": "Andreani domicilio",
+  "correo-sucursal": "Correo Argentino sucursal",
+  "correo-domicilio": "Correo Argentino domicilio",
 };
 
 /** Los estados que cuentan como facturación real. */
@@ -194,4 +196,28 @@ export function slugify(text: string): string {
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+// ── Errores ───────────────────────────────────────────────────
+
+/** Los errores de Supabase no son `Error`: llegan como objeto plano
+ *  ({ message, details, hint, code }). Sin esto, `instanceof Error` da false y
+ *  la pantalla muestra un "no se pudo guardar" pelado, justo cuando el código
+ *  de Postgres era la única pista útil. */
+export function errorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const { message, hint, code } = error as {
+      message?: unknown;
+      hint?: unknown;
+      code?: unknown;
+    };
+    if (typeof message === "string" && message) {
+      const detalle = typeof hint === "string" && hint ? ` ${hint}` : "";
+      const codigo = typeof code === "string" && code ? ` (${code})` : "";
+      return `${message}${codigo}.${detalle}`;
+    }
+  }
+  return fallback;
 }

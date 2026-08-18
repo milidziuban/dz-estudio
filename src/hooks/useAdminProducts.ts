@@ -18,6 +18,7 @@ type AdminProductRow = {
   description: string;
   medidas: string;
   peso: string | null;
+  peso_gramos: number | null;
   material: string | null;
   cuidados: string | null;
   variants: ProductVariant[] | null;
@@ -38,6 +39,7 @@ function mapProduct(row: AdminProductRow): AdminProduct {
     description: row.description,
     medidas: row.medidas,
     peso: row.peso ?? undefined,
+    pesoGramos: row.peso_gramos ?? undefined,
     material: row.material ?? undefined,
     cuidados: row.cuidados ?? undefined,
     variants: row.variants?.length ? row.variants : undefined,
@@ -78,6 +80,7 @@ export function draftFromProduct(product: AdminProduct): ProductDraft {
     description: product.description,
     medidas: product.medidas,
     peso: product.peso ?? "",
+    pesoGramos: product.pesoGramos ?? null,
     material: product.material ?? "",
     cuidados: product.cuidados ?? "",
     inStock: product.inStock,
@@ -99,6 +102,7 @@ export function emptyDraft(): ProductDraft {
     description: "",
     medidas: "",
     peso: "",
+    pesoGramos: null,
     material: "",
     cuidados: "",
     inStock: true,
@@ -121,6 +125,7 @@ function rowFromDraft(draft: ProductDraft) {
     description: draft.description,
     medidas: draft.medidas,
     peso: draft.peso || null,
+    peso_gramos: draft.pesoGramos,
     material: draft.material || null,
     cuidados: draft.cuidados || null,
     variants: draft.variants,

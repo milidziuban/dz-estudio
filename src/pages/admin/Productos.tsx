@@ -14,6 +14,7 @@ import {
   useSaveProduct,
 } from "../../hooks/useAdminProducts";
 import { useStoreSettings } from "../../hooks/useStoreSettings";
+import { errorMessage } from "../../lib/admin";
 import { cn } from "../../lib/cn";
 import { COLOR_HEX } from "../../lib/colors";
 import { formatPrice } from "../../lib/format";
@@ -111,7 +112,7 @@ export default function AdminProductos() {
       setDraft(null);
     } catch (error) {
       setFormError(
-        error instanceof Error ? error.message : "No se pudo guardar",
+        errorMessage(error, "No se pudo guardar"),
       );
     }
   };

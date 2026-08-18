@@ -59,10 +59,10 @@ export function checkoutWhatsappUrl(
     ...(discount
       ? [`Descuento (${discount.label}): -${formatPrice(discount.amount)}`]
       : []),
-    ...(envio
+    ...(envio && shippingCost !== undefined
       ? [
           `Envío (${envio.label}): ${
-            envio.cost === 0 ? "gratis" : formatPrice(envio.cost)
+            shippingCost === 0 ? "gratis" : formatPrice(shippingCost)
           }`,
         ]
       : []),

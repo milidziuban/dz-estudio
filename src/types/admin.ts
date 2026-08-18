@@ -136,18 +136,39 @@ export type PagosSettings = {
   };
 };
 
+export type ShippingProvider = "andreani" | "correo-argentino";
+
 export type ShippingOptionSetting = {
   id: string;
   label: string;
   detail: string;
+  /** "vivo": el costo real lo calcula la transportista en el checkout.
+   *  "fijo": el costo es este número, lo define el panel. */
+  mode: "fijo" | "vivo";
+  /** Costo fijo (mode "fijo") o de respaldo si la cotización en vivo
+   *  no está configurada o falla (mode "vivo"). */
   cost: number;
   enabled: boolean;
+  /** Solo en mode "vivo": a qué transportista y servicio cotizar. */
+  provider?: ShippingProvider;
+  service?: "sucursal" | "domicilio";
+};
+
+export type PaqueteEstandar = {
+  largoCm: number;
+  anchoCm: number;
+  altoCm: number;
 };
 
 export type EnviosSettings = {
   options: ShippingOptionSetting[];
   /** Monto desde el que el envío es gratis. null = sin envío gratis */
   freeShippingFrom: number | null;
+  /** Código postal del depósito que despacha, para cotizar Andreani/Correo. */
+  origenCp: string;
+  /** Paquete tipo en el que sale un pedido — son objetos blandos, no hace
+   *  falta pedir medidas por producto para cotizar el volumen. */
+  paquete: PaqueteEstandar;
 };
 
 export type DistributionLocation = {
@@ -200,6 +221,8 @@ export type ProductDraft = {
   description: string;
   medidas: string;
   peso: string;
+  /** Peso real en gramos para cotizar el envío. null = usar el default del panel. */
+  pesoGramos: number | null;
   material: string;
   cuidados: string;
   inStock: boolean;

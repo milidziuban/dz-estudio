@@ -22,7 +22,7 @@ import {
   SETTINGS_DEFAULTS,
   useSettingsDraft,
 } from "../../hooks/useStoreSettings";
-import { formatDate } from "../../lib/admin";
+import { errorMessage, formatDate } from "../../lib/admin";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import type { Discount, DiscountKind } from "../../types/admin";
@@ -85,7 +85,7 @@ export default function AdminDescuentos() {
       setDraft(null);
     } catch (error) {
       setFormError(
-        error instanceof Error ? error.message : "No se pudo guardar el cupón",
+        errorMessage(error, "No se pudo guardar el cupón"),
       );
     }
   };

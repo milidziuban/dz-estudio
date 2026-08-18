@@ -4,13 +4,20 @@ El panel vive en `/admin` del mismo sitio. No está linkeado desde ninguna parte
 de la tienda, está fuera de Google (`robots.txt` + `noindex`) y solo entra quien
 esté en la tabla `admins` de Supabase.
 
-## 1. Correr la migración
+## 1. Correr las migraciones
 
-Supabase → SQL Editor → pegar completo y Run:
+Supabase → SQL Editor → pegar completo y Run, **en este orden**:
 
 ```
+supabase/migrations/20260817120000_catalogo_tiendanube.sql
 supabase/migrations/20260818120000_panel_admin.sql
+supabase/migrations/20260819120000_envio_correo_argentino.sql
 ```
+
+La primera deja el esquema de `products` como lo espera el código (`peso`,
+`variants`, `in_stock`) y carga el catálogo real de Tienda Nube. Si se la saltea,
+el panel lista los productos pero **no deja guardar ninguno**: el update habla de
+columnas que no existen.
 
 Crea la tabla `admins`, la función `is_admin()`, las policies de escritura y las
 tablas nuevas (`page_views`, `discounts`, `store_settings`,
@@ -99,7 +106,11 @@ Estos cambios se ven en el sitio sin deploy:
 
 - **Productos**: precio, stock, fichas, fotos, variantes, prender y apagar.
 - **Métodos de envío**: nombre, aclaración, costo, cuáles se ofrecen y desde qué
-  monto el envío es gratis. El checkout los lee de `store_settings`.
+  monto el envío es gratis. El checkout los lee de `store_settings`. Correo
+  Argentino cotiza en vivo por código postal (edge function `shipping-quote`,
+  ver `supabase/functions/README.md` para cargar las credenciales de
+  MiCorreo); Andreani todavía es costo fijo porque su API pide credenciales
+  que da el comercial de cuenta, no autoservicio.
 - **Métodos de pago**: banco, titular, CUIT, CBU y alias de la transferencia.
 - **Descuentos → promociones automáticas**: los porcentajes y el mínimo de las
   dos promos que se aplican solas en el carrito.

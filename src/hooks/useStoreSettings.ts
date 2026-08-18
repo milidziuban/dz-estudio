@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { GA_ID } from "../lib/analytics";
-import { BANK_INFO, SHIPPING_OPTIONS } from "../lib/checkout";
+import {
+  BANK_INFO,
+  ORIGEN_CP_DEFAULT,
+  PAQUETE_DEFAULT_CM,
+  SHIPPING_OPTIONS,
+} from "../lib/checkout";
 import { ALMOHADONES_PROMO, INSTALLMENTS, TRANSFER_PROMO } from "../lib/promos";
 import { SITE } from "../lib/site";
 import { supabase } from "../lib/supabase";
@@ -35,10 +40,15 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       id: option.id,
       label: option.label,
       detail: option.detail,
+      mode: option.mode,
       cost: option.cost,
       enabled: true,
+      ...("provider" in option ? { provider: option.provider } : {}),
+      ...("service" in option ? { service: option.service } : {}),
     })),
     freeShippingFrom: null,
+    origenCp: ORIGEN_CP_DEFAULT,
+    paquete: PAQUETE_DEFAULT_CM,
   },
   distribucion: {
     locations: [

@@ -1,3 +1,4 @@
+import { errorMessage } from "../../lib/admin";
 import Button from "../Button";
 
 type SaveBarProps = {
@@ -50,9 +51,7 @@ export default function SaveBar({
       {error != null && (
         <p role="alert" className="text-xs font-semibold text-orange">
           ✕{" "}
-          {error instanceof Error
-            ? error.message
-            : "No se pudo guardar. Reintentá."}
+          {errorMessage(error, "No se pudo guardar. Reintentá.")}
         </p>
       )}
     </>

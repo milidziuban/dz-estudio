@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { COLOR_HEX, COLOR_LABEL, COLOR_TOKENS } from "../../lib/colors";
 import { cn } from "../../lib/cn";
-import { slugify } from "../../lib/admin";
+import { errorMessage, slugify } from "../../lib/admin";
 import { uploadProductImage } from "../../lib/storage";
 import type { ProductDraft } from "../../types/admin";
 import type { ColorToken } from "../../types/product";
@@ -60,7 +60,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
       });
     } catch (error) {
       setUploadError(
-        error instanceof Error ? error.message : "No se pudo subir la foto",
+        errorMessage(error, "No se pudo subir la foto"),
       );
     } finally {
       setUploading(false);
@@ -220,6 +220,25 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
             value={draft.peso}
             onChange={(event) => set("peso", event.target.value)}
           />
+          <TextField
+            id="p-peso-gramos"
+            label="Peso real (gramos)"
+            type="number"
+            min={0}
+            step={10}
+            placeholder="Sin cargar: se usa el default del panel"
+            value={draft.pesoGramos ?? ""}
+            onChange={(event) =>
+              set(
+                "pesoGramos",
+                event.target.value === "" ? null : Number(event.target.value),
+              )
+            }
+          />
+          <p className="-mt-2 text-[11px] leading-relaxed text-ink/50">
+            Este es el que se usa para cotizar el envío — no lo que dice la
+            ficha del producto.
+          </p>
           <TextField
             id="p-material"
             label="Material"

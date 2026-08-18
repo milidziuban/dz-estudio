@@ -9,7 +9,7 @@ import type { ShippingOptionSetting } from "../../types/admin";
 
 export default function AdminMetodosEnvio() {
   const envios = useSettingsDraft("envios");
-  const { options, freeShippingFrom } = envios.value;
+  const { options, freeShippingFrom, origenCp, paquete } = envios.value;
 
   const setOption = (index: number, patch: Partial<ShippingOptionSetting>) => {
     const next = [...options];
@@ -43,16 +43,23 @@ export default function AdminMetodosEnvio() {
       <div className="space-y-3">
         <SettingsSection
           title="Opciones de entrega"
-          description="Son los tres métodos que acepta la base de datos. Podés cambiarles el nombre, la aclaración y el costo, o apagar los que no quieras ofrecer — pero no se pueden agregar métodos nuevos sin tocar el código y la migración."
+          description="Son los métodos que acepta la base de datos. Podés cambiarles el nombre, la aclaración y el costo, o apagar los que no quieras ofrecer — pero no se pueden agregar métodos nuevos sin tocar el código y la migración."
           footer={saveBar}
         >
           <ul className="space-y-4">
             {options.map((option, index) => (
               <li key={option.id} className="rounded-xl bg-cream p-5">
-                <div className="mb-4 flex items-start justify-between gap-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
-                    {option.id}
-                  </p>
+                <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+                      {option.id}
+                    </p>
+                    {option.mode === "vivo" && (
+                      <span className="rounded-full bg-verde/25 px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-petroleo">
+                        Cotiza en vivo
+                      </span>
+                    )}
+                  </div>
                   <Toggle
                     label="Ofrecer"
                     checked={option.enabled}
@@ -71,7 +78,11 @@ export default function AdminMetodosEnvio() {
                   />
                   <TextField
                     id={`e-cost-${option.id}`}
-                    label="Costo (ARS)"
+                    label={
+                      option.mode === "vivo"
+                        ? "Costo de respaldo (ARS)"
+                        : "Costo (ARS)"
+                    }
                     type="number"
                     min={0}
                     step={100}
@@ -95,18 +106,103 @@ export default function AdminMetodosEnvio() {
                 </div>
 
                 <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/45">
-                  En el checkout:{" "}
-                  {option.cost === 0 ? "Gratis" : formatPrice(option.cost)}
+                  {option.mode === "vivo"
+                    ? "Mientras la cotización en vivo esté configurada, este costo no se usa — solo entra si la transportista no responde."
+                    : `En el checkout: ${option.cost === 0 ? "Gratis" : formatPrice(option.cost)}`}
                 </p>
               </li>
             ))}
           </ul>
 
-          <p className="mt-5 text-[11px] leading-relaxed text-ink/50">
-            ⚠️ Andreani cotiza por código postal: estos son montos fijos que vos
-            definís, no la tarifa real de la transportista. Conviene dejarlos un
-            poco por encima del promedio de lo que pagás.
+          <div className="mt-5 space-y-2 text-[11px] leading-relaxed text-ink/50">
+            <p>
+              ✧ <strong>Correo Argentino</strong> cotiza en vivo por código
+              postal apenas cargues las credenciales de MiCorreo como
+              secretos de la función <code>shipping-quote</code> — el paso a
+              paso está en <code>PANEL-ADMIN.md</code>.
+            </p>
+            <p>
+              ⚠️ <strong>Andreani</strong> todavía cotiza con costo fijo: su
+              API no se autogestiona, las credenciales las da tu comercial de
+              cuenta. Cuando las tengas, avisá para conectar la cotización
+              real igual que con Correo Argentino.
+            </p>
+          </div>
+        </SettingsSection>
+
+        <SettingsSection
+          title="Datos para cotizar"
+          description="Lo que usan Andreani y Correo Argentino para calcular el envío: desde dónde sale el paquete y en qué medidas."
+          footer={saveBar}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              id="e-origen-cp"
+              label="Código postal de origen"
+              value={origenCp}
+              onChange={(event) =>
+                envios.update({ ...envios.value, origenCp: event.target.value })
+              }
+            />
+          </div>
+
+          <p className="mb-3 mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+            Paquete estándar
           </p>
+          <p className="mb-4 text-[11px] leading-relaxed text-ink/50">
+            Son objetos textiles blandos: en vez de pedir medidas por
+            producto, todos los pedidos cotizan con este mismo paquete tipo.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <TextField
+              id="e-paquete-largo"
+              label="Largo (cm)"
+              type="number"
+              min={1}
+              value={paquete.largoCm}
+              onChange={(event) =>
+                envios.update({
+                  ...envios.value,
+                  paquete: {
+                    ...paquete,
+                    largoCm: Number(event.target.value) || 1,
+                  },
+                })
+              }
+            />
+            <TextField
+              id="e-paquete-ancho"
+              label="Ancho (cm)"
+              type="number"
+              min={1}
+              value={paquete.anchoCm}
+              onChange={(event) =>
+                envios.update({
+                  ...envios.value,
+                  paquete: {
+                    ...paquete,
+                    anchoCm: Number(event.target.value) || 1,
+                  },
+                })
+              }
+            />
+            <TextField
+              id="e-paquete-alto"
+              label="Alto (cm)"
+              type="number"
+              min={1}
+              value={paquete.altoCm}
+              onChange={(event) =>
+                envios.update({
+                  ...envios.value,
+                  paquete: {
+                    ...paquete,
+                    altoCm: Number(event.target.value) || 1,
+                  },
+                })
+              }
+            />
+          </div>
         </SettingsSection>
 
         <SettingsSection

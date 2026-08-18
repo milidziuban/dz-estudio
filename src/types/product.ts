@@ -40,6 +40,8 @@ export type Product = {
   description: string;
   medidas: string;
   peso?: string;
+  /** Peso real en gramos, para cotizar el envío. Sin cargar, se usa el default del panel. */
+  pesoGramos?: number;
   material?: string;
   cuidados?: string;
   /** Solo en los productos que tienen variantes cargadas en Tienda Nube */
