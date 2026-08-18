@@ -36,6 +36,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     title: "Catálogo",
     items: [
       { to: "/admin/productos", label: "Productos", icon: "productos" },
+      { to: "/admin/precios", label: "Precios", icon: "precios" },
       {
         to: "/admin/distribucion",
         label: "Centro de distribución",

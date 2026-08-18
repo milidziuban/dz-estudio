@@ -3,8 +3,6 @@ import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
-import SaveBar from "../../components/admin/SaveBar";
-import SettingsSection from "../../components/admin/SettingsSection";
 import Toggle from "../../components/admin/Toggle";
 import Button from "../../components/Button";
 import SelectField from "../../components/SelectField";
@@ -18,10 +16,6 @@ import {
   useToggleDiscount,
   type DiscountDraft,
 } from "../../hooks/useDiscounts";
-import {
-  SETTINGS_DEFAULTS,
-  useSettingsDraft,
-} from "../../hooks/useStoreSettings";
 import { errorMessage, formatDate } from "../../lib/admin";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
@@ -56,14 +50,9 @@ export default function AdminDescuentos() {
   const saveDiscount = useSaveDiscount();
   const toggleDiscount = useToggleDiscount();
   const deleteDiscount = useDeleteDiscount();
-  const marketing = useSettingsDraft("marketing");
 
   const [draft, setDraft] = useState<DiscountDraft | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-
-  // Las promos viven anidadas dentro de `marketing`: si la fila de la base
-  // quedó sin ellas, valen las del código.
-  const promos = marketing.value.promos ?? SETTINGS_DEFAULTS.marketing.promos;
 
   const guardarCupon = async () => {
     if (!draft) return;
@@ -101,131 +90,17 @@ export default function AdminDescuentos() {
             </em>
           </>
         }
-        description="Las dos promos automáticas que ya corren en la tienda, y los cupones con código."
+        description="Los cupones con código. Las dos promos automáticas (combo y transferencia) se editan en Precios."
       />
 
-      <div className="space-y-3">
-        <SettingsSection
-          title="Promociones automáticas"
-          description="Se aplican solas en el carrito, sin que el cliente cargue nada. No se combinan entre sí: se aplica la que más le conviene."
-          footer={
-            <SaveBar
-              dirty={marketing.dirty}
-              saved={marketing.saved}
-              saving={marketing.saving}
-              error={marketing.error}
-              onSave={() => void marketing.save()}
-              onReset={marketing.reset}
-            />
-          }
-        >
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="space-y-4">
-              <Toggle
-                label="Descuento por cantidad"
-                hint="Aplica sobre los almohadones del carrito."
-                checked={promos.almohadones.enabled}
-                onChange={(enabled) =>
-                  marketing.update({
-                    ...marketing.value,
-                    promos: {
-                      ...promos,
-                      almohadones: { ...promos.almohadones, enabled },
-                    },
-                  })
-                }
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <TextField
-                  id="promo-alm-percent"
-                  label="Descuento %"
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={promos.almohadones.percent}
-                  onChange={(event) =>
-                    marketing.update({
-                      ...marketing.value,
-                      promos: {
-                        ...promos,
-                        almohadones: {
-                          ...promos.almohadones,
-                          percent: Number(event.target.value) || 0,
-                        },
-                      },
-                    })
-                  }
-                />
-                <TextField
-                  id="promo-alm-qty"
-                  label="Desde (unidades)"
-                  type="number"
-                  min={2}
-                  value={promos.almohadones.minQty}
-                  onChange={(event) =>
-                    marketing.update({
-                      ...marketing.value,
-                      promos: {
-                        ...promos,
-                        almohadones: {
-                          ...promos.almohadones,
-                          minQty: Number(event.target.value) || 2,
-                        },
-                      },
-                    })
-                  }
-                />
-              </div>
-              <p className="text-[11px] leading-relaxed text-ink/50">
-                Queda: {promos.almohadones.percent}% llevando{" "}
-                {promos.almohadones.minQty} o más almohadones.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <Toggle
-                label="Descuento por transferencia"
-                hint="Se aplica sobre el subtotal cuando elige transferencia bancaria."
-                checked={promos.transferencia.enabled}
-                onChange={(enabled) =>
-                  marketing.update({
-                    ...marketing.value,
-                    promos: {
-                      ...promos,
-                      transferencia: { ...promos.transferencia, enabled },
-                    },
-                  })
-                }
-              />
-              <TextField
-                id="promo-transfer-percent"
-                label="Descuento %"
-                type="number"
-                min={1}
-                max={100}
-                value={promos.transferencia.percent}
-                onChange={(event) =>
-                  marketing.update({
-                    ...marketing.value,
-                    promos: {
-                      ...promos,
-                      transferencia: {
-                        ...promos.transferencia,
-                        percent: Number(event.target.value) || 0,
-                      },
-                    },
-                  })
-                }
-              />
-              <p className="text-[11px] leading-relaxed text-ink/50">
-                Queda: {promos.transferencia.percent}% pagando por
-                transferencia. Acordate de que la marquesina y el FAQ nombran
-                este número por separado.
-              </p>
-            </div>
-          </div>
-        </SettingsSection>
-      </div>
+      <p className="mb-6 rounded-xl bg-cream px-4 py-3 text-xs leading-relaxed text-ink/65">
+        ✦ El descuento por combo y el de transferencia son los que ya corren
+        solos en el carrito. Se mudaron a{" "}
+        <a href="/admin/precios" className="font-semibold underline">
+          Precios
+        </a>
+        , junto con el margen y el costo de cada producto.
+      </p>
 
       <div className="mb-3 mt-8 flex flex-wrap items-end justify-between gap-3">
         <div>

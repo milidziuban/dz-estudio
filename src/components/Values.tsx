@@ -9,18 +9,13 @@ const values = [
     title: "3 cuotas sin interés",
     text: "Hasta 6 con Cuotas Simples, o 10% off por transferencia.",
   },
-  {
-    symbol: "✿",
-    title: "Cambios en 30 días",
-    text: "Sin usar y con su etiqueta.",
-  },
 ];
 
 export default function Values() {
   return (
     <section>
       <div className="bg-amarillo px-5 py-14 sm:px-8 md:py-20 lg:px-12">
-        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-3 md:gap-8">
+        <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 sm:gap-8">
           {values.map((value) => (
             <div key={value.title}>
               <p className="text-3xl" aria-hidden="true">

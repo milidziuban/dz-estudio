@@ -19,11 +19,10 @@ export default function FeaturedProducts() {
               ✦ Todo el catálogo
             </p>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Cinco piezas.{" "}
+              Nuestros{" "}
               <em className="font-serif font-normal italic text-pink">
-                Ninguna
-              </em>{" "}
-              de relleno
+                productos
+              </em>
             </h2>
           </div>
           <Button variant="secondary" to="/tienda">

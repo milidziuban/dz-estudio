@@ -12,13 +12,13 @@ export default function Hero() {
           </Tag>
 
           <h1 className="text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
-            Diseños para casas con{" "}
-            <em className="font-serif font-normal italic text-pink">opinión</em>.
+            Animate a ponerle{" "}
+            <em className="font-serif font-normal italic text-pink">onda</em>{" "}
+            a tu hogar.
           </h1>
 
           <p className="mt-6 max-w-md text-lg leading-relaxed">
             Almohadones e individuales estampados, en duplas de dos colores.
-            Rombos y rayas, nada de beige.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

@@ -26,6 +26,8 @@ type AdminProductRow = {
   in_stock: boolean;
   stock: number | null;
   sku: string | null;
+  cost: number | null;
+  is_bundle: boolean;
 };
 
 function mapProduct(row: AdminProductRow): AdminProduct {
@@ -47,6 +49,8 @@ function mapProduct(row: AdminProductRow): AdminProduct {
     inStock: row.in_stock,
     stock: row.stock,
     sku: row.sku,
+    cost: row.cost,
+    isBundle: row.is_bundle,
   };
 }
 
@@ -77,6 +81,8 @@ export function draftFromProduct(product: AdminProduct): ProductDraft {
     price: product.price,
     stock: product.stock,
     sku: product.sku ?? "",
+    cost: product.cost,
+    isBundle: product.isBundle,
     description: product.description,
     medidas: product.medidas,
     peso: product.peso ?? "",
@@ -99,6 +105,8 @@ export function emptyDraft(): ProductDraft {
     price: 0,
     stock: null,
     sku: "",
+    cost: null,
+    isBundle: false,
     description: "",
     medidas: "",
     peso: "",
@@ -133,6 +141,8 @@ function rowFromDraft(draft: ProductDraft) {
     in_stock: draft.inStock,
     stock: draft.stock,
     sku: draft.sku || null,
+    cost: draft.cost,
+    is_bundle: draft.isBundle,
   };
 }
 
@@ -180,12 +190,20 @@ export function useQuickUpdateProduct() {
       patch,
     }: {
       id: number;
-      patch: { price?: number; stock?: number | null; inStock?: boolean };
+      patch: {
+        price?: number;
+        stock?: number | null;
+        inStock?: boolean;
+        cost?: number | null;
+        isBundle?: boolean;
+      };
     }) => {
       const row: Record<string, unknown> = {};
       if (patch.price !== undefined) row.price = patch.price;
       if (patch.stock !== undefined) row.stock = patch.stock;
       if (patch.inStock !== undefined) row.in_stock = patch.inStock;
+      if (patch.cost !== undefined) row.cost = patch.cost;
+      if (patch.isBundle !== undefined) row.is_bundle = patch.isBundle;
 
       const { error } = await supabase.from("products").update(row).eq("id", id);
       if (error) throw error;

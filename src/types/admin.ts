@@ -6,6 +6,12 @@ export type AdminProduct = Product & {
   /** null = sin control de stock */
   stock: number | null;
   sku: string | null;
+  /** Costo unitario en ARS. null = todavía no se cargó. */
+  cost: number | null;
+  /** true = el producto ya es un paquete de 2+ unidades (ej. "Pack x2"):
+   *  el precio de lista sugerido en /admin/precios le aplica el descuento
+   *  por combo directo, en vez de esperar a que el cliente lleve 2. */
+  isBundle: boolean;
 };
 
 /** Estado del pago. Lo escribe el webhook de Mercado Pago o el panel. */
@@ -193,9 +199,17 @@ export type MarketingSettings = {
   whatsapp: string;
   marquee: string[];
   promos: {
-    almohadones: { enabled: boolean; percent: number; minQty: number };
+    combo: { enabled: boolean; percent: number; minQty: number };
     transferencia: { enabled: boolean; percent: number };
   };
+};
+
+/** Parámetros de la calculadora de precios (/admin/precios). El descuento por
+ *  combo y por transferencia se leen de `marketing.promos`: son los mismos
+ *  que ya usa el carrito, no hace falta una segunda copia. */
+export type PreciosSettings = {
+  /** Margen de ganancia sobre el costo, en % (100 = duplicar el costo). */
+  marginPercent: number;
 };
 
 export type StoreSettings = {
@@ -203,6 +217,7 @@ export type StoreSettings = {
   envios: EnviosSettings;
   distribucion: DistribucionSettings;
   marketing: MarketingSettings;
+  precios: PreciosSettings;
 };
 
 export type SettingsKey = keyof StoreSettings;
@@ -218,6 +233,8 @@ export type ProductDraft = {
   price: number;
   stock: number | null;
   sku: string;
+  cost: number | null;
+  isBundle: boolean;
   description: string;
   medidas: string;
   peso: string;

@@ -23,6 +23,7 @@ export const adminLoaders = {
   inicio: () => import("../pages/admin/Inicio"),
   estadisticas: () => import("../pages/admin/Estadisticas"),
   productos: () => import("../pages/admin/Productos"),
+  precios: () => import("../pages/admin/Precios"),
   ventas: () => import("../pages/admin/Ventas"),
   clientes: () => import("../pages/admin/Clientes"),
   descuentos: () => import("../pages/admin/Descuentos"),

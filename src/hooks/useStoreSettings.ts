@@ -7,7 +7,7 @@ import {
   PAQUETE_DEFAULT_CM,
   SHIPPING_OPTIONS,
 } from "../lib/checkout";
-import { ALMOHADONES_PROMO, INSTALLMENTS, TRANSFER_PROMO } from "../lib/promos";
+import { COMBO_PROMO, INSTALLMENTS, TRANSFER_PROMO } from "../lib/promos";
 import { SITE } from "../lib/site";
 import { supabase } from "../lib/supabase";
 import type { SettingsKey, StoreSettings } from "../types/admin";
@@ -70,21 +70,24 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
     marquee: [
       INSTALLMENTS.label,
       "10% off pagando por transferencia",
-      "10% llevando 2 almohadones",
+      "10% llevando 2 o más del mismo producto",
       "Envíos a todo el país",
       "Retiro gratis en Santa Fe Capital",
     ],
     promos: {
-      almohadones: {
+      combo: {
         enabled: true,
-        percent: Math.round(ALMOHADONES_PROMO.percent * 100),
-        minQty: ALMOHADONES_PROMO.minQty,
+        percent: Math.round(COMBO_PROMO.percent * 100),
+        minQty: COMBO_PROMO.minQty,
       },
       transferencia: {
         enabled: true,
         percent: Math.round(TRANSFER_PROMO.percent * 100),
       },
     },
+  },
+  precios: {
+    marginPercent: 100,
   },
 };
 
@@ -136,6 +139,7 @@ export function useStoreSettings() {
         envios: { ...SETTINGS_DEFAULTS.envios },
         distribucion: { ...SETTINGS_DEFAULTS.distribucion },
         marketing: { ...SETTINGS_DEFAULTS.marketing },
+        precios: { ...SETTINGS_DEFAULTS.precios },
       };
 
       // Vista laxa del objeto para poder escribir por clave dinámica: cada

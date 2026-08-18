@@ -28,7 +28,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="px-5 pb-16 sm:px-8 md:pb-24 lg:px-12">
+    <section className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
       <Card className="mx-auto max-w-6xl rounded-3xl bg-celeste p-8 md:p-14">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
           Novedades{" "}
@@ -37,8 +37,8 @@ export default function Newsletter() {
           </em>
         </h2>
         <p className="mt-4 max-w-md leading-relaxed">
-          Te escribimos solo cuando hay colección nueva. Edición limitada:
-          cuando se van, se van — mejor enterarse antes.
+          Te escribimos cuando hay colección nueva. Edición limitada: mejor
+          enterarse antes de que se vayan.
         </p>
 
         {estado === "ok" ? (

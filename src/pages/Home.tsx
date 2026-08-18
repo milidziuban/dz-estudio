@@ -1,4 +1,3 @@
-import About from "../components/About";
 import Collections from "../components/Collections";
 import FeaturedProducts from "../components/FeaturedProducts";
 import Hero from "../components/Hero";
@@ -15,7 +14,7 @@ export default function Home() {
       <FeaturedProducts />
       <Collections />
       <Values />
-      <About />
+      {/* Sobre la marca: oculta por el momento a pedido */}
       <Newsletter />
     </>
   );

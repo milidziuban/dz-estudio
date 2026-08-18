@@ -2,6 +2,7 @@ export type IconName =
   | "inicio"
   | "estadisticas"
   | "productos"
+  | "precios"
   | "ventas"
   | "clientes"
   | "descuentos"
@@ -17,6 +18,8 @@ const PATHS: Record<IconName, string> = {
   inicio: "M4 11 12 4l8 7M6 10v9h12v-9",
   estadisticas: "M4 20V10M10 20V4M16 20v-7M22 20H2",
   productos: "M4 8h16v12H4zM4 8l2-4h12l2 4M9 12h6",
+  precios:
+    "M20.59 13.41 12 4.83A2 2 0 0 0 10.5 4.24L4 4v6.5a2 2 0 0 0 .59 1.41l8.59 8.59a2 2 0 0 0 2.82 0l4.59-4.59a2 2 0 0 0 0-2.82ZM7 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z",
   ventas: "M6 7h12l1.5 13.5a1 1 0 0 1-1 1.5h-13a1 1 0 0 1-1-1.5L6 7Zm3 3V6a3 3 0 0 1 6 0v4",
   clientes:
     "M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1",

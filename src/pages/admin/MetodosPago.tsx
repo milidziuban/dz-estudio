@@ -167,7 +167,7 @@ export default function AdminMetodosPago() {
             />
             <p className="-mt-3 text-[11px] leading-relaxed text-ink/50">
               El descuento que se aplica de verdad en el carrito se edita en{" "}
-              <strong>Descuentos</strong>. Este campo es el que queda guardado
+              <strong>Precios</strong>. Este campo es el que queda guardado
               como referencia del método de pago.
             </p>
 

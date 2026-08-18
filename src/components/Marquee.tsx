@@ -15,7 +15,7 @@ export default function Marquee({ items }: MarqueeProps) {
           <span className="whitespace-nowrap px-4 font-mono text-xs font-medium uppercase tracking-widest text-cream">
             {item}
           </span>
-          <span className="text-pink" aria-hidden="true">
+          <span className="text-xs text-pink" aria-hidden="true">
             ✦
           </span>
         </Fragment>

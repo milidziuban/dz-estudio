@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { CATEGORY_LABEL } from "../data/products";
 import { formatPrice } from "../lib/format";
-import { ALMOHADONES_PROMO } from "../lib/promos";
+import { COMBO_PROMO } from "../lib/promos";
 import type { Product } from "../types/product";
 import Card from "./Card";
 import ProductImage from "./ProductImage";
@@ -39,14 +39,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             />
           )}
-          {product.category === "almohadones" && (
-            <Tag
-              color="amarillo"
-              className="absolute left-3 top-3 text-[10px]"
-            >
-              {ALMOHADONES_PROMO.short}
-            </Tag>
-          )}
+          <Tag color="amarillo" className="absolute left-3 top-3 text-[10px]">
+            {COMBO_PROMO.short}
+          </Tag>
           {!product.inStock && (
             <span className="absolute inset-0 flex items-center justify-center bg-cream/80 font-mono text-xs font-medium uppercase tracking-widest">
               Sin stock

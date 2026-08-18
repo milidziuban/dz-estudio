@@ -1,13 +1,17 @@
+import type { Category } from "../types/product";
 import type { ResolvedCartItem } from "./cart";
 
-// Promociones reales de la tienda (sincronizado 17/08/2026).
-// Los valores por defecto son los de Tienda Nube; desde /admin/descuentos se
+// Promociones reales de la tienda (sincronizado 18/08/2026).
+// Los valores por defecto son los de Tienda Nube; desde /admin/precios se
 // pueden cambiar y quedan guardados en store_settings.
 
-export const ALMOHADONES_PROMO = {
-  id: "almohadones-2",
-  /** Promoción "10% de descuento llevando 2 productos", categoría Almohadones */
-  label: "10% llevando 2 o más almohadones",
+/** Categorías sobre las que corre el descuento por combo (2+ del mismo tipo). */
+export const COMBO_CATEGORIES: Category[] = ["almohadones", "individuales"];
+
+export const COMBO_PROMO = {
+  id: "combo",
+  /** Promoción "10% de descuento llevando 2 o más del mismo tipo de producto" */
+  label: "10% llevando 2 o más",
   short: "10% llevando 2",
   percent: 0.1,
   minQty: 2,
@@ -39,15 +43,15 @@ export const INSTALLMENTS = {
 /** Configuración editable de las dos promos automáticas. Los porcentajes van
  *  en enteros (10 = 10%), igual que se cargan en el panel. */
 export type PromoConfig = {
-  almohadones: { enabled: boolean; percent: number; minQty: number };
+  combo: { enabled: boolean; percent: number; minQty: number };
   transferencia: { enabled: boolean; percent: number };
 };
 
 export const DEFAULT_PROMOS: PromoConfig = {
-  almohadones: {
+  combo: {
     enabled: true,
-    percent: Math.round(ALMOHADONES_PROMO.percent * 100),
-    minQty: ALMOHADONES_PROMO.minQty,
+    percent: Math.round(COMBO_PROMO.percent * 100),
+    minQty: COMBO_PROMO.minQty,
   },
   transferencia: {
     enabled: true,
@@ -55,8 +59,8 @@ export const DEFAULT_PROMOS: PromoConfig = {
   },
 };
 
-export function almohadonesLabel(config: PromoConfig): string {
-  return `${config.almohadones.percent}% llevando ${config.almohadones.minQty} o más almohadones`;
+export function comboLabel(config: PromoConfig): string {
+  return `${config.combo.percent}% llevando ${config.combo.minQty} o más del mismo tipo`;
 }
 
 export function transferLabel(config: PromoConfig): string {
@@ -70,35 +74,47 @@ export type AppliedDiscount = {
   amount: number;
 };
 
-/** Base de cálculo de la promo: solo los almohadones del carrito. */
-function almohadonesDiscount(
-  items: ResolvedCartItem[],
-  config: PromoConfig,
-): number {
-  if (!config.almohadones.enabled) return 0;
-  const rows = items.filter((i) => i.product.category === "almohadones");
-  const qty = rows.reduce((total, i) => total + i.qty, 0);
-  if (qty < config.almohadones.minQty) return 0;
-  const base = rows.reduce((total, i) => total + i.product.price * i.qty, 0);
-  return Math.round(base * (config.almohadones.percent / 100));
+/** Base de cálculo de la promo: 2+ unidades de la misma categoría, sumadas
+ *  categoría por categoría (así llevar 1 almohadón + 1 individual no cuenta). */
+function comboDiscount(items: ResolvedCartItem[], config: PromoConfig): number {
+  if (!config.combo.enabled) return 0;
+  let total = 0;
+  for (const category of COMBO_CATEGORIES) {
+    const rows = items.filter((i) => i.product.category === category);
+    const qty = rows.reduce((sum, i) => sum + i.qty, 0);
+    if (qty < config.combo.minQty) continue;
+    const base = rows.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+    total += Math.round(base * (config.combo.percent / 100));
+  }
+  return total;
 }
 
-/** Cuánto falta para que entre la promo de almohadones (0 = ya entró). */
-export function almohadonesFaltan(
+const CATEGORY_LABEL: Record<Category, string> = {
+  almohadones: "almohadón",
+  individuales: "individual",
+};
+
+/** Cuánto falta para que entre la promo combo, para la primera categoría del
+ *  carrito que todavía no llegó al mínimo (null = ya entró en todas o no aplica). */
+export function comboFaltan(
   items: ResolvedCartItem[],
   config: PromoConfig = DEFAULT_PROMOS,
-): number {
-  if (!config.almohadones.enabled) return 0;
-  const qty = items
-    .filter((i) => i.product.category === "almohadones")
-    .reduce((total, i) => total + i.qty, 0);
-  if (qty === 0) return 0;
-  return Math.max(0, config.almohadones.minQty - qty);
+): { categoryLabel: string; faltan: number } | null {
+  if (!config.combo.enabled) return null;
+  for (const category of COMBO_CATEGORIES) {
+    const qty = items
+      .filter((i) => i.product.category === category)
+      .reduce((sum, i) => sum + i.qty, 0);
+    if (qty === 0) continue;
+    const faltan = Math.max(0, config.combo.minQty - qty);
+    if (faltan > 0) return { categoryLabel: CATEGORY_LABEL[category], faltan };
+  }
+  return null;
 }
 
 /**
- * En Tienda Nube la promo de almohadones no se combina con otras, así que
- * nunca sumamos las dos: aplicamos la que más le conviene al cliente.
+ * En Tienda Nube la promo por combo no se combina con otras, así que nunca
+ * sumamos las dos: aplicamos la que más le conviene al cliente.
  * `pagaPorTransferencia` habilita la segunda opción.
  */
 export function bestDiscount(
@@ -109,12 +125,12 @@ export function bestDiscount(
 ): AppliedDiscount | null {
   const candidates: AppliedDiscount[] = [];
 
-  const almohadones = almohadonesDiscount(items, config);
-  if (almohadones > 0) {
+  const combo = comboDiscount(items, config);
+  if (combo > 0) {
     candidates.push({
-      id: ALMOHADONES_PROMO.id,
-      label: almohadonesLabel(config),
-      amount: almohadones,
+      id: COMBO_PROMO.id,
+      label: comboLabel(config),
+      amount: combo,
     });
   }
 

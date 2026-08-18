@@ -5,8 +5,8 @@ import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
 import {
-  almohadonesFaltan,
   bestDiscount,
+  comboFaltan,
   DEFAULT_PROMOS,
   INSTALLMENTS,
 } from "../lib/promos";
@@ -29,7 +29,7 @@ export default function CartDrawer() {
   // En el drawer todavía no se eligió el medio de pago: mostramos solo las
   // promos que ya están ganadas.
   const discount = bestDiscount(resolved, subtotal, false, promos);
-  const faltan = almohadonesFaltan(resolved, promos);
+  const faltan = comboFaltan(resolved, promos);
   const total = subtotal - (discount?.amount ?? 0);
 
   useEffect(() => {
@@ -109,10 +109,11 @@ export default function CartDrawer() {
             </ul>
 
             <div className="border-t border-ink/10 p-5">
-              {faltan > 0 && (
+              {faltan && (
                 <p className="mb-4 rounded-xl bg-amarillo px-4 py-3 text-xs leading-relaxed">
-                  ✦ Sumá {faltan} almohadón más y se te aplica{" "}
-                  <strong>{promos.almohadones.percent}% de descuento</strong>.
+                  ✦ Sumá {faltan.faltan} {faltan.categoryLabel}
+                  {faltan.faltan > 1 ? "es" : ""} más y se te aplica{" "}
+                  <strong>{promos.combo.percent}% de descuento</strong>.
                 </p>
               )}
 

@@ -17,11 +17,7 @@ export default function Collections() {
           ✧ Las dos líneas
         </p>
         <h2 className="mb-10 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-          Dos categorías,{" "}
-          <em className="font-serif font-normal italic text-petroleo">
-            ningún
-          </em>{" "}
-          relleno
+          Categorías
         </h2>
 
         <div className="grid gap-8 md:grid-cols-2 md:gap-6 lg:gap-8">
