@@ -209,6 +209,7 @@ export function useQuickUpdateProduct() {
         inStock?: boolean;
         cost?: number | null;
         isBundle?: boolean;
+        category?: Category;
       };
     }) => {
       const row: Record<string, unknown> = {};
@@ -217,6 +218,7 @@ export function useQuickUpdateProduct() {
       if (patch.inStock !== undefined) row.in_stock = patch.inStock;
       if (patch.cost !== undefined) row.cost = patch.cost;
       if (patch.isBundle !== undefined) row.is_bundle = patch.isBundle;
+      if (patch.category !== undefined) row.category = patch.category;
 
       const { error } = await supabase.from("products").update(row).eq("id", id);
       if (error) throw error;

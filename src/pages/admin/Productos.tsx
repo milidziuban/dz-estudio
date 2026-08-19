@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
 import PageHeading from "../../components/admin/PageHeading";
+import PriceCell from "../../components/admin/PriceCell";
 import ProductForm from "../../components/admin/ProductForm";
 import QueryError from "../../components/admin/QueryError";
 import StockCell from "../../components/admin/StockCell";
@@ -19,8 +20,8 @@ import { useStoreSettings } from "../../hooks/useStoreSettings";
 import { errorMessage } from "../../lib/admin";
 import { cn } from "../../lib/cn";
 import { COLOR_HEX } from "../../lib/colors";
-import { formatPrice } from "../../lib/format";
 import type { AdminProduct, ProductDraft } from "../../types/admin";
+import type { Category } from "../../types/product";
 
 type Filtro = "todos" | "almohadones" | "individuales";
 
@@ -72,6 +73,46 @@ function ProductStockCell({ product }: { product: AdminProduct }) {
       onCommit={(stock) =>
         quickUpdate.mutate({ id: product.id, patch: { stock } })
       }
+    />
+  );
+}
+
+/** Categoría editable en línea: cambia y guarda al toque, sin abrir la ficha. */
+function ProductCategoryCell({ product }: { product: AdminProduct }) {
+  const quickUpdate = useQuickUpdateProduct();
+
+  return (
+    <select
+      aria-label={`Categoría de ${product.name}`}
+      value={product.category}
+      onChange={(event) =>
+        quickUpdate.mutate({
+          id: product.id,
+          patch: { category: event.target.value as Category },
+        })
+      }
+      className={cn(
+        "rounded-lg border bg-transparent py-1 pl-1.5 pr-1 font-mono text-[10px] uppercase tracking-widest text-ink/55 focus:border-ink focus:outline-none",
+        quickUpdate.isPending ? "border-celeste" : "border-transparent hover:border-ink/20",
+      )}
+    >
+      <option value="almohadones">Almohadones</option>
+      <option value="individuales">Individuales</option>
+    </select>
+  );
+}
+
+/** Precio editable en línea: el caso más frecuente es ajustar un número, no
+ *  abrir la ficha completa. Mismo patrón que ProductStockCell. */
+function ProductPriceCell({ product }: { product: AdminProduct }) {
+  const quickUpdate = useQuickUpdateProduct();
+
+  return (
+    <PriceCell
+      value={product.price}
+      ariaLabel={`Precio de ${product.name}`}
+      pending={quickUpdate.isPending}
+      onCommit={(price) => quickUpdate.mutate({ id: product.id, patch: { price } })}
     />
   );
 }
@@ -278,13 +319,11 @@ export default function AdminProductos() {
             </td>
 
             <td className="hidden px-4 py-3 sm:table-cell">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-ink/55">
-                {product.category}
-              </span>
+              <ProductCategoryCell product={product} />
             </td>
 
-            <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs">
-              {formatPrice(product.price)}
+            <td className="whitespace-nowrap px-4 py-3 text-right">
+              <ProductPriceCell product={product} />
             </td>
 
             <td className="px-4 py-3 text-right">
