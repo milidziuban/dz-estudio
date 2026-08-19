@@ -11,6 +11,25 @@ npx supabase secrets set MP_ACCESS_TOKEN=TEST-xxxxxxxx-tu-token
 npx supabase secrets set SITE_URL=http://localhost:5173
 ```
 
+### Pasar Mercado Pago de prueba a producción
+
+El modo (test o real) lo define únicamente el valor de `MP_ACCESS_TOKEN`, no hay
+nada más hardcodeado. Para pasar a producción:
+
+1. En tu cuenta real de Mercado Pago (no la de prueba): *Tu negocio →
+   Configuración → Credenciales de producción* y copiá el Access Token
+   (empieza con `APP_USR-`, no con `TEST-`).
+2. Reemplazá el secreto:
+
+```powershell
+npx supabase secrets set MP_ACCESS_TOKEN=APP_USR-tu-token-de-produccion
+npx supabase secrets set SITE_URL=https://tu-dominio-real.com
+```
+
+`SITE_URL` tiene que ser https: el `auto_return` (volver solo a la tienda
+después de pagar) solo se activa si la back_url no es localhost/http. No
+hace falta redeployar las funciones, los secretos se aplican al instante.
+
 > `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` ya vienen
 > inyectados automáticamente en las Edge Functions — no hace falta setearlos.
 
