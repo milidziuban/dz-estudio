@@ -81,5 +81,6 @@ export function checkoutWhatsappUrl(
     ...(shippingCost === undefined
       ? ["", "Todavía no elegí el envío, ¿me ayudás?"]
       : []),
+    ...(data.notas ? ["", `Nota: ${data.notas}`] : []),
   ]);
 }

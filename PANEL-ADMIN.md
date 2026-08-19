@@ -12,6 +12,11 @@ Supabase → SQL Editor → pegar completo y Run, **en este orden**:
 supabase/migrations/20260817120000_catalogo_tiendanube.sql
 supabase/migrations/20260818120000_panel_admin.sql
 supabase/migrations/20260819120000_envio_correo_argentino.sql
+supabase/migrations/20260819130000_precios_y_costos.sql
+supabase/migrations/20260819140000_seguimiento_pedido.sql
+supabase/migrations/20260819150000_stock_al_despachar.sql
+supabase/migrations/20260819160000_notas_del_pedido.sql
+supabase/migrations/20260819170000_notificaciones_ventas.sql
 ```
 
 La primera deja el esquema de `products` como lo espera el código (`peso`,
@@ -124,11 +129,29 @@ Lo que todavía **no** está conectado, y hay que tenerlo presente:
   no tiene el campo para canjearlos. Por ahora sirven para tenerlos definidos.
 - **Instagram / WhatsApp / email del footer**: se guardan en el panel, pero el
   footer y la página de contacto los siguen tomando de `src/lib/site.ts`.
-- **Stock**: se ve y se edita, pero una venta no lo descuenta sola. El descuento
-  automático necesitaría hacerse del lado del servidor (en el webhook de
-  Mercado Pago), no desde el navegador.
+- **Stock**: se ve y se edita a mano, y ahora también baja solo — pero recién al
+  **despachar**, no al cobrar. Un trigger en Postgres
+  (`supabase/migrations/20260819150000_stock_al_despachar.sql`) resta las
+  unidades del pedido cuando `shipping_status` pasa a `despachado` por primera
+  vez (columna `stock_descontado` evita descontar dos veces). Antes de eso, un
+  pedido pagado y sin despachar solo cuenta como "comprometido" en
+  Distribución — el número de `stock` no se mueve hasta que sale del depósito.
 - **Visitas**: se cuentan desde que se corre la migración. GA4 sigue midiendo
   aparte y con más detalle.
+
+## Notificaciones de ventas nuevas
+
+La campanita del header (`NotificationBell` + `OrderToastStack`, enganchadas
+en `AdminLayout` vía el hook `useOrderAlerts`) escucha los `insert` en
+`orders` por Supabase Realtime y avisa apenas entra un pedido — antes de que
+se confirme el pago, porque el checkout inserta la orden en `pending` desde
+el paso 1 (ver `src/pages/Checkout.tsx`). El aviso muestra nombre, monto y
+medio de pago; un click lleva a Ventas.
+
+Requiere la migración `20260819170000_notificaciones_ventas.sql` (suma
+`orders` a la publicación `supabase_realtime`) y que el proyecto tenga
+Realtime habilitado — viene prendido por default, pero si algún proyecto lo
+desactivó a mano hay que prenderlo en **Database → Replication**.
 
 ## Estructura
 

@@ -131,6 +131,10 @@ export const checkoutSchema = z.object({
   ),
   // Paso 3 — pago
   pago: z.enum(["mp", "transferencia"]),
+  notas: z
+    .string()
+    .max(500, "Máximo 500 caracteres")
+    .optional(),
 });
 
 export type CheckoutData = z.infer<typeof checkoutSchema>;

@@ -6,6 +6,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import ProductImage from "../components/ProductImage";
 import SelectField from "../components/SelectField";
+import TextareaField from "../components/TextareaField";
 import TextField from "../components/TextField";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
@@ -181,6 +182,7 @@ export default function Checkout() {
         cp: data.cp,
       },
       shipping_method: data.envio,
+      customer_notes: data.notas || null,
       items: orderItems,
       subtotal,
       discount: discount?.amount ?? 0,
@@ -459,6 +461,16 @@ export default function Checkout() {
                 </p>
 
                 <input type="hidden" {...register("pago")} />
+
+                <TextareaField
+                  label="Notas del pedido (opcional)"
+                  id="notas"
+                  rows={3}
+                  placeholder="Algo que quieras contarnos: instrucciones de entrega, un pedido especial, lo que sea."
+                  error={errors.notas?.message}
+                  className="mb-6"
+                  {...register("notas")}
+                />
 
                 <div role="tablist" aria-label="Método de pago" className="flex gap-2">
                   <button

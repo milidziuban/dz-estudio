@@ -80,6 +80,7 @@ export type Order = {
   shippingStatus: ShippingStatus;
   trackingCode: string | null;
   adminNotes: string | null;
+  customerNotes: string | null;
   mpPaymentId: string | null;
 };
 

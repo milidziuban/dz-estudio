@@ -17,6 +17,7 @@ import {
   SHIPPING_METHOD_LABEL,
   SHIPPING_STATUS_LABEL,
   downloadCsv,
+  errorMessage,
   formatCompactPrice,
   formatDate,
   formatDateTime,
@@ -36,6 +37,17 @@ const ESTADOS: (OrderStatus | "todos")[] = [
   "refunded",
 ];
 
+const VISTAS = ["tabla", "kanban"] as const;
+type Vista = (typeof VISTAS)[number];
+
+/** Columnas del kanban de despacho, en el orden en que avanza un pedido. */
+const KANBAN_COLUMNAS: ShippingStatus[] = [
+  "pendiente",
+  "preparando",
+  "despachado",
+  "entregado",
+];
+
 /** Link de WhatsApp al cliente, con el número tal como lo dejó en el checkout. */
 function whatsappLink(order: Order): string | null {
   if (!order.customerPhone) return null;
@@ -53,8 +65,18 @@ export default function AdminVentas() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const estado = (searchParams.get("estado") ?? "todos") as OrderStatus | "todos";
+  const vista = (searchParams.get("vista") ?? "tabla") as Vista;
   const [busqueda, setBusqueda] = useState("");
   const [abierta, setAbierta] = useState<Order | null>(null);
+
+  // Kanban: qué tarjeta se está arrastrando / soltando, y el error de la
+  // última movida si el guardado falla (el resto del panel usa el mismo patrón).
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverColumna, setDragOverColumna] = useState<ShippingStatus | null>(
+    null,
+  );
+  const [movingId, setMovingId] = useState<string | null>(null);
+  const [kanbanError, setKanbanError] = useState<string | null>(null);
 
   // Borrador de la orden abierta: se guarda con el botón, no en cada tecla
   const [patch, setPatch] = useState<{
@@ -93,6 +115,26 @@ export default function AdminVentas() {
       ).length,
     };
   }, [todas]);
+
+  // El kanban gestiona despachos: solo tiene sentido para pedidos ya
+  // cobrados, respeta el mismo filtro de búsqueda que la tabla.
+  const kanbanOrders = useMemo(() => visibles.filter(isPaid), [visibles]);
+
+  const moverA = async (order: Order, next: ShippingStatus) => {
+    if (order.shippingStatus === next) return;
+    setKanbanError(null);
+    setMovingId(order.id);
+    try {
+      await updateOrder.mutateAsync({
+        id: order.id,
+        patch: { shippingStatus: next },
+      });
+    } catch (error) {
+      setKanbanError(errorMessage(error, "No se pudo mover el pedido"));
+    } finally {
+      setMovingId(null);
+    }
+  };
 
   const abrir = (order: Order) => {
     setAbierta(order);
@@ -228,8 +270,150 @@ export default function AdminVentas() {
             </button>
           ))}
         </div>
+
+        <div
+          role="group"
+          aria-label="Cambiar vista"
+          className="flex gap-1 rounded-full bg-white p-1 sm:ml-auto"
+        >
+          {VISTAS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={vista === v}
+              onClick={() => {
+                const next = new URLSearchParams(searchParams);
+                if (v === "tabla") next.delete("vista");
+                else next.set("vista", v);
+                setSearchParams(next, { replace: true });
+              }}
+              className={cn(
+                "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+                vista === v ? "bg-ink text-cream" : "text-ink/55 hover:text-ink",
+              )}
+            >
+              {v === "tabla" ? "Tabla" : "Kanban"}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {vista === "kanban" ? (
+        <div className="space-y-3">
+          <p className="rounded-xl bg-white px-4 py-3 text-xs leading-relaxed text-ink/65">
+            ✦ Arrastrá un pedido a otra columna para cambiar su estado de
+            envío. Al soltarlo en <strong>Despachado</strong>, el stock baja
+            solo — ya no queda solo "comprometido".
+          </p>
+
+          {kanbanError && (
+            <p className="rounded-xl bg-orange/10 px-4 py-3 text-xs text-orange">
+              {kanbanError}
+            </p>
+          )}
+
+          {orders.isLoading ? (
+            <div className="rounded-2xl bg-white px-4 py-16 text-center font-mono text-xs uppercase tracking-widest text-ink/50">
+              ✦ Cargando…
+            </div>
+          ) : kanbanOrders.length === 0 ? (
+            <div className="rounded-2xl bg-white px-4 py-16 text-center text-sm text-ink/50">
+              {todas.length === 0
+                ? "Todavía no entró ninguna orden."
+                : "Ningún pedido pagado coincide con ese filtro."}
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-4">
+              {KANBAN_COLUMNAS.map((columna) => {
+                const enColumna = kanbanOrders.filter(
+                  (order) => order.shippingStatus === columna,
+                );
+                return (
+                  <div
+                    key={columna}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setDragOverColumna(columna);
+                    }}
+                    onDragLeave={() =>
+                      setDragOverColumna((current) =>
+                        current === columna ? null : current,
+                      )
+                    }
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setDragOverColumna(null);
+                      const id = event.dataTransfer.getData("text/plain");
+                      const order = kanbanOrders.find((o) => o.id === id);
+                      if (order) void moverA(order, columna);
+                    }}
+                    className={cn(
+                      "flex min-h-[10rem] flex-col gap-2.5 rounded-2xl bg-white/60 p-3 transition-colors",
+                      dragOverColumna === columna && "bg-white ring-2 ring-ink/15",
+                    )}
+                  >
+                    <div className="flex items-center justify-between px-1">
+                      <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/60">
+                        {SHIPPING_STATUS_LABEL[columna]}
+                      </h3>
+                      <span className="font-mono text-[10px] text-ink/40">
+                        {enColumna.length}
+                      </span>
+                    </div>
+
+                    {enColumna.length === 0 ? (
+                      <p className="rounded-xl border border-dashed border-ink/15 px-3 py-6 text-center font-mono text-[10px] uppercase tracking-widest text-ink/30">
+                        Vacío
+                      </p>
+                    ) : (
+                      enColumna.map((order) => (
+                        <div
+                          key={order.id}
+                          draggable
+                          onDragStart={(event) => {
+                            event.dataTransfer.setData("text/plain", order.id);
+                            event.dataTransfer.effectAllowed = "move";
+                            setDraggingId(order.id);
+                          }}
+                          onDragEnd={() => setDraggingId(null)}
+                          onClick={() => abrir(order)}
+                          className={cn(
+                            "cursor-grab rounded-xl bg-white p-3 text-left transition-opacity active:cursor-grabbing",
+                            (draggingId === order.id || movingId === order.id) &&
+                              "opacity-40",
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-mono text-[10px] font-medium">
+                              {order.id.slice(0, 8).toUpperCase()}
+                            </span>
+                            <span className="font-mono text-[10px] text-ink/40">
+                              {formatDate(order.createdAt)}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 truncate text-sm">
+                            {order.customerName}
+                          </p>
+                          <p className="truncate font-mono text-[10px] text-ink/45">
+                            {order.items.length}{" "}
+                            {order.items.length === 1 ? "ítem" : "ítems"} ·{" "}
+                            {formatPrice(order.total)}
+                          </p>
+                          {order.trackingCode && (
+                            <p className="mt-1 truncate font-mono text-[10px] text-petroleo">
+                              {order.trackingCode}
+                            </p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : (
       <AdminTable
         columns={[
           { label: "Orden" },
@@ -298,6 +482,7 @@ export default function AdminVentas() {
           </tr>
         ))}
       </AdminTable>
+      )}
 
       <AdminDrawer
         open={abierta !== null}
@@ -430,6 +615,17 @@ export default function AdminVentas() {
                 <p className="mt-2 font-mono text-[10px] text-ink/45">
                   Pago de Mercado Pago #{abierta.mpPaymentId}
                 </p>
+              )}
+
+              {abierta.customerNotes && (
+                <div className="mt-3 rounded-xl bg-amarillo/25 p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+                    Nota del cliente
+                  </p>
+                  <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed">
+                    {abierta.customerNotes}
+                  </p>
+                </div>
               )}
             </section>
 

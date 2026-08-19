@@ -29,6 +29,7 @@ type OrderRow = {
   shipping_status: ShippingStatus | null;
   tracking_code: string | null;
   admin_notes: string | null;
+  customer_notes: string | null;
   mp_payment_id: string | null;
 };
 
@@ -53,6 +54,7 @@ function mapOrder(row: OrderRow): Order {
     shippingStatus: row.shipping_status ?? "pendiente",
     trackingCode: row.tracking_code,
     adminNotes: row.admin_notes,
+    customerNotes: row.customer_notes,
     mpPaymentId: row.mp_payment_id,
   };
 }
