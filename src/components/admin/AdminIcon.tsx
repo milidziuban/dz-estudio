@@ -10,7 +10,8 @@ export type IconName =
   | "pagos"
   | "envios"
   | "distribucion"
-  | "salir";
+  | "salir"
+  | "campana";
 
 /** Paths de 24x24, stroke. Un solo lugar para todos los íconos del panel:
  *  no vale la pena traer una librería de íconos por diez formas. */
@@ -29,6 +30,8 @@ const PATHS: Record<IconName, string> = {
   envios: "M3 7h11v10H3zM14 10h4l3 3v4h-7M6.5 20a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm11 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z",
   distribucion: "M3 20V9l9-5 9 5v11M9 20v-6h6v6M3 20h18",
   salir: "M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 8l-4 4 4 4M6 12h9",
+  campana:
+    "M12 3a5 5 0 0 0-5 5v3.2c0 .5-.2 1-.5 1.4L5 15h14l-1.5-2.4c-.3-.4-.5-.9-.5-1.4V8a5 5 0 0 0-5-5ZM9.5 18a2.5 2.5 0 0 0 5 0",
 };
 
 type AdminIconProps = {

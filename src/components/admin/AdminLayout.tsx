@@ -1,11 +1,14 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
+import { useOrderAlerts } from "../../hooks/useOrderAlerts";
 import { ADMIN_NAV } from "../../lib/admin-nav";
 import { cn } from "../../lib/cn";
 import PageLoader from "../PageLoader";
 import Seo from "../Seo";
 import AdminIcon from "./AdminIcon";
+import NotificationBell from "./NotificationBell";
+import OrderToastStack from "./OrderToastStack";
 
 function navClasses({ isActive }: { isActive: boolean }): string {
   return cn(
@@ -18,6 +21,8 @@ export default function AdminLayout() {
   const { email, nombre, signOut } = useAdminAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const { alerts, unseenCount, markAllSeen, toasts, dismissToast } =
+    useOrderAlerts();
 
   // Al navegar, el menú mobile se cierra solo
   useEffect(() => setMenuOpen(false), [location.pathname]);
@@ -132,6 +137,11 @@ export default function AdminLayout() {
           </button>
 
           <div className="flex flex-1 items-center justify-end gap-4">
+            <NotificationBell
+              alerts={alerts}
+              unseenCount={unseenCount}
+              onOpen={markAllSeen}
+            />
             <Link
               to="/"
               className="font-mono text-[11px] uppercase tracking-widest text-ink/60 transition-colors hover:text-ink"
@@ -147,6 +157,8 @@ export default function AdminLayout() {
           </Suspense>
         </main>
       </div>
+
+      <OrderToastStack toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
