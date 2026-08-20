@@ -26,9 +26,9 @@ export const CATEGORY_INTRO: Record<
     tagLabel: "3 modelos · $23.000",
     description:
       "Fundas de 40x40 en rombos y rayas de dos colores. Llevando 2 o más, 10% de descuento.",
-    image: "/productos/almohadon-rayas-blanco-negro.webp",
-    imageAlt: "Almohadón de rayas blanco y negro",
-    imageFit: "contain",
+    image: "/productos/almohadon-rayas-cama.jpg",
+    imageAlt: "Almohadones de rayas blanco y negro sobre una cama",
+    imageFit: "cover",
   },
   individuales: {
     colorB: "orange",

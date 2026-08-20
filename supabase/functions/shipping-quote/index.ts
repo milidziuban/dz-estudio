@@ -92,15 +92,12 @@ async function cotizarCorreoArgentino(params: {
         customerId,
         postalCodeOrigin: params.origenCp,
         postalCodeDestination: params.destinationCp,
-        dimensions: [
-          {
-            weight: params.weightGrams,
-            height: params.paquete.altoCm,
-            width: params.paquete.anchoCm,
-            length: params.paquete.largoCm,
-            quantity: 1,
-          },
-        ],
+        dimensions: {
+          weight: params.weightGrams,
+          height: params.paquete.altoCm,
+          width: params.paquete.anchoCm,
+          length: params.paquete.largoCm,
+        },
       }),
     });
 

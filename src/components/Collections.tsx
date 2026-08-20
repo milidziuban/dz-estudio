@@ -14,7 +14,7 @@ export default function Collections() {
     <section className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
-          ✧ Las dos líneas
+          ✧ Dos lanzamientos
         </p>
         <h2 className="mb-10 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
           Categorías

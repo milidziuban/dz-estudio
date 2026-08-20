@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { CATEGORY_LABEL } from "../data/products";
 import { formatPrice } from "../lib/format";
-import { COMBO_PROMO } from "../lib/promos";
+import { COMBO_CATEGORIES, COMBO_PROMO } from "../lib/promos";
 import type { Product } from "../types/product";
 import Card from "./Card";
 import ProductImage from "./ProductImage";
@@ -10,11 +9,6 @@ import Tag from "./Tag";
 type ProductCardProps = {
   product: Product;
 };
-
-const CATEGORY_TAG = {
-  almohadones: "pink",
-  individuales: "celeste",
-} as const;
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [primary, secondary] = product.images;
@@ -44,9 +38,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             />
           )}
-          <Tag color="amarillo" className="absolute left-3 top-3 text-[10px]">
-            {COMBO_PROMO.short}
-          </Tag>
+          {COMBO_CATEGORIES.includes(product.category) && (
+            <Tag color="amarillo" className="absolute left-3 top-3 text-[10px]">
+              {COMBO_PROMO.short}
+            </Tag>
+          )}
           {soldOut && (
             <span className="absolute inset-0 flex items-center justify-center bg-cream/80 font-mono text-xs font-medium uppercase tracking-widest">
               Sin stock
@@ -56,9 +52,6 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Card>
 
       <div className="flex flex-col gap-1.5 pt-4">
-        <Tag color={CATEGORY_TAG[product.category]} className="self-start">
-          {CATEGORY_LABEL[product.category]}
-        </Tag>
         <h3 className="text-base font-bold leading-snug">{product.name}</h3>
         <p className="font-mono text-sm uppercase tracking-wider text-ink/70">
           {formatPrice(product.price)}

@@ -18,13 +18,13 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 max-w-md text-lg leading-relaxed">
-            Almohadones e individuales estampados, en duplas de dos colores.
+            Encontrá distintos almohadones e individuales impermeables estampados.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button to="/tienda">Ver los productos</Button>
             <Button variant="secondary" to="/tienda?categoria=almohadones">
-              Almohadones desde $23.000
+              Almohadones desde $18.300
             </Button>
           </div>
 

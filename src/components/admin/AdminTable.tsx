@@ -6,6 +6,9 @@ export type Column = {
   align?: "left" | "right" | "center";
   /** Oculta la columna en pantallas chicas */
   hideOnMobile?: boolean;
+  /** Si se pasa junto con `sort`/`onSortChange` en la tabla, el header
+   *  se vuelve clickeable para ordenar por esta clave. */
+  sortKey?: string;
 };
 
 type AdminTableProps = {
@@ -16,6 +19,11 @@ type AdminTableProps = {
   isEmpty?: boolean;
   isLoading?: boolean;
   className?: string;
+  /** Orden activo, si la tabla es ordenable */
+  sort?: { key: string; dir: "asc" | "desc" } | null;
+  /** Se llama con el `sortKey` de la columna clickeada; decidir el toggle
+   *  de dirección queda del lado de quien la use. */
+  onSortChange?: (key: string) => void;
 };
 
 export function alignClass(align: Column["align"]): string {
@@ -33,6 +41,8 @@ export default function AdminTable({
   isEmpty,
   isLoading,
   className,
+  sort,
+  onSortChange,
 }: AdminTableProps) {
   return (
     <div className={cn("overflow-hidden rounded-2xl bg-white", className)}>
@@ -40,19 +50,43 @@ export default function AdminTable({
         <table className="w-full min-w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-ink/10">
-              {columns.map((column) => (
-                <th
-                  key={column.label}
-                  scope="col"
-                  className={cn(
-                    "whitespace-nowrap px-4 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/50",
-                    alignClass(column.align),
-                    column.hideOnMobile && "hidden sm:table-cell",
-                  )}
-                >
-                  {column.label}
-                </th>
-              ))}
+              {columns.map((column) => {
+                const sortable = Boolean(column.sortKey && onSortChange);
+                const active = sortable && sort?.key === column.sortKey;
+                return (
+                  <th
+                    key={column.label}
+                    scope="col"
+                    aria-sort={
+                      active ? (sort?.dir === "asc" ? "ascending" : "descending") : undefined
+                    }
+                    className={cn(
+                      "whitespace-nowrap px-4 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/50",
+                      alignClass(column.align),
+                      column.hideOnMobile && "hidden sm:table-cell",
+                    )}
+                  >
+                    {sortable ? (
+                      <button
+                        type="button"
+                        onClick={() => onSortChange?.(column.sortKey as string)}
+                        className={cn(
+                          "inline-flex items-center gap-1 transition-colors hover:text-ink",
+                          column.align === "right" && "flex-row-reverse",
+                          active && "text-ink",
+                        )}
+                      >
+                        {column.label}
+                        <span className={cn("text-[9px]", !active && "text-ink/25")}>
+                          {active ? (sort?.dir === "asc" ? "↑" : "↓") : "↕"}
+                        </span>
+                      </button>
+                    ) : (
+                      column.label
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

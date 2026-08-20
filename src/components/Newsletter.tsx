@@ -37,7 +37,7 @@ export default function Newsletter() {
           </em>
         </h2>
         <p className="mt-4 max-w-md leading-relaxed">
-          Te escribimos cuando hay colección nueva. Edición limitada: mejor
+          Te escribimos cuando hay colección nueva y edición limitada, mejor
           enterarse antes de que se vayan.
         </p>
 

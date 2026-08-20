@@ -1,17 +1,20 @@
 import type { Category } from "../types/product";
 import type { ResolvedCartItem } from "./cart";
+import { formatPrice } from "./format";
 
 // Promociones reales de la tienda (sincronizado 18/08/2026).
 // Los valores por defecto son los de Tienda Nube; desde /admin/precios se
 // pueden cambiar y quedan guardados en store_settings.
 
-/** Categorías sobre las que corre el descuento por combo (2+ del mismo tipo). */
-export const COMBO_CATEGORIES: Category[] = ["almohadones", "individuales"];
+/** Categorías sobre las que corre el descuento por combo (2+ del mismo tipo).
+ *  Los individuales quedan afuera a propósito: ya se venden de a 2 o más por
+ *  producto, así que no suman una promo aparte. */
+export const COMBO_CATEGORIES: Category[] = ["almohadones"];
 
 export const COMBO_PROMO = {
   id: "combo",
-  /** Promoción "10% de descuento llevando 2 o más del mismo tipo de producto" */
-  label: "10% llevando 2 o más",
+  /** Promoción "10% de descuento llevando 2 o más almohadones" */
+  label: "10% llevando 2 o más almohadones",
   short: "10% llevando 2",
   percent: 0.1,
   minQty: 2,
@@ -30,14 +33,19 @@ export const TRANSFER_PROMO = {
  * (Tu negocio → Costos y cuotas), acá solo se anuncian. De ahí hasta `max`
  * entran por Cuotas Simples, con el costo financiero a cargo del cliente.
  * `max` sí es real: es el tope que viaja en la preferencia de pago.
+ * `minAmount` es el piso que pone Mercado Pago para las cuotas sin interés:
+ * por debajo de ese monto, sea el producto o el carrito, no se ofrecen.
  */
+const INSTALLMENTS_MIN_AMOUNT = 45000;
+
 export const INSTALLMENTS = {
   sinInteres: 3,
   max: 6,
+  minAmount: INSTALLMENTS_MIN_AMOUNT,
   /** Titular corto: marquesina, badges, grilla de producto */
-  label: "3 cuotas sin interés",
+  label: `3 cuotas sin interés desde ${formatPrice(INSTALLMENTS_MIN_AMOUNT)}`,
   /** Frase completa: carrito, checkout, medios de pago */
-  detail: "3 cuotas sin interés o hasta 6 con Cuotas Simples",
+  detail: `3 cuotas sin interés desde ${formatPrice(INSTALLMENTS_MIN_AMOUNT)}, o hasta 6 con Cuotas Simples`,
 } as const;
 
 /** Configuración editable de las dos promos automáticas. Los porcentajes van
@@ -60,7 +68,7 @@ export const DEFAULT_PROMOS: PromoConfig = {
 };
 
 export function comboLabel(config: PromoConfig): string {
-  return `${config.combo.percent}% llevando ${config.combo.minQty} o más del mismo tipo`;
+  return `${config.combo.percent}% llevando ${config.combo.minQty} o más almohadones`;
 }
 
 export function transferLabel(config: PromoConfig): string {

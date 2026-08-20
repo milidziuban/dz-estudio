@@ -62,7 +62,11 @@ export default function AdminMetodosPago() {
                 <strong>tope</strong> sí es real: viaja en la preferencia de
                 pago y de ahí para arriba el cliente no ve más opciones. Entre
                 una y otra quedan las Cuotas Simples, con el interés a cargo del
-                cliente.
+                cliente. Mercado Pago no las ofrece por debajo de{" "}
+                <strong>$45.000</strong>: ese piso está escrito en el texto que
+                anuncia la tienda (
+                <code className="font-mono">lib/promos.ts</code>), no en un
+                campo de acá — si Mercado Pago lo cambia, se actualiza ahí.
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <TextField

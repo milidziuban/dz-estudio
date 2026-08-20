@@ -16,6 +16,7 @@ import {
 } from "../../hooks/useStoreSettings";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
+import { COMBO_CATEGORIES } from "../../lib/promos";
 import { computeListPrice, computeTransferPrice } from "../../lib/pricing";
 import type { AdminProduct } from "../../types/admin";
 
@@ -63,6 +64,68 @@ function CostCell({ product }: { product: AdminProduct }) {
   );
 }
 
+/** Precio de venta editable en el listado. Si costo + margen (y combo, si
+ *  corresponde) sugieren un número distinto al que está cargado, aparece un
+ *  aviso abajo con un solo click para usarlo — así queda claro qué se está
+ *  aplicando y sobre qué precio, en vez de una columna aparte. */
+function PriceCell({
+  product,
+  listPrice,
+}: {
+  product: AdminProduct;
+  listPrice: number | null;
+}) {
+  const quickUpdate = useQuickUpdateProduct();
+  const [value, setValue] = useState<string>(String(product.price));
+
+  const commit = () => {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setValue(String(product.price));
+      return;
+    }
+    if (parsed === product.price) return;
+    quickUpdate.mutate({ id: product.id, patch: { price: parsed } });
+  };
+
+  const usarSugerido = () => {
+    if (listPrice === null) return;
+    setValue(String(listPrice));
+    quickUpdate.mutate({ id: product.id, patch: { price: listPrice } });
+  };
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <input
+        type="number"
+        min={0}
+        step={100}
+        aria-label={`Precio de venta de ${product.name}`}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }}
+        className={cn(
+          "w-28 rounded-lg border bg-transparent px-2 py-1 text-right font-mono text-xs focus:border-ink focus:outline-none",
+          quickUpdate.isPending ? "border-celeste" : "border-ink/20",
+        )}
+      />
+      {listPrice !== null && listPrice !== product.price && (
+        <button
+          type="button"
+          onClick={usarSugerido}
+          title="Costo + margen (y el combo, si el producto ya viene en pack) sugieren este precio."
+          className="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-orange transition-colors hover:text-ink"
+        >
+          Sugerido {formatPrice(listPrice)} — usar ✦
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function AdminPrecios() {
   const products = useAdminProducts();
   const quickUpdate = useQuickUpdateProduct();
@@ -77,14 +140,22 @@ export default function AdminPrecios() {
   const filas = useMemo(() => {
     return (products.data ?? []).map((product) => {
       const cost = product.cost;
+      // El combo solo corre en almohadones: en individuales, "es paquete"
+      // no cambia nada, así que ni se lo tenemos en cuenta acá.
+      const comboAplica = COMBO_CATEGORIES.includes(product.category);
       const listPrice =
         cost === null
           ? null
-          : computeListPrice(cost, marginPercent, product.isBundle, comboPercent);
+          : computeListPrice(
+              cost,
+              marginPercent,
+              comboAplica && product.isBundle,
+              comboPercent,
+            );
       const transferPrice =
         listPrice === null ? null : computeTransferPrice(listPrice, transferPercent);
       const profit = listPrice === null || cost === null ? null : listPrice - cost;
-      return { product, cost, listPrice, transferPrice, profit };
+      return { product, cost, listPrice, transferPrice, profit, comboAplica };
     });
   }, [products.data, marginPercent, comboPercent, transferPercent]);
 
@@ -153,7 +224,7 @@ export default function AdminPrecios() {
             <div className="space-y-4">
               <Toggle
                 label="Descuento por combo"
-                hint="2 o más del mismo producto (almohadones o individuales)."
+                hint="2 o más almohadones. Los individuales no entran: ya se venden en set."
                 checked={promos.combo.enabled}
                 onChange={(enabled) =>
                   marketing.update({
@@ -255,19 +326,17 @@ export default function AdminPrecios() {
         <AdminTable
           columns={[
             { label: "Producto" },
-            { label: "Es paquete", align: "center", hideOnMobile: true },
+            { label: "Vendido en pack", align: "center", hideOnMobile: true },
             { label: "Costo", align: "right" },
-            { label: "Precio de lista", align: "right" },
-            { label: "Precio actual", align: "right", hideOnMobile: true },
+            { label: "Precio de venta", align: "right" },
             { label: "Con transferencia", align: "right", hideOnMobile: true },
             { label: "Ganancia", align: "right", hideOnMobile: true },
-            { label: "", align: "right" },
           ]}
           isLoading={products.isLoading}
           isEmpty={filas.length === 0}
           empty="El catálogo está vacío."
         >
-          {filas.map(({ product, listPrice, transferPrice, profit }) => (
+          {filas.map(({ product, listPrice, transferPrice, profit, comboAplica }) => (
             <tr
               key={product.id}
               className="border-b border-ink/[0.06] last:border-0"
@@ -285,8 +354,12 @@ export default function AdminPrecios() {
                 <ToggleSwitch
                   compact
                   checked={product.isBundle}
-                  label={`${product.name} es paquete`}
-                  title="Ya se vende empaquetado (ej. pack x2): el descuento por combo se le aplica directo al precio de lista."
+                  label={`${product.name} se vende en pack`}
+                  title={
+                    comboAplica
+                      ? "Ya se vende empaquetado en 2 o más unidades (ej. 'set x2'): el 10% de combo se descuenta directo del precio sugerido, en vez de esperar a que el cliente sume una segunda unidad en el carrito."
+                      : "Ya se vende empaquetado en 2 o más unidades (ej. 'set x2'). Es solo un dato del catálogo: los individuales no tienen descuento por combo, así que esto no cambia el precio sugerido."
+                  }
                   onChange={(isBundle) =>
                     quickUpdate.mutate({
                       id: product.id,
@@ -301,16 +374,8 @@ export default function AdminPrecios() {
                 <CostCell product={product} />
               </td>
 
-              <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs">
-                {listPrice === null ? (
-                  <span className="text-ink/40">Cargá el costo</span>
-                ) : (
-                  formatPrice(listPrice)
-                )}
-              </td>
-
-              <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-xs sm:table-cell">
-                {formatPrice(product.price)}
+              <td className="px-4 py-3 text-right">
+                <PriceCell product={product} listPrice={listPrice} />
               </td>
 
               <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-xs sm:table-cell">
@@ -320,33 +385,17 @@ export default function AdminPrecios() {
               <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-xs text-verde sm:table-cell">
                 {profit === null ? "—" : formatPrice(profit)}
               </td>
-
-              <td className="whitespace-nowrap px-4 py-3 text-right">
-                <button
-                  type="button"
-                  disabled={
-                    listPrice === null ||
-                    listPrice === product.price ||
-                    quickUpdate.isPending
-                  }
-                  onClick={() =>
-                    quickUpdate.mutate({
-                      id: product.id,
-                      patch: { price: listPrice ?? undefined },
-                    })
-                  }
-                  className="font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:text-ink/55"
-                >
-                  Aplicar ✦
-                </button>
-              </td>
             </tr>
           ))}
         </AdminTable>
       )}
       <p className="mt-3 max-w-2xl text-[11px] leading-relaxed text-ink/50">
-        "Aplicar" escribe el precio de lista calculado como el precio de venta
-        real del producto (el mismo campo que se edita en Productos).
+        "Precio de venta" es el precio real, editable acá o en Productos.
+        Cuando costo + margen sugieren un número distinto, aparece
+        "Sugerido — usar" debajo para aplicarlo con un click. "Vendido en
+        pack" es un dato del catálogo (el producto ya trae 2+ unidades); en
+        almohadones también le descuenta el combo directo al precio sugerido,
+        en individuales no cambia nada porque no tienen esa promo.
       </p>
     </>
   );

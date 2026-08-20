@@ -1,3 +1,6 @@
+import { formatPrice } from "../lib/format";
+import { INSTALLMENTS } from "../lib/promos";
+
 const values = [
   {
     symbol: "✦",
@@ -7,7 +10,7 @@ const values = [
   {
     symbol: "✧",
     title: "3 cuotas sin interés",
-    text: "Hasta 6 con Cuotas Simples, o 10% off por transferencia.",
+    text: `Desde ${formatPrice(INSTALLMENTS.minAmount)}. Hasta 6 con Cuotas Simples, o 10% off por transferencia.`,
   },
 ];
 

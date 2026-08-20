@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
+import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import PageHeading from "../../components/admin/PageHeading";
 import PriceCell from "../../components/admin/PriceCell";
 import ProductForm from "../../components/admin/ProductForm";
@@ -24,6 +25,8 @@ import type { AdminProduct, ProductDraft } from "../../types/admin";
 import type { Category } from "../../types/product";
 
 type Filtro = "todos" | "almohadones" | "individuales";
+type SortKey = "name" | "price" | "stock";
+type Sort = { key: SortKey; dir: "asc" | "desc" };
 
 /** true si algo de este producto está en o debajo del umbral de poco stock,
  *  ya sea el stock del producto entero o el de alguna de sus variantes. */
@@ -34,6 +37,17 @@ function isLowStock(product: AdminProduct, threshold: number): boolean {
     );
   }
   return product.stock !== null && product.stock <= threshold;
+}
+
+/** Total de stock para ordenar: sin control se manda al final, sea cual sea
+ *  la dirección — no hay un número real con el que compararlo. */
+function stockSortValue(product: AdminProduct): number | null {
+  if (product.variants?.length) {
+    const controlado = product.variants.every((v) => v.stock !== null);
+    if (!controlado) return null;
+    return product.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+  }
+  return product.stock;
 }
 
 /** Celda de stock editable en el listado: el caso más frecuente es corregir
@@ -126,15 +140,27 @@ export default function AdminProductos() {
 
   const [busqueda, setBusqueda] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todos");
+  const [soloBajoStock, setSoloBajoStock] = useState(false);
+  const [sort, setSort] = useState<Sort | null>(null);
   const [draft, setDraft] = useState<ProductDraft | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null);
 
   const lowStock = settings?.distribucion.lowStockThreshold ?? 3;
 
+  const toggleSort = (key: string) => {
+    setSort((current) => {
+      if (current?.key !== key) return { key: key as SortKey, dir: "asc" };
+      if (current.dir === "asc") return { key: current.key, dir: "desc" };
+      return null;
+    });
+  };
+
   const visibles = useMemo(() => {
     const term = busqueda.trim().toLowerCase();
-    return (products.data ?? []).filter((product) => {
+    const filtradas = (products.data ?? []).filter((product) => {
       if (filtro !== "todos" && product.category !== filtro) return false;
+      if (soloBajoStock && !isLowStock(product, lowStock)) return false;
       if (!term) return true;
       return (
         product.name.toLowerCase().includes(term) ||
@@ -142,7 +168,25 @@ export default function AdminProductos() {
         (product.sku ?? "").toLowerCase().includes(term)
       );
     });
-  }, [products.data, busqueda, filtro]);
+
+    if (!sort) return filtradas;
+    const dir = sort.dir === "asc" ? 1 : -1;
+    return [...filtradas].sort((a, b) => {
+      if (sort.key === "name") return a.name.localeCompare(b.name) * dir;
+      if (sort.key === "price") return (a.price - b.price) * dir;
+      const stockA = stockSortValue(a);
+      const stockB = stockSortValue(b);
+      if (stockA === null && stockB === null) return 0;
+      if (stockA === null) return 1;
+      if (stockB === null) return -1;
+      return (stockA - stockB) * dir;
+    });
+  }, [products.data, busqueda, filtro, soloBajoStock, lowStock, sort]);
+
+  const bajoStockCount = useMemo(
+    () => (products.data ?? []).filter((product) => isLowStock(product, lowStock)).length,
+    [products.data, lowStock],
+  );
 
   const guardar = async () => {
     if (!draft) return;
@@ -171,12 +215,22 @@ export default function AdminProductos() {
     }
   };
 
-  const borrar = async (product: AdminProduct) => {
-    const ok = window.confirm(
-      `¿Borrar "${product.name}"? Se va de la tienda. Las órdenes que ya lo incluyen no se tocan.`,
-    );
-    if (!ok) return;
-    await deleteProduct.mutateAsync(product.id);
+  const confirmarBorrado = async () => {
+    if (!productToDelete) return;
+    await deleteProduct.mutateAsync(productToDelete.id);
+    setProductToDelete(null);
+  };
+
+  const duplicar = (product: AdminProduct) => {
+    setFormError(null);
+    setDraft({
+      ...draftFromProduct(product),
+      id: null,
+      name: `${product.name} (copia)`,
+      slug: `${product.slug}-copia`,
+      sku: "",
+      inStock: false,
+    });
   };
 
   if (products.error) {
@@ -212,15 +266,27 @@ export default function AdminProductos() {
         </Button>
       </PageHeading>
 
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <input
-          type="search"
-          value={busqueda}
-          onChange={(event) => setBusqueda(event.target.value)}
-          placeholder="Buscar por nombre, slug o SKU"
-          aria-label="Buscar productos"
-          className="w-full rounded-full border border-ink/20 bg-white px-5 py-2.5 font-mono text-xs focus:border-ink focus:outline-none sm:max-w-xs"
-        />
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+        <div className="relative w-full sm:max-w-xs">
+          <input
+            type="search"
+            value={busqueda}
+            onChange={(event) => setBusqueda(event.target.value)}
+            placeholder="Buscar por nombre, slug o SKU"
+            aria-label="Buscar productos"
+            className="w-full rounded-full border border-ink/20 bg-white px-5 py-2.5 pr-9 font-mono text-xs focus:border-ink focus:outline-none"
+          />
+          {busqueda && (
+            <button
+              type="button"
+              aria-label="Limpiar búsqueda"
+              onClick={() => setBusqueda("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 transition-colors hover:text-ink"
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
         <div
           role="group"
@@ -249,6 +315,19 @@ export default function AdminProductos() {
           ))}
         </div>
 
+        <button
+          type="button"
+          aria-pressed={soloBajoStock}
+          onClick={() => setSoloBajoStock((v) => !v)}
+          title="Solo productos en o por debajo del umbral de poco stock"
+          className={cn(
+            "rounded-full px-3.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+            soloBajoStock ? "bg-orange text-cream" : "bg-white text-ink/55 hover:text-ink",
+          )}
+        >
+          Bajo stock {bajoStockCount > 0 && `(${bajoStockCount})`}
+        </button>
+
         <p className="font-mono text-[10px] uppercase tracking-widest text-ink/45 sm:ml-auto">
           {visibles.length} {visibles.length === 1 ? "producto" : "productos"}
         </p>
@@ -256,17 +335,19 @@ export default function AdminProductos() {
 
       <AdminTable
         columns={[
-          { label: "Producto" },
+          { label: "Producto", sortKey: "name" },
           { label: "Categoría", hideOnMobile: true },
-          { label: "Precio", align: "right" },
-          { label: "Stock", align: "right" },
+          { label: "Precio", align: "right", sortKey: "price" },
+          { label: "Stock", align: "right", sortKey: "stock" },
           { label: "A la venta", align: "center" },
           { label: "", align: "right" },
         ]}
+        sort={sort}
+        onSortChange={toggleSort}
         isLoading={products.isLoading}
         isEmpty={visibles.length === 0}
         empty={
-          busqueda || filtro !== "todos"
+          busqueda || filtro !== "todos" || soloBajoStock
             ? "Ningún producto coincide con esa búsqueda."
             : "El catálogo está vacío. Cargá el primer producto."
         }
@@ -274,7 +355,7 @@ export default function AdminProductos() {
         {visibles.map((product) => (
           <tr
             key={product.id}
-            className="border-b border-ink/[0.06] last:border-0"
+            className="border-b border-ink/[0.06] transition-colors last:border-0 hover:bg-ink/[0.02]"
           >
             <td className="px-4 py-3">
               <div className="flex items-center gap-3">
@@ -369,7 +450,14 @@ export default function AdminProductos() {
               </button>
               <button
                 type="button"
-                onClick={() => void borrar(product)}
+                onClick={() => duplicar(product)}
+                className="ml-3 font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+              >
+                Duplicar
+              </button>
+              <button
+                type="button"
+                onClick={() => setProductToDelete(product)}
                 className="ml-3 font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
               >
                 Borrar
@@ -413,6 +501,21 @@ export default function AdminProductos() {
       >
         {draft && <ProductForm draft={draft} onChange={setDraft} />}
       </AdminDrawer>
+
+      <ConfirmDialog
+        open={productToDelete !== null}
+        title="Borrar producto"
+        description={
+          productToDelete
+            ? `¿Borrar "${productToDelete.name}"? Se va de la tienda. Las órdenes que ya lo incluyen no se tocan.`
+            : undefined
+        }
+        confirmLabel="Borrar"
+        destructive
+        pending={deleteProduct.isPending}
+        onConfirm={() => void confirmarBorrado()}
+        onCancel={() => setProductToDelete(null)}
+      />
     </>
   );
 }

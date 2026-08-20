@@ -35,9 +35,14 @@ hace falta redeployar las funciones, los secretos se aplican al instante.
 
 ### Correo Argentino (cotización en vivo)
 
-1. Creá una cuenta en [micorreo.correoargentino.com.ar](https://micorreo.correoargentino.com.ar)
-   (es autogestionable, no hace falta acuerdo comercial).
-2. Ahí te dan `customerId`, `userToken` y `passwordToken`. Cargalos:
+1. Registrate en [micorreo.correoargentino.com.ar](https://micorreo.correoargentino.com.ar/MiCorreo/public/mi-correo)
+   con tus datos (DNI o CUIT, email, teléfono).
+2. El registro del sitio no da las credenciales de API solas: hay que pedirlas
+   aparte con el [formulario de contacto de Correo Argentino](https://www.correoargentino.com.ar/MiCorreo/public/contact)
+   (o llamando al 0810-777-7787 / (011) 4891-9191, lunes a viernes 8 a 20hs).
+   Te dan un `customerId`, `userToken` y `passwordToken` — un juego para TEST
+   y otro distinto para PROD, hay que pedirlos por separado. Cargá primero
+   los de TEST:
 
 ```powershell
 npx supabase secrets set CORREO_ARGENTINO_CUSTOMER_ID=tu-customer-id

@@ -4,7 +4,7 @@ import PaymentMethods from "./PaymentMethods";
 
 const navItems = [
   { label: "Tienda", to: "/tienda" },
-  { label: "Sobre nosotros", to: "/sobre-nosotros" },
+  // { label: "Sobre nosotros", to: "/sobre-nosotros" },
   { label: "FAQ", to: "/faq" },
   { label: "Contacto", to: "/contacto" },
   { label: "Seguí tu pedido", to: "/pedido" },
@@ -89,7 +89,7 @@ export default function Footer() {
       </div>
 
       <p className="border-t border-cream/20 px-5 py-5 text-center font-mono text-[11px] uppercase tracking-widest text-cream/60">
-        © 2026 DZ Estudio ✦ CUIT {SITE.cuit} ✦ Maximalismo con criterio
+        © 2026 DZ Estudio
       </p>
     </footer>
   );
