@@ -2,8 +2,15 @@
 // Edge Function: create-preference
 // Crea una preferencia de pago en Mercado Pago (Checkout Pro).
 // El Access Token NUNCA sale del servidor.
-// La orden ya fue insertada por el frontend; acá la leemos con la
-// service role key (fuente de verdad de montos) y armamos la preferencia.
+//
+// La orden ya fue insertada por el frontend, pero el trigger SQL
+// `recalculate_order_totals` (ver supabase/migrations/20260819180000_*)
+// ya recalculó items[].price, subtotal, discount y total a partir de
+// `products`/`store_settings` antes de guardarla — nada de eso viene del
+// cliente. Lo único que ese trigger no puede corregir con precisión es el
+// envío "en vivo" (Correo Argentino cotiza por HTTP, no desde SQL), así
+// que acá lo volvemos a cotizar de verdad y corregimos shipping_cost/total
+// si hace falta, antes de cobrar por Mercado Pago.
 // ============================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -53,6 +60,85 @@ Deno.serve(async (req) => {
       ?.mercadopago;
     const maxInstallments = Number(mpSettings?.maxInstallments) || 6;
     const defaultInstallments = Number(mpSettings?.installments) || 3;
+
+    // El trigger SQL ya validó shipping_method y fijó shipping_cost si la
+    // opción es de costo fijo. Si es "vivo" (Correo Argentino), acá lo
+    // volvemos a cotizar de verdad y corregimos el monto antes de cobrar.
+    const { data: envios } = await supabase
+      .from("store_settings")
+      .select("value")
+      .eq("key", "envios")
+      .maybeSingle();
+
+    const enviosSettings = (envios?.value ?? {}) as {
+      freeShippingFrom?: number | null;
+      options?: Array<{
+        id: string;
+        mode?: string;
+        cost?: number;
+        provider?: string;
+        service?: "sucursal" | "domicilio";
+      }>;
+    };
+    const shippingOption = enviosSettings.options?.find(
+      (o) => o.id === order.shipping_method,
+    );
+    const freeShippingFrom = enviosSettings.freeShippingFrom ?? null;
+    const envioGratis =
+      freeShippingFrom !== null && Number(order.subtotal) >= freeShippingFrom;
+
+    let correctShippingCost = Number(order.shipping_cost) || 0;
+
+    if (
+      !envioGratis &&
+      shippingOption?.mode === "vivo" &&
+      shippingOption.provider === "correo-argentino"
+    ) {
+      const slugs = (order.items as Array<{ slug: string; qty: number }>).map(
+        (it) => it.slug,
+      );
+      const { data: productWeights } = await supabase
+        .from("products")
+        .select("slug, peso_gramos")
+        .in("slug", slugs);
+
+      const weightBySlug = new Map(
+        (productWeights ?? []).map((p) => [p.slug, p.peso_gramos as number | null]),
+      );
+      const weightGrams = (order.items as Array<{ slug: string; qty: number }>).reduce(
+        (total, it) => total + (weightBySlug.get(it.slug) ?? 400) * it.qty,
+        0,
+      );
+
+      const cp = (order.shipping_address as { cp?: string })?.cp ?? "";
+      const { data: quote } = await supabase.functions.invoke("shipping-quote", {
+        body: { destinationCp: cp, weightGrams },
+      });
+
+      const correo = quote?.correoArgentino as
+        | { configured?: boolean; sucursal?: number | null; domicilio?: number | null }
+        | undefined;
+      const liveCost =
+        shippingOption.service === "sucursal" ? correo?.sucursal : correo?.domicilio;
+
+      // Si la cotización real no está configurada o falla, cae al costo de
+      // respaldo del panel — nunca al que haya mandado el cliente.
+      correctShippingCost =
+        correo?.configured && typeof liveCost === "number"
+          ? liveCost
+          : Number(shippingOption.cost) || 0;
+    }
+
+    if (correctShippingCost !== Number(order.shipping_cost)) {
+      const correctedTotal =
+        Number(order.subtotal) - Number(order.discount) + correctShippingCost;
+      await supabase
+        .from("orders")
+        .update({ shipping_cost: correctShippingCost, total: correctedTotal })
+        .eq("id", order.id);
+      order.shipping_cost = correctShippingCost;
+      order.total = correctedTotal;
+    }
 
     const accessToken = Deno.env.get("MP_ACCESS_TOKEN")!;
     const siteUrl = Deno.env.get("SITE_URL") ?? "http://localhost:5173";
