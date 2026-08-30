@@ -159,9 +159,8 @@ export const products: Product[] = [
         background: "cream",
       },
       {
-        src: "/productos/individuales-doble-pack.webp",
-        fit: "contain",
-        background: "cream",
+        src: "https://glgyhzqwiutasicnwedv.supabase.co/storage/v1/object/public/productos/gemini-generated-image-smzibesmzibesmzi-1787090626340.jpg",
+        fit: "cover",
       },
     ],
     inStock: true,
