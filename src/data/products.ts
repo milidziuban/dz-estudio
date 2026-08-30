@@ -1,8 +1,9 @@
 import type { Category, ColorToken, Product } from "../types/product";
 
-// Catálogo espejo de Tienda Nube (tienda dzestudio, sincronizado 17/08/2026).
-// Los ids son los de Tienda Nube; las fotos son las mismas, descargadas a
-// /public/productos. Al dar de alta un producto allá, replicarlo acá.
+// Catálogo de respaldo: espejo de la tabla `products` de Supabase
+// (sincronizado 30/08/2026). La tienda lee siempre de la base; esto es lo que
+// se muestra si la consulta falla. Al cambiar un precio o un producto en el
+// panel, actualizar también acá.
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   almohadones: "Almohadones",
@@ -23,7 +24,7 @@ export const CATEGORY_INTRO: Record<
 > = {
   almohadones: {
     colorB: "petroleo",
-    tagLabel: "3 modelos · $23.000",
+    tagLabel: "3 modelos · $18.300",
     description:
       "Fundas de 40x40 en rombos y rayas de dos colores. Llevando 2 o más, 10% de descuento.",
     image: "/productos/almohadon-rayas-cama.jpg",
@@ -32,30 +33,34 @@ export const CATEGORY_INTRO: Record<
   },
   individuales: {
     colorB: "orange",
-    tagLabel: "2 packs · desde $5.100",
+    tagLabel: "3 packs · desde $5.400",
     description:
-      "Packs de dos individuales de 30x42. La versión doble es reversible: rayas de un lado, formas orgánicas del otro.",
-    image: "/productos/individuales-simple-pack.webp",
-    imageAlt: "Individuales de rayas blanco y negro puestos en la mesa",
+      "Packs de dos individuales de 30x42, en gabardina impermeable. Los reversibles traen rayas de un lado y ondas del otro.",
+    image: "/productos/individuales-reversibles-celeste-mesa.webp",
+    imageAlt: "Individuales reversibles celestes puestos en una mesa de madera",
     imageFit: "cover",
   },
 };
 
-const ALMOHADON_DESC =
-  "Almohadón decorativo, textura suave y diseño versátil que combina con distintos ambientes.";
+const CUIDADOS = "Lavar con agua fría, a ciclo suave o a mano. No secar al sol.";
+const REVERSIBLE_DESC =
+  "Dos individuales que son cuatro: de un lado rayas, del otro ondas, en COLORES las dos caras. Los das vuelta y la mesa cambia. Gabardina impermeable: el vino se queda arriba el tiempo suficiente para que llegues con un repasador.";
 
 export const products: Product[] = [
   // ✧ Almohadones
   {
     id: 356622826,
     slug: "almohadones-rombo-rosa",
-    name: "Almohadones Rombo Rosa",
+    name: "Almohadón Rombo Rosa · 40 × 40 cm",
     category: "almohadones",
     colors: ["pink", "orange"],
-    price: 23000,
-    description: ALMOHADON_DESC,
+    price: 18300,
+    description:
+      "Rombos rosas y bordó sobre pana. La estampa ya la pone el almohadón: el resto del sillón puede quedarse tranquilo. Funda con solapa, se saca para lavar, relleno incluido.",
     medidas: "40 x 40 cm (aprox.)",
     peso: "350 g (aprox.)",
+    material: "Pana estampada",
+    cuidados: CUIDADOS,
     images: [
       {
         src: "/productos/almohadon-rombo-rosa.webp",
@@ -68,13 +73,16 @@ export const products: Product[] = [
   {
     id: 361309976,
     slug: "almohadones-rayas-blanco-y-negro",
-    name: "Almohadones Rayas Blanco y Negro",
+    name: "Almohadón Rayas Blanco y Negro · 40 × 40 cm",
     category: "almohadones",
     colors: ["ink", "cream"],
-    price: 23000,
-    description: ALMOHADON_DESC,
+    price: 18300,
+    description:
+      "Rayas negras sobre crudo, en pana. El único de la serie que no discute con nada: va con los rombos, va solo y va sobre cualquier color de sillón. Si estás armando de a dos, este es la mitad tranquila del par. Funda con solapa, se saca para lavar, relleno incluido.",
     medidas: "40 x 40 cm (aprox.)",
     peso: "350 g (aprox.)",
+    material: "Pana estampada",
+    cuidados: CUIDADOS,
     images: [
       {
         src: "/productos/almohadon-rayas-blanco-negro.webp",
@@ -87,13 +95,16 @@ export const products: Product[] = [
   {
     id: 361310010,
     slug: "almohadones-rombo-celeste",
-    name: "Almohadones Rombo Celeste",
+    name: "Almohadón Rombo Celeste · 40 × 40 cm",
     category: "almohadones",
-    colors: ["celeste", "orange"],
-    price: 23000,
-    description: ALMOHADON_DESC,
+    colors: ["celeste"],
+    price: 18300,
+    description:
+      "Rombos celestes y marrones sobre pana. El marrón lo ata a la madera y el celeste lo levanta, así que es el que mejor cae sobre sillones claros —lino crudo, beige, gris— y en cualquier ambiente donde haya madera cerca. Funda con solapa, se saca para lavar, relleno incluido.",
     medidas: "40 x 40 cm (aprox.)",
     peso: "350 g (aprox.)",
+    material: "Pana estampada",
+    cuidados: CUIDADOS,
     images: [
       {
         src: "/productos/almohadon-rombo-celeste.webp",
@@ -106,32 +117,57 @@ export const products: Product[] = [
   // ✦ Individuales
   {
     id: 357072093,
-    slug: "individuales-doble-pack-x2",
-    name: "Individuales Doble Pack x2",
+    slug: "individuales-reversibles-celeste",
+    name: "Individuales Reversibles Celeste · Pack x2 · 30 × 42 cm",
     category: "individuales",
-    colors: ["pink", "celeste"],
-    price: 7100,
-    description:
-      "Pack de 2 individuales reversibles: de un lado diseño de rayas, del otro un diseño más orgánico, mismo color en ambas caras.",
+    colors: ["celeste", "orange"],
+    price: 7200,
+    description: REVERSIBLE_DESC.replace("COLORES", "celeste y marrón"),
     medidas: "30 x 42 cm cada uno · pack x2",
     peso: "400 g el pack (aprox.)",
-    variants: [
-      { id: "1564845157", label: "Celeste", color: "celeste" },
-      { id: "1564845158", label: "Rosa", color: "pink" },
+    material: "Gabardina acrílica impermeable",
+    cuidados: CUIDADOS,
+    images: [
+      { src: "/productos/individuales-reversibles-celeste-mesa.webp", fit: "cover" },
+      { src: "/productos/individuales-reversibles-celeste-detalle.webp", fit: "cover" },
+      { src: "/productos/individuales-reversibles-celeste-caras.webp", fit: "cover" },
     ],
-    images: [{ src: "/productos/individuales-doble-pack.webp", fit: "cover" }],
+    inStock: true,
+  },
+  {
+    id: 357072094,
+    slug: "individuales-reversibles-rosa",
+    name: "Individuales Reversibles Rosa · Pack x2 · 30 × 42 cm",
+    category: "individuales",
+    colors: ["pink", "celeste"],
+    price: 7200,
+    description: REVERSIBLE_DESC.replace("COLORES", "rosa y azul"),
+    medidas: "30 x 42 cm cada uno · pack x2",
+    peso: "400 g el pack (aprox.)",
+    material: "Gabardina acrílica impermeable",
+    cuidados: CUIDADOS,
+    images: [
+      {
+        src: "/productos/individuales-doble-pack.webp",
+        fit: "contain",
+        background: "cream",
+      },
+    ],
     inStock: true,
   },
   {
     id: 358182239,
     slug: "individuales-simple-pack-x2",
-    name: "Individuales Simple Pack x2",
+    name: "Individuales Rayas Blanco y Negro · Pack x2 · 30 × 42 cm",
     category: "individuales",
     colors: ["ink", "cream"],
-    price: 5100,
+    price: 5400,
     description:
-      "Pack de 2 individuales de una sola cara, en rayas blanco y negro. La base neutra para cualquier vajilla.",
+      "Dos individuales de una sola cara, en rayas blancas y negras. Es la base: no compite con la vajilla, no pasa de moda y aguanta que le pongas encima lo que sea. Gabardina impermeable, así que lo que se vuelca se limpia con un paño en vez de terminar en el lavarropas.",
     medidas: "30 x 42 cm cada uno · pack x2",
+    peso: "400 g el pack (aprox.)",
+    material: "Gabardina acrílica impermeable",
+    cuidados: CUIDADOS,
     images: [{ src: "/productos/individuales-simple-pack.webp", fit: "cover" }],
     inStock: true,
   },
