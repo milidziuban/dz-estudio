@@ -111,6 +111,7 @@ export const products: Product[] = [
         fit: "contain",
         background: "cream",
       },
+      { src: "/productos/almohadon-rombo-celeste-detalle.webp", fit: "cover" },
     ],
     inStock: true,
   },
@@ -128,6 +129,11 @@ export const products: Product[] = [
     material: "Gabardina acrílica impermeable",
     cuidados: CUIDADOS,
     images: [
+      {
+        src: "/productos/individuales-reversibles-celeste-packshot.webp",
+        fit: "contain",
+        background: "cream",
+      },
       { src: "/productos/individuales-reversibles-celeste-mesa.webp", fit: "cover" },
       { src: "/productos/individuales-reversibles-celeste-detalle.webp", fit: "cover" },
       { src: "/productos/individuales-reversibles-celeste-caras.webp", fit: "cover" },
@@ -147,6 +153,11 @@ export const products: Product[] = [
     material: "Gabardina acrílica impermeable",
     cuidados: CUIDADOS,
     images: [
+      {
+        src: "/productos/individuales-reversibles-rosa-packshot.webp",
+        fit: "contain",
+        background: "cream",
+      },
       {
         src: "/productos/individuales-doble-pack.webp",
         fit: "contain",
