@@ -8,3 +8,6 @@ dist
 # Supabase CLI
 supabase/.temp
 supabase/.branches
+
+# Claude Code (configuración local, no del proyecto)
+.claude/settings.local.json
