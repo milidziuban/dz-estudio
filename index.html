@@ -16,7 +16,72 @@
       media="(prefers-color-scheme: dark)"
     />
     <title>DZ Estudio — Maximalismo con criterio</title>
-    <!-- title y description los maneja react-helmet-async por página (ver src/components/Seo.tsx) -->
+
+    <!--
+      Tarjeta al compartir el link (Open Graph).
+
+      Estas etiquetas tienen que estar ACÁ, en el HTML que el servidor manda de
+      entrada. Los robots de WhatsApp, Instagram y Facebook no ejecutan
+      JavaScript: entran, leen el código crudo y se van. Si las etiquetas las
+      pone react-helmet después de cargar la página, el robot ya se fue y el
+      link se comparte pelado.
+
+      react-helmet-async las reemplaza igual en el navegador con las de cada
+      página (por eso el data-rh), así que src/components/Seo.tsx sigue mandando
+      para el usuario. Esto es el piso, para el robot.
+
+      Al cambiar cualquiera de estos textos, cambiarlo también en
+      src/lib/site.ts.
+    -->
+    <meta
+      name="description"
+      data-rh="true"
+      content="Almohadones e individuales estampados, diseñados y hechos en Argentina."
+    />
+    <link rel="canonical" data-rh="true" href="https://www.dz-estudio.com/" />
+
+    <meta property="og:type" data-rh="true" content="website" />
+    <meta property="og:site_name" data-rh="true" content="DZ Estudio" />
+    <meta property="og:locale" data-rh="true" content="es_AR" />
+    <meta
+      property="og:title"
+      data-rh="true"
+      content="DZ Estudio — Maximalismo con criterio"
+    />
+    <meta
+      property="og:description"
+      data-rh="true"
+      content="Almohadones e individuales estampados, diseñados y hechos en Argentina."
+    />
+    <meta property="og:url" data-rh="true" content="https://www.dz-estudio.com/" />
+    <meta
+      property="og:image"
+      data-rh="true"
+      content="https://www.dz-estudio.com/og-cover.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Almohadones estampados de DZ Estudio"
+    />
+
+    <meta name="twitter:card" data-rh="true" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      data-rh="true"
+      content="DZ Estudio — Maximalismo con criterio"
+    />
+    <meta
+      name="twitter:description"
+      data-rh="true"
+      content="Almohadones e individuales estampados, diseñados y hechos en Argentina."
+    />
+    <meta
+      name="twitter:image"
+      data-rh="true"
+      content="https://www.dz-estudio.com/og-cover.png"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

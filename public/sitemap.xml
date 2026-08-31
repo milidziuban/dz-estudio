@@ -1,33 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Sitemap básico con las páginas estáticas.
-  ⚠️ Reemplazar el dominio por el real de Vercel.
-  Las URLs de producto (/producto/:slug) son dinámicas; si querés indexarlas,
-  conviene generar este archivo desde los datos de Supabase en el build.
+  Páginas que Google debería indexar.
+
+  Las fichas de producto están listadas a mano: son seis y cambian poco. Al dar
+  de alta o renombrar un producto en el panel, agregar o corregir su URL acá
+  (la URL es /producto/ + el slug de la ficha en Supabase).
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://dz-estudio.vercel.app/</loc>
+    <loc>https://www.dz-estudio.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://dz-estudio.vercel.app/tienda</loc>
+    <loc>https://www.dz-estudio.com/tienda</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
+
   <url>
-    <loc>https://dz-estudio.vercel.app/sobre-nosotros</loc>
+    <loc>https://www.dz-estudio.com/producto/almohadones-rombo-rosa</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.dz-estudio.com/producto/almohadones-rombo-celeste</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.dz-estudio.com/producto/almohadones-rayas-blanco-y-negro</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.dz-estudio.com/producto/individuales-reversibles-celeste</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.dz-estudio.com/producto/individuales-reversibles-rosa</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.dz-estudio.com/producto/individuales-simple-pack-x2</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.dz-estudio.com/sobre-nosotros</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://dz-estudio.vercel.app/faq</loc>
+    <loc>https://www.dz-estudio.com/faq</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://dz-estudio.vercel.app/contacto</loc>
+    <loc>https://www.dz-estudio.com/contacto</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

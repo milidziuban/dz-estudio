@@ -4,5 +4,6 @@ Disallow: /checkout
 Disallow: /checkout/
 Disallow: /admin
 Disallow: /admin/
+Disallow: /pedido
 
-Sitemap: https://dz-estudio.vercel.app/sitemap.xml
+Sitemap: https://www.dz-estudio.com/sitemap.xml
