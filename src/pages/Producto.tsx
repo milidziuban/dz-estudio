@@ -8,10 +8,11 @@ import Tag from "../components/Tag";
 import { CATEGORY_LABEL } from "../data/products";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
+import { useStoreSettings } from "../hooks/useStoreSettings";
 import { cn } from "../lib/cn";
 import { COLOR_HEX } from "../lib/colors";
 import { formatPrice } from "../lib/format";
-import { INSTALLMENTS } from "../lib/promos";
+import { comboBanner, DEFAULT_PROMOS, INSTALLMENTS } from "../lib/promos";
 import { SITE } from "../lib/site";
 
 const DETAILS = [
@@ -24,6 +25,9 @@ const DETAILS = [
 export default function Producto() {
   const { slug } = useParams<{ slug: string }>();
   const { data: products = [], isLoading } = useProducts();
+  // Porcentaje y mínimo del combo salen del panel, no del código
+  const { data: settings } = useStoreSettings();
+  const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
 
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
@@ -85,6 +89,8 @@ export default function Producto() {
   const selectedVariant = product.variants?.find((v) => v.id === variantId);
   const variantSoldOut = selectedVariant?.inStock === false;
   const canAdd = product.inStock && !variantSoldOut;
+  // null si a esta categoría no le corre el combo
+  const avisoCombo = comboBanner(product.category, promos);
 
   const handleAdd = () => {
     addToCart(product.slug, variantId, qty);
@@ -159,10 +165,9 @@ export default function Producto() {
               {INSTALLMENTS.label} ✦ 10% off por transferencia
             </p>
 
-            {product.category === "almohadones" && (
+            {avisoCombo && (
               <p className="mt-5 rounded-xl bg-amarillo px-4 py-3 text-sm leading-relaxed">
-                ✦ Llevando 2 almohadones o más,{" "}
-                <strong>10% de descuento</strong> en toda la categoría.
+                ✦ {avisoCombo}.
               </p>
             )}
 

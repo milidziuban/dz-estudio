@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
+import { useStoreSettings } from "../hooks/useStoreSettings";
 import { formatPrice } from "../lib/format";
-import { COMBO_CATEGORIES, COMBO_PROMO } from "../lib/promos";
+import { COMBO_CATEGORIES, comboBadge, DEFAULT_PROMOS } from "../lib/promos";
 import type { Product } from "../types/product";
 import Card from "./Card";
 import ProductImage from "./ProductImage";
@@ -11,6 +12,14 @@ type ProductCardProps = {
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
+  // El badge sale de la config del panel, no de una constante: si cambia el
+  // porcentaje o el mínimo, la grilla no puede seguir anunciando el viejo.
+  // Es la misma query cacheada para todas las tarjetas, no una por producto.
+  const { data: settings } = useStoreSettings();
+  const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
+  const conCombo =
+    promos.combo.enabled && COMBO_CATEGORIES.includes(product.category);
+
   const [primary, secondary] = product.images;
   const soldOut =
     !product.inStock ||
@@ -38,9 +47,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             />
           )}
-          {COMBO_CATEGORIES.includes(product.category) && (
+          {conCombo && (
             <Tag color="amarillo" className="absolute left-3 top-3 text-[10px]">
-              {COMBO_PROMO.short}
+              {comboBadge(promos)}
             </Tag>
           )}
           {soldOut && (

@@ -140,16 +140,18 @@ export default function AdminPrecios() {
   const filas = useMemo(() => {
     return (products.data ?? []).map((product) => {
       const cost = product.cost;
-      // El combo solo corre en almohadones: en individuales, "es paquete"
-      // no cambia nada, así que ni se lo tenemos en cuenta acá.
       const comboAplica = COMBO_CATEGORIES.includes(product.category);
+      // "Vendido en pack" descuenta el combo directo del precio sugerido solo
+      // si el carrito NO se lo va a dar: si la categoría ya tiene la promo,
+      // bajarlo también acá sería descontar dos veces sobre el mismo producto.
+      const comboEnElPrecio = product.isBundle && !comboAplica;
       const listPrice =
         cost === null
           ? null
           : computeListPrice(
               cost,
               marginPercent,
-              comboAplica && product.isBundle,
+              comboEnElPrecio,
               comboPercent,
             );
       const transferPrice =
@@ -357,8 +359,8 @@ export default function AdminPrecios() {
                   label={`${product.name} se vende en pack`}
                   title={
                     comboAplica
-                      ? "Ya se vende empaquetado en 2 o más unidades (ej. 'set x2'): el 10% de combo se descuenta directo del precio sugerido, en vez de esperar a que el cliente sume una segunda unidad en el carrito."
-                      : "Ya se vende empaquetado en 2 o más unidades (ej. 'set x2'). Es solo un dato del catálogo: los individuales no tienen descuento por combo, así que esto no cambia el precio sugerido."
+                      ? "Ya se vende empaquetado en 2 o más unidades (ej. 'pack x2'). Es un dato del catálogo: esta categoría ya tiene el descuento por combo en el carrito, así que el precio sugerido no lo descuenta otra vez."
+                      : "Ya se vende empaquetado en 2 o más unidades (ej. 'pack x2'): como esta categoría no tiene descuento por combo en el carrito, el precio sugerido se lo descuenta directo."
                   }
                   onChange={(isBundle) =>
                     quickUpdate.mutate({
@@ -393,9 +395,10 @@ export default function AdminPrecios() {
         "Precio de venta" es el precio real, editable acá o en Productos.
         Cuando costo + margen sugieren un número distinto, aparece
         "Sugerido — usar" debajo para aplicarlo con un click. "Vendido en
-        pack" es un dato del catálogo (el producto ya trae 2+ unidades); en
-        almohadones también le descuenta el combo directo al precio sugerido,
-        en individuales no cambia nada porque no tienen esa promo.
+        pack" es un dato del catálogo: el producto ya trae 2 o más unidades.
+        Hoy el descuento por combo corre en las dos categorías y lo aplica el
+        carrito, así que el precio sugerido no se lo vuelve a descontar — si
+        no, el mismo producto quedaría con el descuento puesto dos veces.
       </p>
     </>
   );

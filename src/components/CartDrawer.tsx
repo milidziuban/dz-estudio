@@ -111,8 +111,7 @@ export default function CartDrawer() {
             <div className="border-t border-ink/10 p-5">
               {faltan && (
                 <p className="mb-4 rounded-xl bg-amarillo px-4 py-3 text-xs leading-relaxed">
-                  ✦ Sumá {faltan.faltan} {faltan.categoryLabel}
-                  {faltan.faltan > 1 ? "es" : ""} más y se te aplica{" "}
+                  ✦ Sumá {faltan.faltan} {faltan.noun} más y se te aplica{" "}
                   <strong>{promos.combo.percent}% de descuento</strong>.
                 </p>
               )}

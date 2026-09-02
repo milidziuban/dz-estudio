@@ -7,7 +7,13 @@ import {
   PAQUETE_DEFAULT_CM,
   SHIPPING_OPTIONS,
 } from "../lib/checkout";
-import { COMBO_PROMO, INSTALLMENTS, TRANSFER_PROMO } from "../lib/promos";
+import {
+  DEFAULT_PROMOS,
+  INSTALLMENTS,
+  TRANSFER_PROMO,
+  comboLabel,
+  transferLabel,
+} from "../lib/promos";
 import { SITE } from "../lib/site";
 import { supabase } from "../lib/supabase";
 import type { SettingsKey, StoreSettings } from "../types/admin";
@@ -67,24 +73,17 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
     gaId: GA_ID ?? null,
     instagram: SITE.instagram,
     whatsapp: SITE.whatsapp,
+    // Las dos líneas de promo se arman con las mismas funciones que usa el
+    // carrito, no escritas a mano: si cambia sobre qué categorías corre el
+    // combo, la marquesina no puede quedar prometiendo otra cosa.
     marquee: [
       INSTALLMENTS.label,
-      "10% off pagando por transferencia",
-      "10% llevando 2 o más del mismo producto",
+      transferLabel(DEFAULT_PROMOS),
+      comboLabel(DEFAULT_PROMOS),
       "Envíos a todo el país",
       "Retiro gratis en Santa Fe Capital",
     ],
-    promos: {
-      combo: {
-        enabled: true,
-        percent: Math.round(COMBO_PROMO.percent * 100),
-        minQty: COMBO_PROMO.minQty,
-      },
-      transferencia: {
-        enabled: true,
-        percent: Math.round(TRANSFER_PROMO.percent * 100),
-      },
-    },
+    promos: DEFAULT_PROMOS,
   },
   precios: {
     marginPercent: 100,
