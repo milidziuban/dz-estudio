@@ -1,7 +1,14 @@
+import { useEffect } from "react";
 import Button from "../components/Button";
 import Card from "../components/Card";
+import { discardStashedPurchase } from "../lib/analytics";
 
 export default function CheckoutError() {
+  // El pago se rechazó: el pedido que el checkout había guardado para medir la
+  // compra se descarta, así no se cuenta como venta si más tarde la clienta
+  // vuelve a pasar por la pantalla de gracias.
+  useEffect(() => discardStashedPurchase(), []);
+
   return (
     <div className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
       <Card className="mx-auto max-w-2xl overflow-hidden text-center">

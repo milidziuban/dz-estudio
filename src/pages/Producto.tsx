@@ -9,6 +9,7 @@ import { CATEGORY_LABEL } from "../data/products";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
 import { useStoreSettings } from "../hooks/useStoreSettings";
+import { trackAddToCart, trackViewItem } from "../lib/analytics";
 import { cn } from "../lib/cn";
 import { COLOR_HEX } from "../lib/colors";
 import { formatPrice } from "../lib/format";
@@ -47,6 +48,13 @@ export default function Producto() {
     setImgIdx(0);
     setQty(1);
   }, [product?.slug, product?.variants]);
+
+  // `view_item` una vez por ficha abierta. Va atado al slug y no a la variante
+  // elegida: cambiar de color no es haber mirado otro producto.
+  useEffect(() => {
+    if (product) trackViewItem(product);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.slug]);
 
   if (isLoading) {
     return (
@@ -94,6 +102,7 @@ export default function Producto() {
 
   const handleAdd = () => {
     addToCart(product.slug, variantId, qty);
+    trackAddToCart(product, selectedVariant, qty);
     openCart();
   };
 
