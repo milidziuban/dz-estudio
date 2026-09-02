@@ -4,6 +4,10 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import { useCart } from "../hooks/useCart";
 import {
+  discardStashedPurchase,
+  trackStashedPurchase,
+} from "../lib/analytics";
+import {
   SETTINGS_DEFAULTS,
   useStoreSettings,
 } from "../hooks/useStoreSettings";
@@ -39,6 +43,15 @@ export default function CheckoutExito() {
   useEffect(() => {
     if (fromMP) clearCart();
   }, [fromMP, clearCart]);
+
+  // `purchase` va acá, que es donde la compra queda cerrada, con los datos que
+  // el checkout guardó antes de redirigir. Un pago en proceso (efectivo, que se
+  // acredita horas después) no se cuenta como venta: todavía puede no entrar.
+  // El panel sí lo va a contar cuando el webhook lo marque pagado.
+  useEffect(() => {
+    if (isPending) discardStashedPurchase();
+    else trackStashedPurchase();
+  }, [isPending]);
 
   const nombre = state?.nombre;
   const pago = state?.pago ?? (fromMP ? "mp" : undefined);

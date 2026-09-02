@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
@@ -11,6 +11,7 @@ import TextField from "../components/TextField";
 import { useCart } from "../hooks/useCart";
 import { useProducts } from "../hooks/useProducts";
 import { useShippingQuote } from "../hooks/useShippingQuote";
+import { stashPurchase, trackBeginCheckout } from "../lib/analytics";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import {
   checkoutSchema,
@@ -118,6 +119,15 @@ export default function Checkout() {
   );
   const total = subtotal - (discount?.amount ?? 0) + (shippingCost ?? 0);
 
+  // `begin_checkout`, una sola vez por visita. Espera a que el carrito esté
+  // resuelto: los productos llegan por query y en el primer render no están.
+  const inicioMedido = useRef(false);
+  useEffect(() => {
+    if (inicioMedido.current || resolved.length === 0) return;
+    inicioMedido.current = true;
+    trackBeginCheckout(resolved, subtotal);
+  }, [resolved, subtotal]);
+
   if (isLoading) {
     return (
       <p
@@ -199,6 +209,15 @@ export default function Checkout() {
       );
       return;
     }
+
+    // El pedido queda guardado para medir la compra en la pantalla de gracias:
+    // volviendo de Mercado Pago el carrito ya está vacío y la URL solo trae el
+    // id de la orden. Se manda desde allá, que es donde la compra está cerrada.
+    stashPurchase(orderId, resolved, {
+      value: total,
+      shipping: shippingCost ?? 0,
+      discount: discount?.amount ?? 0,
+    });
 
     const orderNumber = orderId.slice(0, 8).toUpperCase();
 
