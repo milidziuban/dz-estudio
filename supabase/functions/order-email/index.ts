@@ -196,7 +196,7 @@ Deno.serve(async (req) => {
       notas: order.customer_notes ?? null,
     };
 
-    const { subject, html } =
+    const { subject, html, text } =
       kind === "transferencia"
         ? transferenciaEmail(mailOrder, site, bank)
         : kind === "pago-confirmado"
@@ -226,6 +226,9 @@ Deno.serve(async (req) => {
         reply_to: Deno.env.get("RESEND_REPLY_TO") ?? undefined,
         subject,
         html,
+        // El texto plano viaja junto al HTML. Un mail que va solo en HTML es
+        // una de las señales que más empuja a Gmail a mandarlo a spam.
+        text,
       }),
     });
 

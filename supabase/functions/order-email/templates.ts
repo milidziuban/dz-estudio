@@ -206,13 +206,66 @@ function shell(site: SiteInfo, preheader: string, inner: string): string {
 }
 
 // ------------------------------------------------------------
+// Versión en texto plano
+//
+// Va en el mismo envío que el HTML, como alternativa. No es un lujo de
+// accesibilidad: un mail que viaja SOLO en HTML es una de las señales que
+// más pesa para que Gmail lo mande a spam, porque casi todo el correo
+// legítimo lleva las dos partes. Cuando se toca un texto de arriba, hay
+// que tocarlo también acá.
+// ------------------------------------------------------------
+
+function detalleTexto(order: MailOrder): string {
+  const lineas = order.items.map(
+    (item) =>
+      `  ${item.qty} x ${item.name}${item.variant ? ` (${item.variant})` : ""}` +
+      ` — ${formatPrice(item.price * item.qty)}`,
+  );
+
+  const montos = [
+    `  Subtotal: ${formatPrice(order.subtotal)}`,
+    order.discount > 0
+      ? `  ${order.discountLabel ?? "Descuento"}: - ${formatPrice(order.discount)}`
+      : null,
+    `  ${order.envioLabel}: ${order.shippingCost > 0 ? formatPrice(order.shippingCost) : "Gratis"}`,
+    `  TOTAL: ${formatPrice(order.total)}`,
+  ].filter(Boolean);
+
+  const destino = order.esRetiro
+    ? `Retirás en:\n  ${order.envioDetalle ?? ""}`
+    : `Enviamos a:\n  ${order.direccion ?? ""}`;
+
+  return [
+    `PEDIDO #${order.numero}`,
+    "",
+    ...lineas,
+    "",
+    ...montos,
+    "",
+    destino,
+    order.notas ? `\nTu nota:\n  ${order.notas}` : "",
+  ]
+    .join("\n")
+    .trimEnd();
+}
+
+function piePagina(site: SiteInfo): string {
+  return [
+    "",
+    "—",
+    `Si algo no cierra, respondé este mail o escribinos por WhatsApp al ${site.whatsapp}.`,
+    `${site.url}  ·  @${site.instagram}`,
+  ].join("\n");
+}
+
+// ------------------------------------------------------------
 // 1 · Transferencia pendiente
 // ------------------------------------------------------------
 export function transferenciaEmail(
   order: MailOrder,
   site: SiteInfo,
   bank: BankInfo,
-): { subject: string; html: string } {
+): { subject: string; html: string; text: string } {
   const dato = (k: string, v: string) =>
     `<tr>
       <td style="padding:4px 0;font-family:${MONO};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${COLORS.ink};opacity:0.6;white-space:nowrap;">${escape(k)}</td>
@@ -243,9 +296,30 @@ export function transferenciaEmail(
     ${orderDetail(order)}
   `;
 
+  const text = [
+    `Anotado, ${order.nombre}. Falta un paso.`,
+    "",
+    "Tu pedido quedó reservado. Para cerrarlo, transferí el total a esta cuenta:",
+    "",
+    `  Alias: ${bank.alias}`,
+    `  CBU: ${bank.cbu}`,
+    `  Titular: ${bank.titular}`,
+    `  CUIT: ${bank.cuit}`,
+    `  Banco: ${bank.banco}`,
+    `  Monto exacto: ${formatPrice(order.total)}`,
+    "",
+    `Cuando la hagas, mandanos el comprobante por WhatsApp (${site.whatsapp}) y lo damos por cerrado.`,
+    "",
+    "Te lo reservamos 48 horas. Después vuelve a la tienda: las ediciones son cortas y hay gente esperando.",
+    "",
+    detalleTexto(order),
+    piePagina(site),
+  ].join("\n");
+
   return {
     subject: `Falta la transferencia — pedido #${order.numero}`,
     html: shell(site, "Te lo reservamos 48 horas.", inner),
+    text,
   };
 }
 
@@ -255,7 +329,7 @@ export function transferenciaEmail(
 export function pagoConfirmadoEmail(
   order: MailOrder,
   site: SiteInfo,
-): { subject: string; html: string } {
+): { subject: string; html: string; text: string } {
   const queSigue = order.esRetiro
     ? `Te avisamos por acá cuando esté listo para que lo pases a buscar por ${escape(site.retiro.direccion)}.`
     : "Lo preparamos en el depósito y te escribimos de nuevo cuando salga, con el código de seguimiento.";
@@ -270,9 +344,25 @@ export function pagoConfirmadoEmail(
     ${paragraph("Guardá este mail: acá está todo lo que pediste y cuánto pagaste.")}
   `;
 
+  const text = [
+    `¡Listo, ${order.nombre}! Ya es tuyo.`,
+    "",
+    "El pago entró. Empezamos a preparar tu pedido.",
+    "",
+    order.esRetiro
+      ? `Te avisamos por acá cuando esté listo para que lo pases a buscar por ${site.retiro.direccion}.`
+      : "Lo preparamos en el depósito y te escribimos de nuevo cuando salga, con el código de seguimiento.",
+    "",
+    detalleTexto(order),
+    "",
+    "Guardá este mail: acá está todo lo que pediste y cuánto pagaste.",
+    piePagina(site),
+  ].join("\n");
+
   return {
     subject: `Pago confirmado — pedido #${order.numero}`,
     html: shell(site, "El pago entró. Ya lo estamos preparando.", inner),
+    text,
   };
 }
 
@@ -282,7 +372,7 @@ export function pagoConfirmadoEmail(
 export function despachadoEmail(
   order: MailOrder,
   site: SiteInfo,
-): { subject: string; html: string } {
+): { subject: string; html: string; text: string } {
   const seguimiento = order.trackingCode
     ? block(
         COLORS.amarillo,
@@ -318,6 +408,38 @@ export function despachadoEmail(
     <div style="height:12px;"></div>
     ${orderDetail(order)}`;
 
+  const text = [
+    order.esRetiro
+      ? `${order.nombre}, te espera.`
+      : `${order.nombre}, va en camino.`,
+    "",
+    ...(order.esRetiro
+      ? [
+          "Tu pedido está armado y listo para retirar.",
+          "",
+          `  Dónde: ${site.retiro.direccion}`,
+          `  Cuándo: ${site.retiro.horario}`,
+          "",
+          "Antes de salir, escribinos por WhatsApp así te esperamos con todo listo.",
+        ]
+      : [
+          `Tu pedido salió del depósito por ${order.envioLabel}.`,
+          ...(order.trackingCode
+            ? [
+                "",
+                `  Código de seguimiento: ${order.trackingCode}`,
+                "  Cargalo en la web del correo. Puede tardar unas horas en aparecer.",
+              ]
+            : []),
+          ...(order.direccion ? ["", `Va a ${order.direccion}.`] : []),
+        ]),
+    "",
+    "Cuando llegue, si te sale una foto linda, mandala. Nos gusta ver dónde terminan.",
+    "",
+    detalleTexto(order),
+    piePagina(site),
+  ].join("\n");
+
   return {
     subject: order.esRetiro
       ? `Listo para retirar — pedido #${order.numero}`
@@ -329,5 +451,6 @@ export function despachadoEmail(
         : "Salió del depósito.",
       inner + cierre,
     ),
+    text,
   };
 }
