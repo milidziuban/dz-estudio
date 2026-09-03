@@ -56,6 +56,48 @@ está habilitada para producción. Sin estos tres secretos, `shipping-quote`
 responde "no configurado" y el checkout usa el costo fijo de respaldo
 cargado en **Panel → Métodos de envío** — no rompe nada, solo no cotiza.
 
+### Resend (los mails del pedido)
+
+La tienda manda tres mails: **falta la transferencia**, **pago confirmado** y
+**despachado / listo para retirar**. Los arma `order-email` leyendo la orden de
+la base, no del navegador.
+
+**1. Verificar el dominio.** Resend no deja mandar desde un Hotmail ni desde un
+Gmail: hay que probar que el dominio es tuyo. En Resend → *Domains* → *Add
+domain* → `dz-estudio.com`. Te da tres o cuatro registros DNS (un `MX`, un `TXT`
+de SPF y un `TXT` de DKIM).
+
+El DNS de `dz-estudio.com` está en **Cloudflare**, así que los registros van en
+Cloudflare → el dominio → *DNS* → *Add record*, copiando nombre y valor tal cual.
+Importante: en los registros que Resend pide, la nubecita naranja (*Proxy*) va
+apagada — **DNS only**. Tardan entre minutos y un par de horas en verificarse.
+
+**2. Cargar los secretos.** La API key sale de Resend → *API Keys* → *Create*:
+
+```powershell
+npx supabase secrets set RESEND_API_KEY=re_tu_api_key
+npx supabase secrets set RESEND_FROM="DZ Estudio <pedidos@dz-estudio.com>"
+npx supabase secrets set RESEND_REPLY_TO=milagrosdziuban@hotmail.com
+```
+
+`RESEND_FROM` tiene que usar el dominio verificado en el paso 1.
+`RESEND_REPLY_TO` es opcional: es a dónde llegan las respuestas de las clientas
+(si no lo cargás, responden a la casilla del `from`).
+
+> Sin `RESEND_API_KEY`, `order-email` contesta `skipped` y no rompe nada: la
+> compra se guarda igual, solo no sale el mail. Sirve para probar el checkout
+> antes de tener el dominio verificado.
+
+**3. Que no se manden dos veces.** La tabla `order_emails` guarda qué mail salió
+para qué pedido, con clave primaria `(order_id, kind)`. Mercado Pago reintenta la
+misma notificación varias veces y el panel se puede guardar dos veces: el segundo
+intento encuentra la fila y no manda nada. Si Resend falla, la fila se borra sola
+para que el reintento sí salga. Para reenviar un mail a mano, borrá su fila:
+
+```sql
+delete from order_emails where order_id = '...' and kind = 'pago-confirmado';
+```
+
 ### Andreani
 
 Todavía no está conectada: su API no se autogestiona, las credenciales
@@ -71,6 +113,7 @@ fijo en el panel.
 npx supabase functions deploy create-preference
 npx supabase functions deploy mp-webhook --no-verify-jwt
 npx supabase functions deploy shipping-quote
+npx supabase functions deploy order-email
 ```
 
 `mp-webhook` va con `--no-verify-jwt` porque Mercado Pago llama sin el header

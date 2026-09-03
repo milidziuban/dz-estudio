@@ -242,6 +242,13 @@ export default function Checkout() {
     }
 
     // Transferencia: no hay pasarela, confirmamos directo.
+    // El mail con los datos bancarios y el plazo de 48 h lo arma el servidor
+    // a partir de la orden — acá solo se dispara. Si falla, la pantalla de
+    // gracias igual los muestra, así que no bloqueamos la compra por esto.
+    void supabase.functions.invoke("order-email", {
+      body: { orderId, kind: "transferencia" },
+    });
+
     clearCart();
     navigate("/checkout/exito", {
       state: {

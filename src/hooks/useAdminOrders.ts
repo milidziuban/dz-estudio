@@ -106,6 +106,21 @@ export function useUpdateOrder() {
 
       const { error } = await supabase.from("orders").update(row).eq("id", id);
       if (error) throw error;
+
+      // Dos cambios de estado le hablan a la clienta: dar por pagada una
+      // transferencia y marcar el pedido como despachado. El mail lo arma el
+      // servidor leyendo la orden ya guardada, y sale una sola vez por pedido
+      // aunque la pantalla se guarde de nuevo.
+      if (patch.status === "paid") {
+        await supabase.functions.invoke("order-email", {
+          body: { orderId: id, kind: "pago-confirmado" },
+        });
+      }
+      if (patch.shippingStatus === "despachado") {
+        await supabase.functions.invoke("order-email", {
+          body: { orderId: id, kind: "despachado" },
+        });
+      }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });

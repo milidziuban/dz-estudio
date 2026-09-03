@@ -57,6 +57,15 @@ Deno.serve(async (req) => {
         .from("orders")
         .update({ status, mp_payment_id: String(paymentId) })
         .eq("id", orderId);
+
+      // Pago aprobado: mail de confirmación. MP reintenta la misma
+      // notificación varias veces; `order-email` es idempotente, así que
+      // el segundo aviso no manda un segundo mail.
+      if (status === "paid") {
+        await supabase.functions.invoke("order-email", {
+          body: { orderId, kind: "pago-confirmado" },
+        });
+      }
     }
 
     // MP espera un 200 rápido para dar por entregada la notificación
