@@ -26,6 +26,7 @@ import {
   SETTINGS_DEFAULTS,
   useStoreSettings,
 } from "../hooks/useStoreSettings";
+import { SITE } from "../lib/site";
 import { supabase } from "../lib/supabase";
 import { checkoutWhatsappUrl } from "../lib/whatsapp";
 
@@ -37,7 +38,7 @@ const STEPS = [
 
 const STEP_FIELDS: Record<number, (keyof CheckoutData)[]> = {
   1: ["email", "telefono", "nombre", "apellido"],
-  2: ["direccion", "ciudad", "provincia", "cp", "envio"],
+  2: ["envio", "direccion", "ciudad", "provincia", "cp"],
 };
 
 export default function Checkout() {
@@ -68,10 +69,15 @@ export default function Checkout() {
   const banco = (settings?.pagos ?? SETTINGS_DEFAULTS.pagos).transferencia;
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
   const shippingOptions = envios.options.filter((option) => option.enabled);
+  const distribucion = settings?.distribucion ?? SETTINGS_DEFAULTS.distribucion;
+  const puntoRetiro = distribucion.locations.find((location) => location.retiro);
 
   const resolved = resolveCartItems(items, products);
   const subtotal = cartSubtotal(resolved);
   const envioSel = watch("envio");
+  // Quien retira no carga dirección: los campos se ocultan y el esquema deja
+  // de exigirlos (ver `checkoutSchema`).
+  const esRetiro = envioSel === "retiro";
   const pagoSel = watch("pago");
   const cpWatched = watch("cp") ?? "";
 
@@ -185,12 +191,17 @@ export default function Checkout() {
       customer_email: data.email,
       customer_name: `${data.nombre} ${data.apellido}`,
       customer_phone: data.telefono,
-      shipping_address: {
-        direccion: data.direccion,
-        ciudad: data.ciudad,
-        provincia: data.provincia,
-        cp: data.cp,
-      },
+      // La columna es `not null`: en retiro va el objeto vacío, y el panel y
+      // los mails muestran el depósito a partir de `shipping_method`.
+      shipping_address:
+        data.envio === "retiro"
+          ? {}
+          : {
+              direccion: data.direccion,
+              ciudad: data.ciudad,
+              provincia: data.provincia,
+              cp: data.cp,
+            },
       shipping_method: data.envio,
       customer_notes: data.notas || null,
       items: orderItems,
@@ -372,43 +383,7 @@ export default function Checkout() {
                   </span>
                   Envío
                 </p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <TextField
-                    label="Dirección"
-                    id="direccion"
-                    placeholder="Calle y número, piso, depto"
-                    error={errors.direccion?.message}
-                    className="sm:col-span-2"
-                    {...register("direccion")}
-                  />
-                  <TextField
-                    label="Ciudad"
-                    id="ciudad"
-                    error={errors.ciudad?.message}
-                    {...register("ciudad")}
-                  />
-                  <SelectField
-                    label="Provincia"
-                    id="provincia"
-                    error={errors.provincia?.message}
-                    {...register("provincia")}
-                  >
-                    <option value="">Elegí una provincia…</option>
-                    {PROVINCIAS.map((provincia) => (
-                      <option key={provincia} value={provincia}>
-                        {provincia}
-                      </option>
-                    ))}
-                  </SelectField>
-                  <TextField
-                    label="Código postal"
-                    id="cp"
-                    error={errors.cp?.message}
-                    {...register("cp")}
-                  />
-                </div>
-
-                <p className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-widest">
+                <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
                   ✧ ¿Cómo lo recibís?
                 </p>
                 {envioGratis && (
@@ -448,16 +423,69 @@ export default function Checkout() {
                     </label>
                   ))}
                 </div>
-                {hasLiveOptions && cpWatched.trim().length < 4 && (
-                    <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
-                      Cargá el código postal para que Correo Argentino cotice
-                      el envío.
-                    </p>
-                  )}
+                {hasLiveOptions && !esRetiro && cpWatched.trim().length < 4 && (
+                  <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+                    Correo Argentino cotiza con tu código postal: el precio se
+                    ajusta cuando lo cargues acá abajo.
+                  </p>
+                )}
                 {errors.envio && (
                   <p className="mt-2 text-xs font-semibold text-orange">
                     ✕ {errors.envio.message}
                   </p>
+                )}
+
+                {esRetiro ? (
+                  <div className="mt-8 rounded-xl bg-verde/20 p-5">
+                    <p className="font-mono text-xs font-medium uppercase tracking-widest">
+                      ✦ Lo retirás vos
+                    </p>
+                    <p className="mt-3 text-sm leading-relaxed">
+                      {puntoRetiro?.direccion ?? SITE.retiro.direccion}
+                      <br />
+                      {puntoRetiro?.horario ?? SITE.retiro.horario}
+                    </p>
+                    <p className="mt-3 text-xs leading-relaxed text-ink/70">
+                      No hace falta que cargues una dirección: te avisamos apenas
+                      esté listo para retirar.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                    <TextField
+                      label="Dirección"
+                      id="direccion"
+                      placeholder="Calle y número, piso, depto"
+                      error={errors.direccion?.message}
+                      className="sm:col-span-2"
+                      {...register("direccion")}
+                    />
+                    <TextField
+                      label="Ciudad"
+                      id="ciudad"
+                      error={errors.ciudad?.message}
+                      {...register("ciudad")}
+                    />
+                    <SelectField
+                      label="Provincia"
+                      id="provincia"
+                      error={errors.provincia?.message}
+                      {...register("provincia")}
+                    >
+                      <option value="">Elegí una provincia…</option>
+                      {PROVINCIAS.map((provincia) => (
+                        <option key={provincia} value={provincia}>
+                          {provincia}
+                        </option>
+                      ))}
+                    </SelectField>
+                    <TextField
+                      label="Código postal"
+                      id="cp"
+                      error={errors.cp?.message}
+                      {...register("cp")}
+                    />
+                  </div>
                 )}
 
                 <div className="mt-8 flex gap-4">

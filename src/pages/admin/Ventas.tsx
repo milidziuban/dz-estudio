@@ -463,7 +463,9 @@ export default function AdminVentas() {
                   order.shippingMethod}
               </span>
               <span className="text-[11px] text-ink/45">
-                {order.shippingAddress?.provincia}
+                {order.shippingMethod === "retiro"
+                  ? "Retira en el depósito"
+                  : order.shippingAddress?.provincia}
               </span>
             </td>
 
@@ -532,13 +534,20 @@ export default function AdminVentas() {
                     {abierta.customerPhone}
                   </p>
                 )}
-                <p className="mt-3 text-xs text-ink/70">
-                  {abierta.shippingAddress?.direccion}
-                  <br />
-                  {abierta.shippingAddress?.ciudad},{" "}
-                  {abierta.shippingAddress?.provincia} (CP{" "}
-                  {abierta.shippingAddress?.cp})
-                </p>
+                {/* Las órdenes de retiro se guardan sin dirección: no se la pedimos. */}
+                {abierta.shippingMethod === "retiro" ? (
+                  <p className="mt-3 text-xs text-ink/70">
+                    Retira en el depósito — no hay envío que despachar.
+                  </p>
+                ) : (
+                  <p className="mt-3 text-xs text-ink/70">
+                    {abierta.shippingAddress?.direccion}
+                    <br />
+                    {abierta.shippingAddress?.ciudad},{" "}
+                    {abierta.shippingAddress?.provincia} (CP{" "}
+                    {abierta.shippingAddress?.cp})
+                  </p>
+                )}
                 <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/50">
                   {SHIPPING_METHOD_LABEL[abierta.shippingMethod] ??
                     abierta.shippingMethod}

@@ -100,41 +100,69 @@ export const BANK_INFO = {
   alias: "[ALIAS]",
 };
 
-export const checkoutSchema = z.object({
-  // Paso 1 — contacto
-  email: z.string().email("Ingresá un email válido"),
-  telefono: z.string().min(6, "Ingresá un teléfono válido"),
-  nombre: z.string().min(2, "Contanos tu nombre"),
-  apellido: z.string().min(2, "Falta tu apellido"),
-  // Paso 2 — envío
-  direccion: z.string().min(5, "Calle y número, así llega"),
-  ciudad: z.string().min(2, "¿En qué ciudad estás?"),
-  provincia: z
-    .string()
-    .refine(
-      (value) => (PROVINCIAS as readonly string[]).includes(value),
-      "Elegí tu provincia",
+/** Campos de dirección: se piden solo si el pedido viaja. */
+const CAMPOS_DIRECCION = ["direccion", "ciudad", "provincia", "cp"] as const;
+
+type CampoDireccion = (typeof CAMPOS_DIRECCION)[number];
+
+/**
+ * La dirección es opcional en el esquema base y se exige recién en el
+ * refinamiento: quien retira en el depósito no tiene por qué cargar calle,
+ * ciudad, provincia ni código postal.
+ */
+export const checkoutSchema = z
+  .object({
+    // Paso 1 — contacto
+    email: z.string().email("Ingresá un email válido"),
+    telefono: z.string().min(6, "Ingresá un teléfono válido"),
+    nombre: z.string().min(2, "Contanos tu nombre"),
+    apellido: z.string().min(2, "Falta tu apellido"),
+    // Paso 2 — envío
+    direccion: z.string().optional(),
+    ciudad: z.string().optional(),
+    provincia: z.string().optional(),
+    cp: z.string().optional(),
+    envio: z.enum(
+      [
+        "retiro",
+        "andreani-sucursal",
+        "andreani-domicilio",
+        "correo-sucursal",
+        "correo-domicilio",
+      ],
+      {
+        required_error: "Elegí cómo lo recibís",
+        invalid_type_error: "Elegí cómo lo recibís",
+      },
     ),
-  cp: z.string().min(4, "Código postal inválido"),
-  envio: z.enum(
-    [
-      "retiro",
-      "andreani-sucursal",
-      "andreani-domicilio",
-      "correo-sucursal",
-      "correo-domicilio",
-    ],
-    {
-      required_error: "Elegí cómo lo recibís",
-      invalid_type_error: "Elegí cómo lo recibís",
-    },
-  ),
-  // Paso 3 — pago
-  pago: z.enum(["mp", "transferencia"]),
-  notas: z
-    .string()
-    .max(500, "Máximo 500 caracteres")
-    .optional(),
-});
+    // Paso 3 — pago
+    pago: z.enum(["mp", "transferencia"]),
+    notas: z
+      .string()
+      .max(500, "Máximo 500 caracteres")
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.envio === "retiro") return;
+
+    const valor = (campo: CampoDireccion) => (data[campo] ?? "").trim();
+    const exigir = (campo: CampoDireccion, ok: boolean, message: string) => {
+      if (ok) return;
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [campo], message });
+    };
+
+    exigir(
+      "direccion",
+      valor("direccion").length >= 5,
+      "Calle y número, así llega",
+    );
+    exigir("ciudad", valor("ciudad").length >= 2, "¿En qué ciudad estás?");
+    exigir(
+      "provincia",
+      (PROVINCIAS as readonly string[]).includes(valor("provincia")),
+      "Elegí tu provincia",
+    );
+    exigir("cp", valor("cp").length >= 4, "Código postal inválido");
+  });
 
 export type CheckoutData = z.infer<typeof checkoutSchema>;
