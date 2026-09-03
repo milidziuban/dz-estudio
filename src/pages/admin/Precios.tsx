@@ -134,6 +134,7 @@ export default function AdminPrecios() {
 
   const promos = marketing.value.promos ?? SETTINGS_DEFAULTS.marketing.promos;
   const marginPercent = precios.value.marginPercent;
+  const metaGananciaMensual = precios.value.metaGananciaMensual;
   const comboPercent = promos.combo.percent;
   const transferPercent = promos.transferencia.percent;
 
@@ -177,8 +178,8 @@ export default function AdminPrecios() {
 
       <div className="space-y-3">
         <SettingsSection
-          title="Margen de ganancia"
-          description="Se aplica sobre el costo de cada producto para sugerir el precio de lista de abajo."
+          title="Margen y meta"
+          description="El margen se aplica sobre el costo de cada producto para sugerir el precio de lista de abajo. La meta es la que mide el avance del mes en Inicio."
           footer={
             <SaveBar
               dirty={precios.dirty}
@@ -190,22 +191,47 @@ export default function AdminPrecios() {
             />
           }
         >
-          <TextField
-            id="precios-margin"
-            label="Margen sobre el costo %"
-            type="number"
-            min={0}
-            className="max-w-xs"
-            value={marginPercent}
-            onChange={(event) =>
-              precios.update({
-                marginPercent: Number(event.target.value) || 0,
-              })
-            }
-          />
-          <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
-            100% = el precio de lista duplica el costo.
-          </p>
+          <div className="grid max-w-xl gap-4 sm:grid-cols-2">
+            <div>
+              <TextField
+                id="precios-margin"
+                label="Margen sobre el costo %"
+                type="number"
+                min={0}
+                value={marginPercent}
+                onChange={(event) =>
+                  precios.update({
+                    ...precios.value,
+                    marginPercent: Number(event.target.value) || 0,
+                  })
+                }
+              />
+              <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+                100% = el precio de lista duplica el costo.
+              </p>
+            </div>
+
+            <div>
+              <TextField
+                id="precios-meta"
+                label="Meta de ganancia por mes $"
+                type="number"
+                min={0}
+                step={10000}
+                value={metaGananciaMensual}
+                onChange={(event) =>
+                  precios.update({
+                    ...precios.value,
+                    metaGananciaMensual: Number(event.target.value) || 0,
+                  })
+                }
+              />
+              <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+                Inicio muestra cuánto llevás del mes en curso contra este
+                número. En 0, no muestra meta.
+              </p>
+            </div>
+          </div>
         </SettingsSection>
 
         <SettingsSection

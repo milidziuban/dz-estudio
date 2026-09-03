@@ -224,6 +224,9 @@ export type MarketingSettings = {
 export type PreciosSettings = {
   /** Margen de ganancia sobre el costo, en % (100 = duplicar el costo). */
   marginPercent: number;
+  /** Meta de ganancia por mes en ARS. La usa la tarjeta de Inicio para medir
+   *  el avance del mes en curso. 0 = no mostrar meta. */
+  metaGananciaMensual: number;
 };
 
 export type StoreSettings = {

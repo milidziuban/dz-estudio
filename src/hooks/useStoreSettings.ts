@@ -87,6 +87,7 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
   },
   precios: {
     marginPercent: 100,
+    metaGananciaMensual: 500000,
   },
 };
 

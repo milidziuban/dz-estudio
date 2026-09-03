@@ -181,6 +181,79 @@ export function kpisFor(orders: Order[], visits: PageView[]): Kpis {
   };
 }
 
+// ── Ganancia ──────────────────────────────────────────────────
+
+export type Profit = {
+  /** Facturación sin envío de las órdenes cobradas */
+  revenue: number;
+  /** Costo de materiales de las unidades vendidas que tienen costo cargado */
+  cost: number;
+  /** revenue − cost */
+  profit: number;
+  /** Ganancia sobre facturación, en % */
+  margin: number;
+  /** Unidades vendidas sin costo cargado: el costo real es mayor que `cost` */
+  unitsWithoutCost: number;
+  /** Y de qué productos son, para poder decir cuáles faltan cargar */
+  productsWithoutCost: string[];
+};
+
+/**
+ * Ganancia del período: facturación menos el costo de materiales de lo que se
+ * vendió. La mano de obra no entra — es la misma cuenta que hace
+ * `/admin/precios` con "Ganancia" por producto, y la decisión está fechada en
+ * el vault.
+ *
+ * Dos límites que la tarjeta tiene que decir en pantalla:
+ *
+ * - El costo es el **de hoy**, no el que tenía el producto el día de la venta.
+ *   Las órdenes guardan el precio cobrado pero no el costo, así que si mañana
+ *   sube la tela, la ganancia de las ventas viejas se recalcula con el costo
+ *   nuevo.
+ * - Un producto sin costo cargado cuenta como costo cero, así que infla la
+ *   ganancia. Por eso se devuelven las unidades y los nombres involucrados.
+ */
+export function profitFor(orders: Order[], products: AdminProduct[]): Profit {
+  const costBySlug = new Map(
+    products.map((product) => [product.slug, product.cost]),
+  );
+
+  let revenue = 0;
+  let cost = 0;
+  let unitsWithoutCost = 0;
+  // slug → nombre, para no repetir el mismo producto en el aviso
+  const sinCosto = new Map<string, string>();
+
+  for (const order of orders.filter(isPaid)) {
+    revenue += orderRevenue(order);
+    for (const item of order.items) {
+      // `undefined` = el producto ya no está en el catálogo; `null` = está
+      // pero nunca se le cargó el costo. Las dos cosas se avisan igual.
+      const unitCost = costBySlug.get(item.slug);
+      if (unitCost === undefined || unitCost === null) {
+        unitsWithoutCost += item.qty;
+        sinCosto.set(item.slug, item.name);
+        continue;
+      }
+      cost += unitCost * item.qty;
+    }
+  }
+
+  // Los costos se cargan a mano y pueden traer decimales; los precios no.
+  // Redondear acá evita que la tarjeta muestre $9.149,999999.
+  cost = Math.round(cost);
+  const profit = revenue - cost;
+
+  return {
+    revenue,
+    cost,
+    profit,
+    margin: revenue ? (profit / revenue) * 100 : 0,
+    unitsWithoutCost,
+    productsWithoutCost: [...sinCosto.values()],
+  };
+}
+
 // ── Ranking de productos ──────────────────────────────────────
 
 export type ProductSales = {

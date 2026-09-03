@@ -25,6 +25,7 @@ import {
   kpisFor,
   ordersIn,
   periodFor,
+  profitFor,
   topProducts,
   visitsIn,
 } from "../../lib/admin-stats";
@@ -81,6 +82,31 @@ export default function AdminInicio() {
   }, [range, allOrders, allVisits]);
 
   const { actual, anterior } = stats;
+
+  // La ganancia necesita el costo de cada producto, así que se calcula fuera
+  // del memo de arriba: depende del catálogo, que carga por su cuenta.
+  const ganancia = useMemo(() => {
+    const catalogo = products.data ?? [];
+    const period = periodFor(range, allOrders, allVisits);
+
+    // El avance del mes se mide siempre sobre el mes calendario en curso, no
+    // sobre el rango elegido: la meta es mensual y con "7 días" seleccionado
+    // compararía siete días contra una meta de treinta.
+    const inicioDeMes = new Date();
+    inicioDeMes.setDate(1);
+    inicioDeMes.setHours(0, 0, 0, 0);
+
+    return {
+      periodo: profitFor(
+        ordersIn(allOrders, period.from, period.to),
+        catalogo,
+      ),
+      mes: profitFor(ordersIn(allOrders, inicioDeMes, new Date()), catalogo),
+    };
+  }, [range, allOrders, allVisits, products.data]);
+
+  const meta = settings?.precios.metaGananciaMensual ?? 0;
+  const avanceMeta = meta ? Math.min(100, (ganancia.mes.profit / meta) * 100) : 0;
 
   const lowStockThreshold = settings?.distribucion.lowStockThreshold ?? 3;
   const bajoStock = (products.data ?? []).filter((product) =>
@@ -184,6 +210,93 @@ export default function AdminInicio() {
           }
         />
       </div>
+
+      <section className="mt-3 rounded-2xl bg-white p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+          <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
+            Ganancia del período
+          </h2>
+          <p className="font-mono text-[11px] text-ink/45">
+            facturación − materiales, sin mano de obra
+          </p>
+        </div>
+
+        {/* Sin el catálogo no hay costos, y todo se leería como ganancia
+            pura: mejor no mostrar un número que va a estar mal. */}
+        {products.isLoading || products.error ? (
+          <p className="mt-6 text-sm text-ink/45">
+            {products.error
+              ? "No se pudo cargar el catálogo, así que no se puede calcular la ganancia."
+              : "Cargando los costos del catálogo…"}
+          </p>
+        ) : (
+          <>
+            <p className="mt-4 font-mono text-3xl font-medium tracking-tight">
+              {formatPrice(ganancia.periodo.profit)}
+            </p>
+            <p className="mt-1.5 text-[11px] text-ink/55">
+              {formatPrice(ganancia.periodo.revenue)} facturados −{" "}
+              {formatPrice(ganancia.periodo.cost)} de materiales
+              {ganancia.periodo.revenue > 0 && (
+                <> · margen {formatPercent(ganancia.periodo.margin, 1)}</>
+              )}
+            </p>
+
+            {meta > 0 && (
+              <div className="mt-6 border-t border-ink/[0.08] pt-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+                    Meta del mes
+                  </p>
+                  <p className="font-mono text-xs">
+                    {formatPrice(ganancia.mes.profit)}{" "}
+                    <span className="text-ink/45">
+                      de {formatPrice(meta)} ·{" "}
+                      {formatPercent(avanceMeta, avanceMeta < 10 ? 1 : 0)}
+                    </span>
+                  </p>
+                </div>
+                <div
+                  role="progressbar"
+                  aria-valuenow={Math.round(avanceMeta)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Avance de la meta de ganancia del mes"
+                  className="mt-2.5 h-1.5 rounded-full bg-ink/[0.07]"
+                >
+                  <div
+                    className="h-full rounded-full bg-verde transition-[width]"
+                    style={{ width: `${Math.max(avanceMeta, 0)}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-[11px] text-ink/45">
+                  Es el mes calendario en curso, no el rango de arriba.
+                </p>
+              </div>
+            )}
+
+            {ganancia.periodo.unitsWithoutCost > 0 && (
+              <p className="mt-5 rounded-xl bg-amarillo/40 px-4 py-3 text-[11px] leading-relaxed">
+                ✦ {ganancia.periodo.unitsWithoutCost}{" "}
+                {ganancia.periodo.unitsWithoutCost === 1
+                  ? "unidad vendida no tiene"
+                  : "unidades vendidas no tienen"}{" "}
+                el costo cargado ({ganancia.periodo.productsWithoutCost.join(", ")}),
+                así que cuentan como costo cero y la ganancia de arriba está
+                inflada.{" "}
+                <Link to="/admin/precios" className="underline">
+                  Cargar el costo →
+                </Link>
+              </p>
+            )}
+
+            <p className="mt-4 text-[11px] leading-relaxed text-ink/45">
+              El costo es el que tiene el producto hoy: las órdenes guardan el
+              precio cobrado, no el costo del día de la venta.
+            </p>
+          </>
+        )}
+      </section>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-2">
         <section className="rounded-2xl bg-white p-6">
