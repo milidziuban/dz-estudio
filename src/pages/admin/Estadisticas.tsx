@@ -15,6 +15,7 @@ import {
   formatCompactPrice,
   formatPercent,
   isPaid,
+  orderRevenue,
   variation,
   type RangeId,
 } from "../../lib/admin";
@@ -114,7 +115,7 @@ export default function AdminEstadisticas() {
     const facturacionSerie = buildSeries(
       currentOrders.filter(isPaid).map((order) => ({
         date: new Date(order.createdAt),
-        value: order.total,
+        value: orderRevenue(order),
       })),
       period,
       bucket,
@@ -237,6 +238,7 @@ export default function AdminEstadisticas() {
             <StatCard
               label="Facturación"
               value={formatCompactPrice(actual.facturacion)}
+              hint="sin el envío"
               variation={
                 anterior
                   ? variation(actual.facturacion, anterior.facturacion)

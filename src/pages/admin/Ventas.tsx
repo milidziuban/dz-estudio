@@ -22,6 +22,7 @@ import {
   formatDate,
   formatDateTime,
   isPaid,
+  orderRevenue,
 } from "../../lib/admin";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
@@ -105,7 +106,7 @@ export default function AdminVentas() {
   const totales = useMemo(() => {
     const pagadas = todas.filter(isPaid);
     return {
-      facturado: pagadas.reduce((total, order) => total + order.total, 0),
+      facturado: pagadas.reduce((total, order) => total + orderRevenue(order), 0),
       pagadas: pagadas.length,
       pendientes: todas.filter((order) => order.status === "pending").length,
       porDespachar: pagadas.filter(
@@ -205,6 +206,7 @@ export default function AdminVentas() {
                 Descuento: order.discount,
                 Envio_costo: order.shippingCost,
                 Total: order.total,
+                Facturado_sin_envio: orderRevenue(order),
                 Estado: ORDER_STATUS_LABEL[order.status],
                 Envio_estado: SHIPPING_STATUS_LABEL[order.shippingStatus],
                 Seguimiento: order.trackingCode ?? "",
@@ -220,7 +222,7 @@ export default function AdminVentas() {
         <StatCard
           label="Facturado total"
           value={formatCompactPrice(totales.facturado)}
-          hint="órdenes cobradas"
+          hint="órdenes cobradas, sin el envío"
         />
         <StatCard label="Ventas cobradas" value={String(totales.pagadas)} />
         <StatCard

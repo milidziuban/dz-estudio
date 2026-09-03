@@ -3,6 +3,7 @@ import {
   dayKey,
   formatDayMonth,
   isPaid,
+  orderRevenue,
   rangeDays,
   rangeStart,
   type RangeId,
@@ -115,9 +116,12 @@ export function buildSeries(
 // ── KPIs ──────────────────────────────────────────────────────
 
 export type Kpis = {
-  /** Solo órdenes pagadas */
+  /** Solo órdenes pagadas, y sin la plata del envío (ver `orderRevenue`) */
   facturacion: number;
+  /** Lo cobrado de envío en el período: no es facturación, se muestra aparte */
+  envios: number;
   ventas: number;
+  /** Facturación sobre ventas: también sin envío, para que sea comparable */
   ticket: number;
   unidades: number;
   visitas: number;
@@ -152,7 +156,11 @@ export function visitsIn(
 
 export function kpisFor(orders: Order[], visits: PageView[]): Kpis {
   const pagadas = orders.filter(isPaid);
-  const facturacion = pagadas.reduce((total, order) => total + order.total, 0);
+  const facturacion = pagadas.reduce(
+    (total, order) => total + orderRevenue(order),
+    0,
+  );
+  const envios = pagadas.reduce((total, order) => total + order.shippingCost, 0);
   const unidades = pagadas.reduce(
     (total, order) =>
       total + order.items.reduce((sum, item) => sum + item.qty, 0),
@@ -162,6 +170,7 @@ export function kpisFor(orders: Order[], visits: PageView[]): Kpis {
 
   return {
     facturacion,
+    envios,
     ventas: pagadas.length,
     ticket: pagadas.length ? Math.round(facturacion / pagadas.length) : 0,
     unidades,
@@ -227,7 +236,7 @@ export function customersFromOrders(orders: Order[]): Customer[] {
         provincia: order.shippingAddress?.provincia ?? "",
         ordersCount: 1,
         paidCount: pagada ? 1 : 0,
-        totalSpent: pagada ? order.total : 0,
+        totalSpent: pagada ? orderRevenue(order) : 0,
         firstOrderAt: order.createdAt,
         lastOrderAt: order.createdAt,
       });
@@ -237,7 +246,7 @@ export function customersFromOrders(orders: Order[]): Customer[] {
     current.ordersCount += 1;
     if (pagada) {
       current.paidCount += 1;
-      current.totalSpent += order.total;
+      current.totalSpent += orderRevenue(order);
     }
     current.lastOrderAt = order.createdAt;
     // Los datos de contacto más recientes son los que valen

@@ -15,6 +15,7 @@ import {
   formatDate,
   formatPercent,
   isPaid,
+  orderRevenue,
   variation,
   type RangeId,
 } from "../../lib/admin";
@@ -59,7 +60,10 @@ export default function AdminInicio() {
       facturacionSerie: buildSeries(
         currentOrders
           .filter(isPaid)
-          .map((order) => ({ date: new Date(order.createdAt), value: order.total })),
+          .map((order) => ({
+            date: new Date(order.createdAt),
+            value: orderRevenue(order),
+          })),
         period,
         bucket,
       ),
@@ -148,7 +152,11 @@ export default function AdminInicio() {
         <StatCard
           label="Facturación"
           value={formatCompactPrice(actual.facturacion)}
-          hint={`${actual.ventas} ${actual.ventas === 1 ? "venta" : "ventas"}`}
+          hint={
+            actual.envios
+              ? `${actual.ventas} ${actual.ventas === 1 ? "venta" : "ventas"} · ${formatCompactPrice(actual.envios)} de envío aparte`
+              : `${actual.ventas} ${actual.ventas === 1 ? "venta" : "ventas"}`
+          }
           variation={
             anterior ? variation(actual.facturacion, anterior.facturacion) : null
           }
@@ -156,7 +164,7 @@ export default function AdminInicio() {
         <StatCard
           label="Ticket promedio"
           value={actual.ticket ? formatPrice(actual.ticket) : "—"}
-          hint={`${actual.unidades} unidades`}
+          hint={`${actual.unidades} unidades, sin envío`}
           variation={anterior ? variation(actual.ticket, anterior.ticket) : null}
         />
         <StatCard

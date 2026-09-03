@@ -42,6 +42,15 @@ export function isPaid(order: Order): boolean {
   return PAID_STATUSES.includes(order.status);
 }
 
+/** Lo que factura la tienda en una orden. El `total` incluye el envío, que es
+ *  plata que pasa de largo hacia Andreani o el Correo: como
+ *  `total = subtotal − descuento + envío`, restarle el envío deja justo lo que
+ *  entra por producto. Sobre un ticket de $18.300 con un envío de $9.500 la
+ *  diferencia es de más del 30%. */
+export function orderRevenue(order: Order): number {
+  return order.total - order.shippingCost;
+}
+
 // ── Rangos de fecha ───────────────────────────────────────────
 
 export const RANGES = [

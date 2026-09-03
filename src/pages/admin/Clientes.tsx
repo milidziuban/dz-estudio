@@ -99,7 +99,7 @@ export default function AdminClientes() {
                 Provincia: customer.provincia,
                 Ordenes: customer.ordersCount,
                 Cobradas: customer.paidCount,
-                Total_gastado: customer.totalSpent,
+                Total_comprado_sin_envio: customer.totalSpent,
                 Primera_compra: formatDate(customer.firstOrderAt),
                 Ultima_compra: formatDate(customer.lastOrderAt),
               })),
@@ -122,9 +122,9 @@ export default function AdminClientes() {
           hint="compraron más de una vez"
         />
         <StatCard
-          label="Gasto promedio"
+          label="Compra promedio"
           value={resumen.promedio ? formatCompactPrice(resumen.promedio) : "—"}
-          hint="por cliente que compró"
+          hint="por cliente, sin el envío"
         />
         <StatCard
           label="Mejor cliente"
@@ -156,7 +156,7 @@ export default function AdminClientes() {
           { label: "Cliente" },
           { label: "Dónde", hideOnMobile: true },
           { label: "Órdenes", align: "right" },
-          { label: "Gastó", align: "right" },
+          { label: "Compró", align: "right" },
           { label: "Última", align: "right", hideOnMobile: true },
         ]}
         isLoading={orders.isLoading}
@@ -212,11 +212,12 @@ export default function AdminClientes() {
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-white p-4">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">
-                  Gastó
+                  Compró
                 </p>
                 <p className="mt-1 font-mono text-lg">
                   {formatPrice(abierto.totalSpent)}
                 </p>
+                <p className="mt-1 text-[10px] text-ink/45">sin el envío</p>
               </div>
               <div className="rounded-xl bg-white p-4">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">

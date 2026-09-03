@@ -94,7 +94,7 @@ export type Customer = {
   ordersCount: number;
   /** De esas, las que efectivamente se cobraron */
   paidCount: number;
-  /** Solo cuenta lo cobrado: pending y rejected no suman */
+  /** Solo cuenta lo cobrado y sin el envío: pending y rejected no suman */
   totalSpent: number;
   firstOrderAt: string;
   lastOrderAt: string;
