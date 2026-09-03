@@ -35,9 +35,16 @@ export default function Hero() {
 
         {/* Lo primero que se ve es lo que se vende */}
         <div className="flex items-center justify-center">
+          {/* Sin `width`/`height` esta foto ocupa 0 px hasta que carga y
+              empuja media home hacia abajo: en un contenedor de 400 px el salto
+              medido es de 302 px. Es además el LCP de la home, así que va con
+              prioridad alta y sin `lazy`. */}
           <img
             src="/productos/hero-almohadones-trio.webp"
             alt="Tres almohadones DZ Estudio: rombos bordó y rosa, rombos celeste y marrón, y rayas blanco y negro"
+            width={1400}
+            height={1057}
+            fetchPriority="high"
             className="w-full max-w-md md:max-w-none"
           />
         </div>

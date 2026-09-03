@@ -18,6 +18,8 @@ export default function Footer() {
           <img
             src="/logo-extendido-cream.svg"
             alt="DZ Estudio"
+            width={713}
+            height={176}
             className="h-6 w-auto"
           />
           <p className="mt-3 text-sm leading-relaxed text-cream/80">

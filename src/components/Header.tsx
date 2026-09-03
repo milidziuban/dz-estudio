@@ -28,6 +28,8 @@ export default function Header() {
           <img
             src="/logo-extendido.svg"
             alt="DZ Estudio"
+            width={713}
+            height={176}
             className="h-6 w-auto sm:h-7"
           />
         </Link>

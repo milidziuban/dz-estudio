@@ -130,6 +130,7 @@ export default function Producto() {
                 image={product.images[imgIdx]}
                 alt={`${product.name} — vista ${imgIdx + 1}`}
                 className="aspect-square"
+                priority
               />
             </div>
             {product.images.length > 1 && (

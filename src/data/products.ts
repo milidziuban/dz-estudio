@@ -20,6 +20,9 @@ export const CATEGORY_INTRO: Record<
     image: string;
     imageAlt: string;
     imageFit: "cover" | "contain";
+    /** Tamaño real del archivo, para que la tarjeta no dependa de la foto */
+    imageWidth: number;
+    imageHeight: number;
   }
 > = {
   almohadones: {
@@ -30,6 +33,8 @@ export const CATEGORY_INTRO: Record<
     image: "/productos/almohadon-rayas-cama.jpg",
     imageAlt: "Almohadones de rayas blanco y negro sobre una cama",
     imageFit: "cover",
+    imageWidth: 857,
+    imageHeight: 1180,
   },
   individuales: {
     colorB: "orange",
@@ -39,6 +44,8 @@ export const CATEGORY_INTRO: Record<
     image: "/productos/individuales-reversibles-celeste-mesa.webp",
     imageAlt: "Individuales reversibles celestes puestos en una mesa de madera",
     imageFit: "cover",
+    imageWidth: 2000,
+    imageHeight: 1818,
   },
 };
 

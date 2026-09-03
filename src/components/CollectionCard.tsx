@@ -12,6 +12,9 @@ type CollectionCardProps = {
   imageAlt: string;
   /** `contain` para los recortes sobre fondo blanco */
   imageFit: "cover" | "contain";
+  /** Tamaño real del archivo */
+  imageWidth: number;
+  imageHeight: number;
   /** Color de acento de la dupla */
   colorB: ColorToken;
   tagColor: TagColor;
@@ -25,6 +28,8 @@ export default function CollectionCard({
   image,
   imageAlt,
   imageFit,
+  imageWidth,
+  imageHeight,
   colorB,
   tagColor,
   tagLabel,
@@ -36,6 +41,8 @@ export default function CollectionCard({
         <img
           src={image}
           alt={imageAlt}
+          width={imageWidth}
+          height={imageHeight}
           loading="lazy"
           className={`h-56 w-full transition-transform duration-500 group-hover:scale-[1.03] md:h-64 ${
             imageFit === "contain" ? "object-contain p-6" : "object-cover"

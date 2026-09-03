@@ -31,6 +31,8 @@ export default function Collections() {
                 image={intro.image}
                 imageAlt={intro.imageAlt}
                 imageFit={intro.imageFit}
+                imageWidth={intro.imageWidth}
+                imageHeight={intro.imageHeight}
                 colorB={intro.colorB}
                 tagColor={TAG_COLOR[category]}
                 tagLabel={intro.tagLabel}

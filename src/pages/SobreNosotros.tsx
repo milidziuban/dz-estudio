@@ -36,6 +36,8 @@ export default function SobreNosotros() {
             <img
               src="/productos/individuales-doble-pack.webp"
               alt="Individual reversible de DZ Estudio en rosa y azul"
+              width={768}
+              height={1365}
               loading="lazy"
               className="h-full w-full object-cover"
             />
