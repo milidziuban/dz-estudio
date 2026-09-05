@@ -15,6 +15,10 @@ import { COLOR_HEX } from "../lib/colors";
 import { formatPrice } from "../lib/format";
 import { comboBanner, DEFAULT_PROMOS, INSTALLMENTS } from "../lib/promos";
 import { SITE } from "../lib/site";
+import {
+  productBreadcrumbJsonLd,
+  productJsonLd,
+} from "../lib/structured-data";
 
 const DETAILS = [
   { key: "medidas", label: "Medidas" },
@@ -113,6 +117,7 @@ export default function Producto() {
         description={product.description}
         image={`${SITE.url}${product.images[0].src}`}
         path={`/producto/${product.slug}`}
+        jsonLd={[productJsonLd(product), productBreadcrumbJsonLd(product)]}
       />
       <div className="mx-auto max-w-6xl">
         <Link

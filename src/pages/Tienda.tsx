@@ -9,6 +9,7 @@ import ProductCard from "../components/ProductCard";
 import Seo from "../components/Seo";
 import { CATEGORY_LABEL } from "../data/products";
 import { useProducts } from "../hooks/useProducts";
+import { productListJsonLd } from "../lib/structured-data";
 import type { ColorToken } from "../types/product";
 
 const categoriaFromParam = (param: string | null) =>
@@ -85,6 +86,7 @@ export default function Tienda() {
         title="Tienda"
         description="Almohadones e individuales estampados, hechos en Argentina. Elegí tu dupla de color."
         path="/tienda"
+        jsonLd={visible.length ? productListJsonLd(visible) : undefined}
       />
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">

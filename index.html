@@ -82,6 +82,30 @@
       data-rh="true"
       content="https://www.dz-estudio.com/og-cover.png"
     />
+    <!--
+      Quién es la marca, para Google (schema.org).
+
+      Va acá y no en React porque no cambia nunca y vale para todo el sitio.
+      Lo que sí cambia página por página —el producto, su precio y su stock—
+      lo pone src/components/Seo.tsx desde src/lib/structured-data.ts.
+
+      Al cambiar el mail o el Instagram, cambiarlo también en src/lib/site.ts.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "OnlineStore",
+        "name": "DZ Estudio",
+        "url": "https://www.dz-estudio.com/",
+        "logo": "https://www.dz-estudio.com/logo-extendido.svg",
+        "image": "https://www.dz-estudio.com/og-cover.png",
+        "description": "Almohadones e individuales estampados, diseñados y hechos en Argentina.",
+        "email": "milagrosdziuban@hotmail.com",
+        "currenciesAccepted": "ARS",
+        "areaServed": { "@type": "Country", "name": "Argentina" },
+        "sameAs": ["https://instagram.com/dzestudio_"]
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
