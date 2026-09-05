@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import BuyBar from "../components/BuyBar";
 import Button from "../components/Button";
 import ProductCard from "../components/ProductCard";
 import ProductImage from "../components/ProductImage";
@@ -40,6 +41,12 @@ export default function Producto() {
   const addToCart = useCart((s) => s.add);
   const openCart = useCart((s) => s.open);
 
+  // Barra fija de comprar en mobile: se muestra cuando el botón de verdad ya
+  // quedó arriba, y se esconde al llegar al final para no taparle el footer.
+  const addRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  const [mostrarBarra, setMostrarBarra] = useState(false);
+
   const product = products.find((p) => p.slug === slug);
 
   // Al cambiar de producto, arrancamos con la primera variante que tenga
@@ -58,6 +65,35 @@ export default function Producto() {
   useEffect(() => {
     if (product) trackViewItem(product);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.slug]);
+
+  // La barra aparece cuando el botón de verdad ya quedó arriba y se va cuando
+  // termina la ficha, para no taparle el footer. Esos dos bordes son
+  // exactamente los que el observer mira, así que no hace falta escuchar el
+  // scroll: entre uno y otro no hay nada que cambiar.
+  useEffect(() => {
+    const boton = addRef.current;
+    const final = endRef.current;
+    if (!boton || !final) return;
+
+    // Se calcula sobre las dos posiciones, no sobre el `isIntersecting` del
+    // que avisó: abajo del pliegue el botón tampoco se ve, y ahí la barra
+    // sobra. Del final alcanza con que haya asomado — si se mirara solo si
+    // está en pantalla, al llegar al footer la barra volvería a aparecer.
+    const medir = () => {
+      const yaPaso = boton.getBoundingClientRect().bottom < 0;
+      const enElFinal = final.getBoundingClientRect().top < window.innerHeight;
+      setMostrarBarra(yaPaso && !enElFinal);
+    };
+
+    const obs = new IntersectionObserver(medir);
+    obs.observe(boton);
+    obs.observe(final);
+    window.addEventListener("resize", medir);
+    return () => {
+      obs.disconnect();
+      window.removeEventListener("resize", medir);
+    };
   }, [product?.slug]);
 
   if (isLoading) {
@@ -234,7 +270,10 @@ export default function Producto() {
             )}
 
             {/* Cantidad + carrito */}
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div
+              ref={addRef}
+              className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center"
+            >
               <div className="flex w-fit items-center rounded-full border border-ink/25">
                 <button
                   type="button"
@@ -322,7 +361,18 @@ export default function Producto() {
             ))}
           </div>
         </section>
+
+        <div ref={endRef} aria-hidden="true" className="h-px" />
       </div>
+
+      <BuyBar
+        visible={canAdd && mostrarBarra}
+        name={product.name}
+        price={product.price}
+        qty={qty}
+        variantLabel={selectedVariant?.label}
+        onAdd={handleAdd}
+      />
     </div>
   );
 }
