@@ -134,7 +134,7 @@ export default function CheckoutExito() {
           </div>
 
           {orderNumber && (
-            <p className="mt-6 text-xs text-ink/55">
+            <p className="mt-6 text-xs text-ink/65">
               <Link
                 to="/pedido"
                 state={{ orderNumber }}

@@ -145,14 +145,14 @@ function OrderSummary({ order }: { order: OrderTracking }) {
     <Card className="mt-10 bg-white p-6 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
             Pedido
           </p>
           <p className="font-mono text-lg font-medium">
             #{order.id.slice(0, 8).toUpperCase()}
           </p>
         </div>
-        <p className="font-mono text-xs text-ink/55">
+        <p className="font-mono text-xs text-ink/65">
           {formatDate(order.createdAt)}
         </p>
       </div>
@@ -166,13 +166,13 @@ function OrderSummary({ order }: { order: OrderTracking }) {
         </Tag>
       </div>
 
-      <p className="mt-3 font-mono text-[11px] uppercase tracking-widest text-ink/50">
+      <p className="mt-3 font-mono text-[11px] uppercase tracking-widest text-ink/65">
         {SHIPPING_METHOD_LABEL[order.shippingMethod] ?? order.shippingMethod}
       </p>
 
       {order.trackingCode && (
         <div className="mt-5 rounded-xl bg-cream p-4">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
             Código de seguimiento
           </p>
           <p className="mt-1 font-mono text-sm font-medium tracking-wider">
@@ -191,7 +191,7 @@ function OrderSummary({ order }: { order: OrderTracking }) {
               <span>
                 {item.qty}× {item.name}
                 {item.variant && (
-                  <span className="text-ink/55"> · {item.variant}</span>
+                  <span className="text-ink/65"> · {item.variant}</span>
                 )}
               </span>
             </li>
@@ -200,7 +200,7 @@ function OrderSummary({ order }: { order: OrderTracking }) {
       )}
 
       <div className="mt-4 flex items-baseline justify-between border-t border-ink/10 pt-4">
-        <span className="font-mono text-xs uppercase tracking-widest text-ink/55">
+        <span className="font-mono text-xs uppercase tracking-widest text-ink/65">
           Total
         </span>
         <span className="font-mono text-lg font-medium">
@@ -208,7 +208,7 @@ function OrderSummary({ order }: { order: OrderTracking }) {
         </span>
       </div>
 
-      <p className="mt-6 text-xs leading-relaxed text-ink/55">
+      <p className="mt-6 text-xs leading-relaxed text-ink/65">
         ¿Algo no cierra?{" "}
         <a
           href={SITE.whatsappUrl}

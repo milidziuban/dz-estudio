@@ -171,7 +171,7 @@ export default function Producto() {
             <p className="mt-4 font-mono text-2xl font-medium tracking-wider">
               {formatPrice(product.price)}
             </p>
-            <p className="mt-1.5 font-mono text-xs uppercase tracking-widest text-ink/60">
+            <p className="mt-1.5 font-mono text-xs uppercase tracking-widest text-ink/65">
               {INSTALLMENTS.label} ✦ 10% off por transferencia
             </p>
 
@@ -205,7 +205,7 @@ export default function Producto() {
                         className={cn(
                           "flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
                           soldOut
-                            ? "cursor-not-allowed border-ink/15 text-ink/35"
+                            ? "cursor-not-allowed border-ink/15 text-ink/65"
                             : variantId === variant.id
                               ? "border-ink bg-ink text-cream"
                               : "border-ink/25 hover:border-ink",

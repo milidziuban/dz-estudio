@@ -265,7 +265,7 @@ export default function AdminVentas() {
               }}
               className={cn(
                 "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
-                estado === id ? "bg-ink text-cream" : "text-ink/55 hover:text-ink",
+                estado === id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
               )}
             >
               {id === "todos" ? "Todas" : ORDER_STATUS_LABEL[id]}
@@ -291,7 +291,7 @@ export default function AdminVentas() {
               }}
               className={cn(
                 "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
-                vista === v ? "bg-ink text-cream" : "text-ink/55 hover:text-ink",
+                vista === v ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
               )}
             >
               {v === "tabla" ? "Tabla" : "Kanban"}
@@ -315,11 +315,11 @@ export default function AdminVentas() {
           )}
 
           {orders.isLoading ? (
-            <div className="rounded-2xl bg-white px-4 py-16 text-center font-mono text-xs uppercase tracking-widest text-ink/50">
+            <div className="rounded-2xl bg-white px-4 py-16 text-center font-mono text-xs uppercase tracking-widest text-ink/65">
               ✦ Cargando…
             </div>
           ) : kanbanOrders.length === 0 ? (
-            <div className="rounded-2xl bg-white px-4 py-16 text-center text-sm text-ink/50">
+            <div className="rounded-2xl bg-white px-4 py-16 text-center text-sm text-ink/65">
               {todas.length === 0
                 ? "Todavía no entró ninguna orden."
                 : "Ningún pedido pagado coincide con ese filtro."}
@@ -355,16 +355,16 @@ export default function AdminVentas() {
                     )}
                   >
                     <div className="flex items-center justify-between px-1">
-                      <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/60">
+                      <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/65">
                         {SHIPPING_STATUS_LABEL[columna]}
                       </h3>
-                      <span className="font-mono text-[10px] text-ink/40">
+                      <span className="font-mono text-[10px] text-ink/65">
                         {enColumna.length}
                       </span>
                     </div>
 
                     {enColumna.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-ink/15 px-3 py-6 text-center font-mono text-[10px] uppercase tracking-widest text-ink/30">
+                      <p className="rounded-xl border border-dashed border-ink/15 px-3 py-6 text-center font-mono text-[10px] uppercase tracking-widest text-ink/65">
                         Vacío
                       </p>
                     ) : (
@@ -389,14 +389,14 @@ export default function AdminVentas() {
                             <span className="font-mono text-[10px] font-medium">
                               {order.id.slice(0, 8).toUpperCase()}
                             </span>
-                            <span className="font-mono text-[10px] text-ink/40">
+                            <span className="font-mono text-[10px] text-ink/65">
                               {formatDate(order.createdAt)}
                             </span>
                           </div>
                           <p className="mt-1.5 truncate text-sm">
                             {order.customerName}
                           </p>
-                          <p className="truncate font-mono text-[10px] text-ink/45">
+                          <p className="truncate font-mono text-[10px] text-ink/65">
                             {order.items.length}{" "}
                             {order.items.length === 1 ? "ítem" : "ítems"} ·{" "}
                             {formatPrice(order.total)}
@@ -443,7 +443,7 @@ export default function AdminVentas() {
               <span className="block font-mono text-xs font-medium">
                 {order.id.slice(0, 8).toUpperCase()}
               </span>
-              <span className="font-mono text-[10px] text-ink/40">
+              <span className="font-mono text-[10px] text-ink/65">
                 {formatDate(order.createdAt)}
               </span>
             </td>
@@ -452,17 +452,17 @@ export default function AdminVentas() {
               <span className="block max-w-[14rem] truncate text-sm">
                 {order.customerName}
               </span>
-              <span className="block max-w-[14rem] truncate font-mono text-[10px] text-ink/40">
+              <span className="block max-w-[14rem] truncate font-mono text-[10px] text-ink/65">
                 {order.customerEmail}
               </span>
             </td>
 
             <td className="hidden px-4 py-3 sm:table-cell">
-              <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/55">
+              <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/65">
                 {SHIPPING_METHOD_LABEL[order.shippingMethod] ??
                   order.shippingMethod}
               </span>
-              <span className="text-[11px] text-ink/45">
+              <span className="text-[11px] text-ink/65">
                 {order.shippingMethod === "retiro"
                   ? "Retira en el depósito"
                   : order.shippingAddress?.provincia}
@@ -471,7 +471,7 @@ export default function AdminVentas() {
 
             <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs">
               {formatPrice(order.total)}
-              <span className="block text-[10px] text-ink/40">
+              <span className="block text-[10px] text-ink/65">
                 {PAYMENT_LABEL[order.paymentMethod]}
               </span>
             </td>
@@ -521,16 +521,16 @@ export default function AdminVentas() {
         {abierta && patch && (
           <div className="space-y-7">
             <section>
-              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                 Cliente
               </h3>
               <div className="rounded-xl bg-white p-4 text-sm leading-relaxed">
                 <p className="font-semibold">{abierta.customerName}</p>
-                <p className="font-mono text-xs text-ink/60">
+                <p className="font-mono text-xs text-ink/65">
                   {abierta.customerEmail}
                 </p>
                 {abierta.customerPhone && (
-                  <p className="font-mono text-xs text-ink/60">
+                  <p className="font-mono text-xs text-ink/65">
                     {abierta.customerPhone}
                   </p>
                 )}
@@ -548,7 +548,7 @@ export default function AdminVentas() {
                     {abierta.shippingAddress?.cp})
                   </p>
                 )}
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
                   {SHIPPING_METHOD_LABEL[abierta.shippingMethod] ??
                     abierta.shippingMethod}
                 </p>
@@ -566,7 +566,7 @@ export default function AdminVentas() {
                   )}
                   <a
                     href={`mailto:${abierta.customerEmail}`}
-                    className="font-mono text-[10px] uppercase tracking-widest text-ink/55 hover:text-ink"
+                    className="font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
                   >
                     Mandar mail ↗
                   </a>
@@ -575,7 +575,7 @@ export default function AdminVentas() {
             </section>
 
             <section>
-              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                 Lo que pidió
               </h3>
               <ul className="divide-y divide-ink/[0.08] rounded-xl bg-white px-4">
@@ -587,7 +587,7 @@ export default function AdminVentas() {
                     <span>
                       {item.qty}× {item.name}
                       {item.variant && (
-                        <span className="text-ink/55"> · {item.variant}</span>
+                        <span className="text-ink/65"> · {item.variant}</span>
                       )}
                     </span>
                     <span className="whitespace-nowrap font-mono text-xs">
@@ -599,7 +599,7 @@ export default function AdminVentas() {
 
               <dl className="mt-3 space-y-1.5 rounded-xl bg-white p-4 font-mono text-xs">
                 <div className="flex justify-between">
-                  <dt className="text-ink/55">Subtotal</dt>
+                  <dt className="text-ink/65">Subtotal</dt>
                   <dd>{formatPrice(abierta.subtotal)}</dd>
                 </div>
                 {abierta.discount > 0 && (
@@ -609,7 +609,7 @@ export default function AdminVentas() {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <dt className="text-ink/55">Envío</dt>
+                  <dt className="text-ink/65">Envío</dt>
                   <dd>
                     {abierta.shippingCost
                       ? formatPrice(abierta.shippingCost)
@@ -623,14 +623,14 @@ export default function AdminVentas() {
               </dl>
 
               {abierta.mpPaymentId && (
-                <p className="mt-2 font-mono text-[10px] text-ink/45">
+                <p className="mt-2 font-mono text-[10px] text-ink/65">
                   Pago de Mercado Pago #{abierta.mpPaymentId}
                 </p>
               )}
 
               {abierta.customerNotes && (
                 <div className="mt-3 rounded-xl bg-amarillo/25 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                     Nota del cliente
                   </p>
                   <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed">
@@ -641,7 +641,7 @@ export default function AdminVentas() {
             </section>
 
             <section className="space-y-4 border-t border-ink/10 pt-5">
-              <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                 Gestión
               </h3>
 

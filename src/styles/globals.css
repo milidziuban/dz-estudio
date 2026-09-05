@@ -14,6 +14,20 @@
   --amarillo: #f4c542;
 }
 
+/* Contraste mínimo del texto gris (WCAG AA)
+ *
+ * El gris se hace con opacidad sobre ink (#1A1A1A). Medido contra los dos
+ * fondos que existen —cream (#F3EFE4) y el blanco de las tarjetas— el piso es:
+ *
+ *   ink/65 → 5.08:1 sobre cream, 5.41:1 sobre blanco   ✔ AA (4.5:1)
+ *   ink/60 → 4.36:1 sobre cream                        ✘ no llega
+ *
+ * Por eso todo texto —incluidos los placeholders y las etiquetas mono de 10px—
+ * usa como mínimo text-ink/65, y sobre fondo ink, text-cream/60 (6.18:1).
+ * Por debajo de eso solo pueden quedar los íconos y los controles
+ * deshabilitados, que la norma exime: ahí el piso es 3:1 → ink/55 (3.73:1).
+ */
+
 @layer base {
   html {
     scroll-behavior: smooth;

@@ -51,7 +51,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
         </div>
 
         {variant && (
-          <p className="mt-0.5 font-mono text-[11px] uppercase tracking-widest text-ink/60">
+          <p className="mt-0.5 font-mono text-[11px] uppercase tracking-widest text-ink/65">
             {variant.label}
           </p>
         )}

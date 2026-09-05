@@ -46,7 +46,7 @@ export default function PaymentMethods({
             <dt
               className={cn(
                 "font-mono text-[11px] uppercase tracking-widest",
-                tone === "dark" ? "text-cream/60" : "text-ink/60",
+                tone === "dark" ? "text-cream/60" : "text-ink/65",
               )}
             >
               {group.title}

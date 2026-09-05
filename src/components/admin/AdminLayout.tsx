@@ -35,7 +35,7 @@ export default function AdminLayout() {
           alt="DZ Estudio"
           className="h-6 w-auto"
         />
-        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/50">
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60">
           Panel de gestión
         </p>
       </Link>
@@ -43,7 +43,7 @@ export default function AdminLayout() {
       <nav aria-label="Secciones del panel" className="flex-1 space-y-6">
         {ADMIN_NAV.map((group) => (
           <div key={group.title}>
-            <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/35">
+            <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60">
               {group.title}
             </p>
             <ul className="space-y-0.5">
@@ -68,7 +68,7 @@ export default function AdminLayout() {
         <p className="font-mono text-[11px] text-cream/70">
           {nombre ?? "Admin"}
         </p>
-        <p className="truncate font-mono text-[10px] text-cream/40">{email}</p>
+        <p className="truncate font-mono text-[10px] text-cream/60">{email}</p>
         <button
           type="button"
           onClick={() => void signOut()}
@@ -144,7 +144,7 @@ export default function AdminLayout() {
             />
             <Link
               to="/"
-              className="font-mono text-[11px] uppercase tracking-widest text-ink/60 transition-colors hover:text-ink"
+              className="font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
             >
               Ver la tienda ↗
             </Link>

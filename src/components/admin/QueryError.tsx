@@ -27,7 +27,7 @@ export default function QueryError({ error, what }: QueryErrorProps) {
         </code>{" "}
         en el SQL Editor de Supabase.
       </p>
-      <p className="mt-3 font-mono text-xs text-ink/50">{message}</p>
+      <p className="mt-3 font-mono text-xs text-ink/65">{message}</p>
     </div>
   );
 }

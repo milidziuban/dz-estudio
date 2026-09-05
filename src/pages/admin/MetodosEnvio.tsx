@@ -51,7 +51,7 @@ export default function AdminMetodosEnvio() {
               <li key={option.id} className="rounded-xl bg-cream p-5">
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
                   <div className="flex items-center gap-2">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                       {option.id}
                     </p>
                     {option.mode === "vivo" && (
@@ -105,7 +105,7 @@ export default function AdminMetodosEnvio() {
                   />
                 </div>
 
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/45">
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
                   {option.mode === "vivo"
                     ? "Mientras la cotización en vivo esté configurada, este costo no se usa — solo entra si la transportista no responde."
                     : `En el checkout: ${option.cost === 0 ? "Gratis" : formatPrice(option.cost)}`}
@@ -114,7 +114,7 @@ export default function AdminMetodosEnvio() {
             ))}
           </ul>
 
-          <div className="mt-5 space-y-2 text-[11px] leading-relaxed text-ink/50">
+          <div className="mt-5 space-y-2 text-[11px] leading-relaxed text-ink/65">
             <p>
               ✧ <strong>Correo Argentino</strong> cotiza en vivo por código
               postal apenas cargues las credenciales de MiCorreo como
@@ -146,10 +146,10 @@ export default function AdminMetodosEnvio() {
             />
           </div>
 
-          <p className="mb-3 mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+          <p className="mb-3 mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
             Paquete estándar
           </p>
-          <p className="mb-4 text-[11px] leading-relaxed text-ink/50">
+          <p className="mb-4 text-[11px] leading-relaxed text-ink/65">
             Son objetos textiles blandos: en vez de pedir medidas por
             producto, todos los pedidos cotizan con este mismo paquete tipo.
           </p>
@@ -241,7 +241,7 @@ export default function AdminMetodosEnvio() {
           </div>
 
           {freeShippingFrom !== null && (
-            <p className="mt-4 text-[11px] leading-relaxed text-ink/50">
+            <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
               Queda: envío sin cargo comprando {formatPrice(freeShippingFrom)} o
               más. Acordate de contarlo en la marquesina.
             </p>

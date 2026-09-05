@@ -146,7 +146,7 @@ export default function AdminClientes() {
           aria-label="Buscar clientes"
           className="w-full rounded-full border border-ink/20 bg-white px-5 py-2.5 font-mono text-xs focus:border-ink focus:outline-none sm:max-w-sm"
         />
-        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/45 sm:ml-auto">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:ml-auto">
           {visibles.length} {visibles.length === 1 ? "cliente" : "clientes"}
         </p>
       </div>
@@ -177,24 +177,24 @@ export default function AdminClientes() {
               <span className="block max-w-[15rem] truncate text-sm">
                 {customer.nombre}
               </span>
-              <span className="block max-w-[15rem] truncate font-mono text-[10px] text-ink/40">
+              <span className="block max-w-[15rem] truncate font-mono text-[10px] text-ink/65">
                 {customer.email}
               </span>
             </td>
-            <td className="hidden px-4 py-3 text-xs text-ink/60 sm:table-cell">
+            <td className="hidden px-4 py-3 text-xs text-ink/65 sm:table-cell">
               {customer.ciudad ? `${customer.ciudad}, ` : ""}
               {customer.provincia || "—"}
             </td>
             <td className="px-4 py-3 text-right font-mono text-xs">
               {customer.paidCount}
               {customer.ordersCount !== customer.paidCount && (
-                <span className="text-ink/40"> / {customer.ordersCount}</span>
+                <span className="text-ink/65"> / {customer.ordersCount}</span>
               )}
             </td>
             <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs">
               {customer.totalSpent ? formatPrice(customer.totalSpent) : "—"}
             </td>
-            <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-[11px] text-ink/55 sm:table-cell">
+            <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-[11px] text-ink/65 sm:table-cell">
               {formatDate(customer.lastOrderAt)}
             </td>
           </tr>
@@ -211,16 +211,16 @@ export default function AdminClientes() {
           <div className="space-y-7">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-white p-4">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                   Compró
                 </p>
                 <p className="mt-1 font-mono text-lg">
                   {formatPrice(abierto.totalSpent)}
                 </p>
-                <p className="mt-1 text-[10px] text-ink/45">sin el envío</p>
+                <p className="mt-1 text-[10px] text-ink/65">sin el envío</p>
               </div>
               <div className="rounded-xl bg-white p-4">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                   Compras
                 </p>
                 <p className="mt-1 font-mono text-lg">{abierto.paidCount}</p>
@@ -229,7 +229,7 @@ export default function AdminClientes() {
 
             <section className="rounded-xl bg-white p-4 text-sm leading-relaxed">
               {abierto.telefono && (
-                <p className="font-mono text-xs text-ink/60">
+                <p className="font-mono text-xs text-ink/65">
                   {abierto.telefono}
                 </p>
               )}
@@ -238,19 +238,19 @@ export default function AdminClientes() {
                 {abierto.ciudad && abierto.provincia ? ", " : ""}
                 {abierto.provincia}
               </p>
-              <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/45">
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
                 Cliente desde {formatDate(abierto.firstOrderAt)}
               </p>
               <a
                 href={`mailto:${abierto.email}`}
-                className="mt-3 inline-block font-mono text-[10px] uppercase tracking-widest text-ink/55 hover:text-ink"
+                className="mt-3 inline-block font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
               >
                 Mandar mail ↗
               </a>
             </section>
 
             <section>
-              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                 Sus órdenes
               </h3>
               <ul className="divide-y divide-ink/[0.08] rounded-xl bg-white px-4">
@@ -266,12 +266,12 @@ export default function AdminClientes() {
                     </div>
                     <div className="mt-1.5 flex items-center gap-2">
                       <StatusBadge kind="pago" value={order.status} />
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/45">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                         {formatDate(order.createdAt)} ·{" "}
                         {PAYMENT_LABEL[order.paymentMethod]}
                       </span>
                     </div>
-                    <p className="mt-2 text-xs text-ink/60">
+                    <p className="mt-2 text-xs text-ink/65">
                       {order.items
                         .map((item) => `${item.qty}× ${item.name}`)
                         .join(" · ")}

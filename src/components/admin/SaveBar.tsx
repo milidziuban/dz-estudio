@@ -33,7 +33,7 @@ export default function SaveBar({
         <button
           type="button"
           onClick={onReset}
-          className="font-mono text-[10px] uppercase tracking-widest text-ink/50 transition-colors hover:text-ink"
+          className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
         >
           Descartar
         </button>

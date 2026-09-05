@@ -106,7 +106,7 @@ export default function AdminDescuentos() {
           <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
             Cupones con código
           </h2>
-          <p className="mt-2 max-w-xl text-xs leading-relaxed text-ink/55">
+          <p className="mt-2 max-w-xl text-xs leading-relaxed text-ink/65">
             ✧ Los cupones se guardan y se administran acá, pero el checkout
             todavía no tiene el campo para canjearlos: por ahora sirven para
             tenerlos definidos y aplicarlos a mano sobre el total.
@@ -150,14 +150,14 @@ export default function AdminDescuentos() {
                   {discount.code}
                 </span>
                 {discount.description && (
-                  <span className="block max-w-[14rem] truncate text-[11px] text-ink/50">
+                  <span className="block max-w-[14rem] truncate text-[11px] text-ink/65">
                     {discount.description}
                   </span>
                 )}
               </td>
               <td className="px-4 py-3 text-sm">
                 {valorDelCupon(discount)}
-                <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/65">
                   {KIND_LABEL[discount.kind]}
                 </span>
               </td>
@@ -167,10 +167,10 @@ export default function AdminDescuentos() {
               <td className="px-4 py-3 text-right font-mono text-xs">
                 {discount.uses}
                 {discount.maxUses !== null && (
-                  <span className="text-ink/40"> / {discount.maxUses}</span>
+                  <span className="text-ink/65"> / {discount.maxUses}</span>
                 )}
               </td>
-              <td className="hidden whitespace-nowrap px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-ink/55 sm:table-cell">
+              <td className="hidden whitespace-nowrap px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:table-cell">
                 {discount.startsAt || discount.endsAt ? (
                   <>
                     {discount.startsAt ? formatDate(discount.startsAt) : "hoy"}
@@ -202,7 +202,7 @@ export default function AdminDescuentos() {
                     setFormError(null);
                     setDraft(draftFromDiscount(discount));
                   }}
-                  className="font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+                  className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
                 >
                   Editar
                 </button>

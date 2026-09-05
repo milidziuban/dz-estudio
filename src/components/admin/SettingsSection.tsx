@@ -21,7 +21,7 @@ export default function SettingsSection({
         {title}
       </h2>
       {description && (
-        <p className="mt-2 max-w-2xl text-xs leading-relaxed text-ink/55">
+        <p className="mt-2 max-w-2xl text-xs leading-relaxed text-ink/65">
           {description}
         </p>
       )}

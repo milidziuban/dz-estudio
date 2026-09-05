@@ -28,7 +28,7 @@ export default function Hero() {
             </Button>
           </div>
 
-          <p className="mt-6 font-mono text-[11px] uppercase tracking-widest text-ink/60">
+          <p className="mt-6 font-mono text-[11px] uppercase tracking-widest text-ink/65">
             Envíos a todo el país ✦ Retiro gratis en Santa Fe Capital
           </p>
         </div>

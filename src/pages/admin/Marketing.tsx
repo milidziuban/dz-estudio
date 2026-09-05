@@ -109,7 +109,7 @@ export default function AdminMarketing() {
           <button
             type="button"
             onClick={() => setMarquee([...marquee, ""])}
-            className="mt-4 font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+            className="mt-4 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
           >
             + Agregar frase
           </button>
@@ -153,7 +153,7 @@ export default function AdminMarketing() {
               }
             />
           </div>
-          <p className="mt-4 text-[11px] leading-relaxed text-ink/50">
+          <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
             En el sitio ahora figuran: @{SITE.instagram} · {SITE.whatsapp} ·{" "}
             {SITE.email}
           </p>
@@ -202,10 +202,10 @@ export default function AdminMarketing() {
               className="border-b border-ink/[0.06] last:border-0"
             >
               <td className="px-4 py-3 font-mono text-xs">{subscriber.email}</td>
-              <td className="hidden px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-ink/50 sm:table-cell">
+              <td className="hidden px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:table-cell">
                 {subscriber.source}
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-[11px] text-ink/55">
+              <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-[11px] text-ink/65">
                 {formatDate(subscriber.createdAt)}
               </td>
               <td className="px-4 py-3 text-right">

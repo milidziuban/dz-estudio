@@ -66,9 +66,9 @@ function ProductStockCell({ product }: { product: AdminProduct }) {
       0,
     );
     return (
-      <span className="font-mono text-xs text-ink/50">
-        {controlado ? total : <span className="text-ink/40">Sin control</span>}
-        <span className="ml-1 text-[10px] text-ink/35">
+      <span className="font-mono text-xs text-ink/65">
+        {controlado ? total : <span className="text-ink/65">Sin control</span>}
+        <span className="ml-1 text-[10px] text-ink/65">
           ({product.variants.length} var.)
         </span>
       </span>
@@ -76,7 +76,7 @@ function ProductStockCell({ product }: { product: AdminProduct }) {
   }
 
   if (product.stock === null) {
-    return <span className="font-mono text-xs text-ink/40">Sin control</span>;
+    return <span className="font-mono text-xs text-ink/65">Sin control</span>;
   }
 
   return (
@@ -106,7 +106,7 @@ function ProductCategoryCell({ product }: { product: AdminProduct }) {
         })
       }
       className={cn(
-        "rounded-lg border bg-transparent py-1 pl-1.5 pr-1 font-mono text-[10px] uppercase tracking-widest text-ink/55 focus:border-ink focus:outline-none",
+        "rounded-lg border bg-transparent py-1 pl-1.5 pr-1 font-mono text-[10px] uppercase tracking-widest text-ink/65 focus:border-ink focus:outline-none",
         quickUpdate.isPending ? "border-celeste" : "border-transparent hover:border-ink/20",
       )}
     >
@@ -281,7 +281,7 @@ export default function AdminProductos() {
               type="button"
               aria-label="Limpiar búsqueda"
               onClick={() => setBusqueda("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 transition-colors hover:text-ink"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/65 transition-colors hover:text-ink"
             >
               ✕
             </button>
@@ -307,7 +307,7 @@ export default function AdminProductos() {
               onClick={() => setFiltro(id)}
               className={cn(
                 "rounded-full px-3.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
-                filtro === id ? "bg-ink text-cream" : "text-ink/55 hover:text-ink",
+                filtro === id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
               )}
             >
               {label}
@@ -322,13 +322,13 @@ export default function AdminProductos() {
           title="Solo productos en o por debajo del umbral de poco stock"
           className={cn(
             "rounded-full px-3.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
-            soloBajoStock ? "bg-orange text-cream" : "bg-white text-ink/55 hover:text-ink",
+            soloBajoStock ? "bg-orange text-cream" : "bg-white text-ink/65 hover:text-ink",
           )}
         >
           Bajo stock {bajoStockCount > 0 && `(${bajoStockCount})`}
         </button>
 
-        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/45 sm:ml-auto">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:ml-auto">
           {visibles.length} {visibles.length === 1 ? "producto" : "productos"}
         </p>
       </div>
@@ -391,7 +391,7 @@ export default function AdminProductos() {
                   >
                     {product.name}
                   </button>
-                  <span className="font-mono text-[10px] text-ink/40">
+                  <span className="font-mono text-[10px] text-ink/65">
                     {product.sku ? `${product.sku} · ` : ""}
                     {product.slug}
                   </span>
@@ -444,14 +444,14 @@ export default function AdminProductos() {
                   setFormError(null);
                   setDraft(draftFromProduct(product));
                 }}
-                className="font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+                className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
               >
                 Editar
               </button>
               <button
                 type="button"
                 onClick={() => duplicar(product)}
-                className="ml-3 font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+                className="ml-3 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
               >
                 Duplicar
               </button>

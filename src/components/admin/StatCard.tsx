@@ -28,7 +28,7 @@ export default function StatCard({
 
   return (
     <div className="rounded-2xl bg-white p-5">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
         {label}
       </p>
       <p className="mt-2.5 font-mono text-2xl font-medium tracking-tight">
@@ -39,14 +39,14 @@ export default function StatCard({
           <span
             className={cn(
               "font-mono text-[11px] font-medium",
-              flat ? "text-ink/50" : positive ? "text-verde" : "text-orange",
+              flat ? "text-ink/65" : positive ? "text-verde" : "text-orange",
             )}
           >
             {flat ? "=" : variation! > 0 ? "↑" : "↓"}{" "}
             {formatPercent(Math.abs(variation!))}
           </span>
         )}
-        {hint && <span className="text-[11px] text-ink/45">{hint}</span>}
+        {hint && <span className="text-[11px] text-ink/65">{hint}</span>}
       </div>
     </div>
   );

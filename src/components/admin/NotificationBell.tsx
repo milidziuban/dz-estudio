@@ -59,11 +59,11 @@ export default function NotificationBell({
             onClick={() => setOpen(false)}
           />
           <div className="absolute right-0 z-50 mt-2 w-80 max-w-[90vw] rounded-2xl bg-white p-2 shadow-2xl">
-            <p className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/40">
+            <p className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/65">
               Ventas recientes
             </p>
             {alerts.length === 0 ? (
-              <p className="px-3 py-6 text-center text-sm text-ink/50">
+              <p className="px-3 py-6 text-center text-sm text-ink/65">
                 Todavía no hay novedades ✧
               </p>
             ) : (
@@ -87,12 +87,12 @@ export default function NotificationBell({
                         </span>
                       </div>
                       <div className="mt-0.5 flex items-center justify-between gap-3">
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                           {alert.paymentMethod === "mp"
                             ? "Mercado Pago"
                             : "Transferencia"}
                         </span>
-                        <span className="font-mono text-[10px] text-ink/40">
+                        <span className="font-mono text-[10px] text-ink/65">
                           {timeAgo(alert.createdAt)}
                         </span>
                       </div>

@@ -22,7 +22,7 @@ const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
         className={cn(
-          "w-full resize-y rounded-lg border bg-transparent px-4 py-3 text-sm leading-relaxed placeholder:text-ink/40",
+          "w-full resize-y rounded-lg border bg-transparent px-4 py-3 text-sm leading-relaxed placeholder:text-ink/65",
           "transition-colors focus:border-ink focus:outline-none",
           error ? "border-orange" : "border-ink/25",
         )}

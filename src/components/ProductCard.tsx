@@ -66,7 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {formatPrice(product.price)}
         </p>
         {product.variants && (
-          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/50">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
             {product.variants.map((v) => v.label).join(" · ")}
           </p>
         )}

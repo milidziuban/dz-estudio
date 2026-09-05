@@ -144,7 +144,7 @@ export default function AdminDistribucion() {
                     ],
                   })
                 }
-                className="font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+                className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
               >
                 + Agregar depósito
               </button>
@@ -155,7 +155,7 @@ export default function AdminDistribucion() {
             {locations.map((location, index) => (
               <li key={location.id} className="rounded-xl bg-cream p-5">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                     {location.principal ? "✦ Principal" : "Depósito"}
                   </p>
                   {locations.length > 1 && (
@@ -313,7 +313,7 @@ export default function AdminDistribucion() {
                           {line.productName}
                         </span>
                       )}
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                         {mismoProductoQueAnterior ? "↳ " : ""}
                         {line.variantLabel}
                         {!line.productInStock && " · apagado"}
@@ -324,19 +324,19 @@ export default function AdminDistribucion() {
                       <span className="block max-w-[16rem] truncate text-sm">
                         {line.productName}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                         {line.category}
                         {!line.productInStock && " · apagado"}
                       </span>
                     </>
                   )}
                 </td>
-                <td className="hidden px-4 py-3 font-mono text-[11px] text-ink/55 sm:table-cell">
+                <td className="hidden px-4 py-3 font-mono text-[11px] text-ink/65 sm:table-cell">
                   {line.sku ?? "—"}
                 </td>
                 <td className="px-4 py-3 text-right">
                   {line.stock === null ? (
-                    <span className="font-mono text-xs text-ink/40">
+                    <span className="font-mono text-xs text-ink/65">
                       Sin control
                     </span>
                   ) : (
@@ -348,7 +348,7 @@ export default function AdminDistribucion() {
                     />
                   )}
                 </td>
-                <td className="px-4 py-3 text-right font-mono text-xs text-ink/55">
+                <td className="px-4 py-3 text-right font-mono text-xs text-ink/65">
                   {reservado || "—"}
                 </td>
                 <td

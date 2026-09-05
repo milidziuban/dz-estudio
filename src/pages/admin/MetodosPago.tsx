@@ -52,7 +52,7 @@ export default function AdminMetodosPago() {
             />
 
             <div className="rounded-xl bg-cream p-4 text-xs leading-relaxed text-ink/65">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                 Cuotas
               </p>
               <p className="mt-2">
@@ -121,7 +121,7 @@ export default function AdminMetodosPago() {
             </div>
 
             <div className="rounded-xl bg-cream p-4 text-xs leading-relaxed text-ink/65">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/50">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                 Credenciales
               </p>
               <p className="mt-2">
@@ -169,7 +169,7 @@ export default function AdminMetodosPago() {
                 })
               }
             />
-            <p className="-mt-3 text-[11px] leading-relaxed text-ink/50">
+            <p className="-mt-3 text-[11px] leading-relaxed text-ink/65">
               El descuento que se aplica de verdad en el carrito se edita en{" "}
               <strong>Precios</strong>. Este campo es el que queda guardado
               como referencia del método de pago.

@@ -71,7 +71,7 @@ export default function AdminLogin() {
             Panel de{" "}
             <em className="font-serif font-normal italic text-pink">gestión</em>
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-ink/60">
+          <p className="mt-2 text-sm leading-relaxed text-ink/65">
             Ventas, productos y números de la tienda. Solo para vos.
           </p>
 
@@ -114,7 +114,7 @@ export default function AdminLogin() {
           </form>
         </div>
 
-        <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-ink/40">
+        <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-ink/65">
           El acceso se gestiona desde Supabase
         </p>
       </div>

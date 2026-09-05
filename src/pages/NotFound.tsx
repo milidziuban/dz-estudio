@@ -7,7 +7,7 @@ export default function NotFound() {
       <Seo title="Página no encontrada" noindex />
 
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-5 py-20 text-center sm:px-8 lg:px-12">
-        <p className="font-mono text-sm font-medium uppercase tracking-widest text-ink/60">
+        <p className="font-mono text-sm font-medium uppercase tracking-widest text-ink/65">
           Error 404
         </p>
         <h1 className="mt-4 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">

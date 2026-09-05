@@ -80,7 +80,7 @@ export default function Toggle({
           {label}
         </span>
         {hint && (
-          <span className="mt-1 block text-xs leading-relaxed text-ink/55">
+          <span className="mt-1 block text-xs leading-relaxed text-ink/65">
             {hint}
           </span>
         )}

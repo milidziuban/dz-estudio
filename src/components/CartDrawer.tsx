@@ -139,7 +139,7 @@ export default function CartDrawer() {
                 </div>
               </dl>
 
-              <p className="mt-2 text-xs text-ink/60">
+              <p className="mt-2 text-xs text-ink/65">
                 {INSTALLMENTS.detail}. Pagando por transferencia,{" "}
                 {promos.transferencia.percent}% off.
               </p>

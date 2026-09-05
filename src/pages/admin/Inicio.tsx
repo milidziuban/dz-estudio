@@ -216,7 +216,7 @@ export default function AdminInicio() {
           <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
             Ganancia del período
           </h2>
-          <p className="font-mono text-[11px] text-ink/45">
+          <p className="font-mono text-[11px] text-ink/65">
             facturación − materiales, sin mano de obra
           </p>
         </div>
@@ -224,7 +224,7 @@ export default function AdminInicio() {
         {/* Sin el catálogo no hay costos, y todo se leería como ganancia
             pura: mejor no mostrar un número que va a estar mal. */}
         {products.isLoading || products.error ? (
-          <p className="mt-6 text-sm text-ink/45">
+          <p className="mt-6 text-sm text-ink/65">
             {products.error
               ? "No se pudo cargar el catálogo, así que no se puede calcular la ganancia."
               : "Cargando los costos del catálogo…"}
@@ -234,7 +234,7 @@ export default function AdminInicio() {
             <p className="mt-4 font-mono text-3xl font-medium tracking-tight">
               {formatPrice(ganancia.periodo.profit)}
             </p>
-            <p className="mt-1.5 text-[11px] text-ink/55">
+            <p className="mt-1.5 text-[11px] text-ink/65">
               {formatPrice(ganancia.periodo.revenue)} facturados −{" "}
               {formatPrice(ganancia.periodo.cost)} de materiales
               {ganancia.periodo.revenue > 0 && (
@@ -245,12 +245,12 @@ export default function AdminInicio() {
             {meta > 0 && (
               <div className="mt-6 border-t border-ink/[0.08] pt-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                     Meta del mes
                   </p>
                   <p className="font-mono text-xs">
                     {formatPrice(ganancia.mes.profit)}{" "}
-                    <span className="text-ink/45">
+                    <span className="text-ink/65">
                       de {formatPrice(meta)} ·{" "}
                       {formatPercent(avanceMeta, avanceMeta < 10 ? 1 : 0)}
                     </span>
@@ -269,7 +269,7 @@ export default function AdminInicio() {
                     style={{ width: `${Math.max(avanceMeta, 0)}%` }}
                   />
                 </div>
-                <p className="mt-2 text-[11px] text-ink/45">
+                <p className="mt-2 text-[11px] text-ink/65">
                   Es el mes calendario en curso, no el rango de arriba.
                 </p>
               </div>
@@ -290,7 +290,7 @@ export default function AdminInicio() {
               </p>
             )}
 
-            <p className="mt-4 text-[11px] leading-relaxed text-ink/45">
+            <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
               El costo es el que tiene el producto hoy: las órdenes guardan el
               precio cobrado, no el costo del día de la venta.
             </p>
@@ -338,14 +338,14 @@ export default function AdminInicio() {
             </h2>
             <Link
               to="/admin/productos"
-              className="font-mono text-[10px] uppercase tracking-widest text-ink/50 hover:text-ink"
+              className="font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
             >
               Ver todo →
             </Link>
           </div>
 
           {stats.ranking.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ink/45">
+            <p className="py-8 text-center text-sm text-ink/65">
               Sin ventas cobradas todavía.
             </p>
           ) : (
@@ -356,14 +356,14 @@ export default function AdminInicio() {
                   <li key={product.slug}>
                     <div className="flex items-baseline justify-between gap-3 text-sm">
                       <span className="truncate">
-                        <span className="font-mono text-[11px] text-ink/40">
+                        <span className="font-mono text-[11px] text-ink/65">
                           {index + 1}.
                         </span>{" "}
                         {product.name}
                       </span>
                       <span className="whitespace-nowrap font-mono text-xs">
                         {product.units} u ·{" "}
-                        <span className="text-ink/55">
+                        <span className="text-ink/65">
                           {formatCompactPrice(product.revenue)}
                         </span>
                       </span>
@@ -391,18 +391,18 @@ export default function AdminInicio() {
             </h2>
             <Link
               to="/admin/ventas"
-              className="font-mono text-[10px] uppercase tracking-widest text-ink/50 hover:text-ink"
+              className="font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
             >
               Ver todas →
             </Link>
           </div>
 
           {orders.isLoading ? (
-            <p className="animate-pulse py-8 text-center font-mono text-xs uppercase tracking-widest text-ink/50">
+            <p className="animate-pulse py-8 text-center font-mono text-xs uppercase tracking-widest text-ink/65">
               ✦ Cargando…
             </p>
           ) : stats.ultimas.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ink/45">
+            <p className="py-8 text-center text-sm text-ink/65">
               Sin órdenes en este período.
             </p>
           ) : (
@@ -414,7 +414,7 @@ export default function AdminInicio() {
                 >
                   <span className="min-w-0">
                     <span className="block truncate">{order.customerName}</span>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                       {formatDate(order.createdAt)} ·{" "}
                       {order.id.slice(0, 8).toUpperCase()}
                     </span>

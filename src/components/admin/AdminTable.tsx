@@ -61,7 +61,7 @@ export default function AdminTable({
                       active ? (sort?.dir === "asc" ? "ascending" : "descending") : undefined
                     }
                     className={cn(
-                      "whitespace-nowrap px-4 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/50",
+                      "whitespace-nowrap px-4 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/65",
                       alignClass(column.align),
                       column.hideOnMobile && "hidden sm:table-cell",
                     )}
@@ -77,7 +77,7 @@ export default function AdminTable({
                         )}
                       >
                         {column.label}
-                        <span className={cn("text-[9px]", !active && "text-ink/25")}>
+                        <span className={cn("text-[9px]", !active && "text-ink/55")}>
                           {active ? (sort?.dir === "asc" ? "↑" : "↓") : "↕"}
                         </span>
                       </button>
@@ -94,7 +94,7 @@ export default function AdminTable({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="animate-pulse px-4 py-16 text-center font-mono text-xs uppercase tracking-widest text-ink/50"
+                  className="animate-pulse px-4 py-16 text-center font-mono text-xs uppercase tracking-widest text-ink/65"
                 >
                   ✦ Cargando…
                 </td>
@@ -103,7 +103,7 @@ export default function AdminTable({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-16 text-center text-sm text-ink/50"
+                  className="px-4 py-16 text-center text-sm text-ink/65"
                 >
                   {empty ?? "Todavía no hay nada por acá."}
                 </td>

@@ -23,7 +23,7 @@ export default function RangeTabs({ value, onChange }: RangeTabsProps) {
             "rounded-full px-3.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
             value === range.id
               ? "bg-ink text-cream"
-              : "text-ink/55 hover:text-ink",
+              : "text-ink/65 hover:text-ink",
           )}
         >
           {range.label}

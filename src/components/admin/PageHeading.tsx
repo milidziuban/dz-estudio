@@ -19,7 +19,7 @@ export default function PageHeading({
           {title}
         </h1>
         {description && (
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink/60">
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink/65">
             {description}
           </p>
         )}

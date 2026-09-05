@@ -42,7 +42,7 @@ export default function SobreNosotros() {
               className="h-full w-full object-cover"
             />
           </div>
-          <p className="mx-auto mt-3 max-w-5xl text-center font-mono text-[11px] uppercase tracking-widest text-ink/60">
+          <p className="mx-auto mt-3 max-w-5xl text-center font-mono text-[11px] uppercase tracking-widest text-ink/65">
             Individual reversible, cara de rayas ✧
           </p>
         </div>

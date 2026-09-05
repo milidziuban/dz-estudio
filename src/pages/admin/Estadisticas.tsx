@@ -42,7 +42,7 @@ function RankingList({
   emptyLabel: string;
 }) {
   if (items.length === 0) {
-    return <p className="py-8 text-center text-sm text-ink/45">{emptyLabel}</p>;
+    return <p className="py-8 text-center text-sm text-ink/65">{emptyLabel}</p>;
   }
   const max = items[0].count;
 
@@ -52,7 +52,7 @@ function RankingList({
         <li key={item.label}>
           <div className="flex items-baseline justify-between gap-3 text-sm">
             <span className="truncate font-mono text-xs">{item.label}</span>
-            <span className="shrink-0 font-mono text-xs text-ink/55">
+            <span className="shrink-0 font-mono text-xs text-ink/65">
               {item.count.toLocaleString("es-AR")}
             </span>
           </div>
@@ -375,7 +375,7 @@ export default function AdminEstadisticas() {
                 <td className="px-4 py-2.5 text-right font-mono text-xs">
                   {row.facturacion ? formatPrice(row.facturacion) : "—"}
                 </td>
-                <td className="hidden px-4 py-2.5 text-right font-mono text-xs text-ink/55 sm:table-cell">
+                <td className="hidden px-4 py-2.5 text-right font-mono text-xs text-ink/65 sm:table-cell">
                   {row.sesiones ? formatPercent(row.conversion, 1) : "—"}
                 </td>
               </tr>

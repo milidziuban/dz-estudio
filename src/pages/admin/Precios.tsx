@@ -206,7 +206,7 @@ export default function AdminPrecios() {
                   })
                 }
               />
-              <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+              <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
                 100% = el precio de lista duplica el costo.
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function AdminPrecios() {
                   })
                 }
               />
-              <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+              <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
                 Inicio muestra cuánto llevás del mes en curso contra este
                 número. En 0, no muestra meta.
               </p>
@@ -373,7 +373,7 @@ export default function AdminPrecios() {
                 <span className="block max-w-[14rem] truncate text-sm font-semibold">
                   {product.name}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
                   {product.category}
                 </span>
               </td>
@@ -417,7 +417,7 @@ export default function AdminPrecios() {
           ))}
         </AdminTable>
       )}
-      <p className="mt-3 max-w-2xl text-[11px] leading-relaxed text-ink/50">
+      <p className="mt-3 max-w-2xl text-[11px] leading-relaxed text-ink/65">
         "Precio de venta" es el precio real, editable acá o en Productos.
         Cuando costo + margen sugieren un número distinto, aparece
         "Sugerido — usar" debajo para aplicarlo con un click. "Vendido en

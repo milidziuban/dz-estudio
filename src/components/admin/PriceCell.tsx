@@ -32,7 +32,7 @@ export default function PriceCell({
 
   return (
     <div className="inline-flex items-center gap-1">
-      <span className="font-mono text-xs text-ink/40">$</span>
+      <span className="font-mono text-xs text-ink/65">$</span>
       <input
         type="number"
         min={1}

@@ -309,7 +309,7 @@ export default function Checkout() {
                 <span
                   className={cn(
                     "font-mono text-xs uppercase tracking-widest",
-                    step === s.number ? "font-medium" : "text-ink/60",
+                    step === s.number ? "font-medium" : "text-ink/65",
                   )}
                 >
                   {s.label}
@@ -424,7 +424,7 @@ export default function Checkout() {
                   ))}
                 </div>
                 {hasLiveOptions && !esRetiro && cpWatched.trim().length < 4 && (
-                  <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+                  <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
                     Correo Argentino cotiza con tu código postal: el precio se
                     ajusta cuando lo cargues acá abajo.
                   </p>
@@ -573,7 +573,7 @@ export default function Checkout() {
                         ? "Guardando pedido…"
                         : "Pagar con Mercado Pago ✦"}
                     </Button>
-                    <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-widest text-ink/60">
+                    <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-widest text-ink/65">
                       Pago procesado por Mercado Pago — no guardamos datos de tu
                       tarjeta
                     </p>
@@ -672,7 +672,7 @@ export default function Checkout() {
                     />
                     <span className="flex-1 text-xs font-bold leading-snug">
                       {product.name}
-                      <span className="block font-mono font-normal text-ink/60">
+                      <span className="block font-mono font-normal text-ink/65">
                         {variant ? `${variant.label} · x${qty}` : `x${qty}`}
                       </span>
                     </span>
@@ -712,7 +712,7 @@ export default function Checkout() {
               </dl>
 
               {pagoSel !== "transferencia" && (
-                <p className="mt-4 text-xs leading-relaxed text-ink/60">
+                <p className="mt-4 text-xs leading-relaxed text-ink/65">
                   {INSTALLMENTS.detail}, con tarjeta de crédito. Pagando por
                   transferencia se te aplica 10% off.
                 </p>

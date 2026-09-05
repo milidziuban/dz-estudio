@@ -68,7 +68,7 @@ export default function AdminDrawer({
               {title}
             </p>
             {subtitle && (
-              <p className="mt-1 text-xs text-ink/55">{subtitle}</p>
+              <p className="mt-1 text-xs text-ink/65">{subtitle}</p>
             )}
           </div>
           <button

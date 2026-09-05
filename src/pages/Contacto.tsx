@@ -74,7 +74,7 @@ export default function Contacto() {
                       name="mensaje"
                       required
                       rows={5}
-                      className="w-full rounded-lg border border-ink/25 bg-transparent px-4 py-3 font-mono text-sm placeholder:text-ink/40 transition-colors focus:border-ink focus:outline-none"
+                      className="w-full rounded-lg border border-ink/25 bg-transparent px-4 py-3 font-mono text-sm placeholder:text-ink/65 transition-colors focus:border-ink focus:outline-none"
                       placeholder="Contanos en qué te damos una mano…"
                     />
                   </div>
@@ -86,7 +86,7 @@ export default function Contacto() {
             {/* Datos de contacto */}
             <div className="space-y-8">
               <div>
-                <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-ink/60">
+                <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-ink/65">
                   ✧ Directo
                 </h2>
                 <ul className="mt-4 space-y-4">

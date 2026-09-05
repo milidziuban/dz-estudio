@@ -25,7 +25,7 @@ function Bloque({
 }) {
   return (
     <section className="border-t border-ink/10 pt-5">
-      <h3 className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/50">
+      <h3 className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
         {title}
       </h3>
       {children}
@@ -100,7 +100,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
           value={draft.slug}
           onChange={(event) => set("slug", slugify(event.target.value))}
         />
-        <p className="-mt-2 font-mono text-[10px] text-ink/45">
+        <p className="-mt-2 font-mono text-[10px] text-ink/65">
           /producto/{draft.slug || "…"}
         </p>
 
@@ -139,7 +139,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
           />
 
           {draft.variants.length > 0 ? (
-            <p className="rounded-xl bg-cream p-4 text-[11px] leading-relaxed text-ink/55">
+            <p className="rounded-xl bg-cream p-4 text-[11px] leading-relaxed text-ink/65">
               Este producto tiene variantes: el stock se controla una por una,
               más abajo en "Variantes".
             </p>
@@ -190,7 +190,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   "flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
                   selected
                     ? "border-ink bg-ink text-cream"
-                    : "border-ink/20 text-ink/60 hover:border-ink",
+                    : "border-ink/20 text-ink/65 hover:border-ink",
                 )}
               >
                 <span
@@ -203,7 +203,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
             );
           })}
         </div>
-        <p className="mt-3 text-[11px] leading-relaxed text-ink/50">
+        <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
           Son los colores por los que se filtra en la tienda. Dos por producto:
           nunca cinco.
         </p>
@@ -246,7 +246,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
               )
             }
           />
-          <p className="-mt-2 text-[11px] leading-relaxed text-ink/50">
+          <p className="-mt-2 text-[11px] leading-relaxed text-ink/65">
             Este es el que se usa para cotizar el envío — no lo que dice la
             ficha del producto.
           </p>
@@ -268,7 +268,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
 
       <Bloque title="Fotos">
         {draft.images.length === 0 && (
-          <p className="mb-4 text-[11px] text-ink/50">
+          <p className="mb-4 text-[11px] text-ink/65">
             Sin fotos todavía. La primera es la que se ve en la grilla.
           </p>
         )}
@@ -357,7 +357,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   aria-label="Subir la foto en el orden"
                   onClick={() => moveImage(index, -1)}
                   disabled={index === 0}
-                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ink/50 transition-colors hover:text-ink disabled:opacity-30"
+                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-30"
                 >
                   ↑
                 </button>
@@ -366,7 +366,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   aria-label="Bajar la foto en el orden"
                   onClick={() => moveImage(index, 1)}
                   disabled={index === draft.images.length - 1}
-                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ink/50 transition-colors hover:text-ink disabled:opacity-30"
+                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-30"
                 >
                   ↓
                 </button>
@@ -408,7 +408,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
             onClick={() =>
               set("images", [...draft.images, { src: "", fit: "cover" }])
             }
-            className="font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+            className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
           >
             + Agregar por ruta
           </button>
@@ -423,7 +423,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
 
       <Bloque title="Variantes">
         {draft.variants.length === 0 && (
-          <p className="mb-4 text-[11px] leading-relaxed text-ink/50">
+          <p className="mb-4 text-[11px] leading-relaxed text-ink/65">
             Sin variantes: el producto se vende en una sola versión. Agregá una
             por cada color que el cliente pueda elegir, con su propio stock.
           </p>
@@ -482,7 +482,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   set("variants", variants);
                 }}
                 placeholder="Sin control"
-                className="w-28 rounded-lg border border-ink/20 bg-transparent px-3 py-2 text-right font-mono text-xs placeholder:text-ink/40 focus:border-ink focus:outline-none"
+                className="w-28 rounded-lg border border-ink/20 bg-transparent px-3 py-2 text-right font-mono text-xs placeholder:text-ink/65 focus:border-ink focus:outline-none"
               />
               <button
                 type="button"
@@ -500,7 +500,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
           ))}
         </ul>
         {draft.variants.length > 0 && (
-          <p className="mt-2 text-[11px] leading-relaxed text-ink/45">
+          <p className="mt-2 text-[11px] leading-relaxed text-ink/65">
             Stock vacío = sin control, se vende sin límite de unidades.
           </p>
         )}
@@ -526,7 +526,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
               stock: draft.variants.length === 0 ? null : draft.stock,
             })
           }
-          className="mt-4 font-mono text-[10px] uppercase tracking-widest text-ink/55 transition-colors hover:text-ink"
+          className="mt-4 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
         >
           + Agregar variante
         </button>
