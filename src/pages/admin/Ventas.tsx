@@ -14,6 +14,8 @@ import { useAdminOrders, useUpdateOrder } from "../../hooks/useAdminOrders";
 import {
   ORDER_STATUS_LABEL,
   PAYMENT_LABEL,
+  PENDING_STAGE_LABEL,
+  RESERVA_HORAS,
   SHIPPING_METHOD_LABEL,
   SHIPPING_STATUS_LABEL,
   downloadCsv,
@@ -23,6 +25,11 @@ import {
   formatDateTime,
   isPaid,
   orderRevenue,
+  pendingStage,
+  reservaVence,
+  timeAgo,
+  timeUntil,
+  type PendingStage,
 } from "../../lib/admin";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
@@ -37,6 +44,37 @@ const ESTADOS: (OrderStatus | "todos")[] = [
   "cancelled",
   "refunded",
 ];
+
+/** Dos atajos que no son estados de la base: salen de mirar hace cuánto entró
+ *  una orden que sigue en `pending`. Van en el mismo grupo de filtros porque
+ *  se usan igual, pero separados: "Pendientes" las incluye a las dos. */
+const ATAJOS = ["vencidas", "abandonados"] as const;
+type Atajo = (typeof ATAJOS)[number];
+type Filtro = OrderStatus | "todos" | Atajo;
+
+const ATAJO_LABEL: Record<Atajo, string> = {
+  vencidas: "Vencidas",
+  abandonados: "Abandonados",
+};
+
+const ATAJO_STAGE: Record<Atajo, PendingStage> = {
+  vencidas: "vencida",
+  abandonados: "abandonada",
+};
+
+/** La línea corta que va debajo del estado en la tabla. */
+function pendingNote(order: Order, stage: PendingStage): string {
+  switch (stage) {
+    case "reservada":
+      return `vence ${timeUntil(reservaVence(order))}`;
+    case "vencida":
+      return `venció ${timeAgo(reservaVence(order))}`;
+    case "pagando":
+      return `pagando, ${timeAgo(order.createdAt)}`;
+    case "abandonada":
+      return `sin pagar ${timeAgo(order.createdAt)}`;
+  }
+}
 
 const VISTAS = ["tabla", "kanban"] as const;
 type Vista = (typeof VISTAS)[number];
@@ -65,7 +103,7 @@ export default function AdminVentas() {
   const updateOrder = useUpdateOrder();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const estado = (searchParams.get("estado") ?? "todos") as OrderStatus | "todos";
+  const estado = (searchParams.get("estado") ?? "todos") as Filtro;
   const vista = (searchParams.get("vista") ?? "tabla") as Vista;
   const [busqueda, setBusqueda] = useState("");
   const [abierta, setAbierta] = useState<Order | null>(null);
@@ -91,8 +129,13 @@ export default function AdminVentas() {
 
   const visibles = useMemo(() => {
     const term = busqueda.trim().toLowerCase();
+    const ahora = Date.now();
     return todas.filter((order) => {
-      if (estado !== "todos" && order.status !== estado) return false;
+      if (estado === "vencidas" || estado === "abandonados") {
+        if (pendingStage(order, ahora) !== ATAJO_STAGE[estado]) return false;
+      } else if (estado !== "todos" && order.status !== estado) {
+        return false;
+      }
       if (!term) return true;
       return (
         order.customerName.toLowerCase().includes(term) ||
@@ -105,10 +148,14 @@ export default function AdminVentas() {
 
   const totales = useMemo(() => {
     const pagadas = todas.filter(isPaid);
+    const ahora = Date.now();
+    const stages = todas.map((order) => pendingStage(order, ahora));
     return {
       facturado: pagadas.reduce((total, order) => total + orderRevenue(order), 0),
       pagadas: pagadas.length,
       pendientes: todas.filter((order) => order.status === "pending").length,
+      vencidas: stages.filter((stage) => stage === "vencida").length,
+      abandonados: stages.filter((stage) => stage === "abandonada").length,
       porDespachar: pagadas.filter(
         (order) =>
           order.shippingStatus === "pendiente" ||
@@ -208,6 +255,11 @@ export default function AdminVentas() {
                 Total: order.total,
                 Facturado_sin_envio: orderRevenue(order),
                 Estado: ORDER_STATUS_LABEL[order.status],
+                // Para armar la lista de a quién escribirle sin abrir el panel
+                Pendiente: (() => {
+                  const stage = pendingStage(order);
+                  return stage ? PENDING_STAGE_LABEL[stage] : "";
+                })(),
                 Envio_estado: SHIPPING_STATUS_LABEL[order.shippingStatus],
                 Seguimiento: order.trackingCode ?? "",
               })),
@@ -228,7 +280,17 @@ export default function AdminVentas() {
         <StatCard
           label="Pendientes"
           value={String(totales.pendientes)}
-          hint="esperan pago o confirmación"
+          hint={
+            totales.vencidas || totales.abandonados
+              ? [
+                  totales.vencidas &&
+                    `${totales.vencidas} con la reserva vencida`,
+                  totales.abandonados && `${totales.abandonados} sin pagar`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : "esperan pago o confirmación"
+          }
         />
         <StatCard
           label="Por despachar"
@@ -271,6 +333,32 @@ export default function AdminVentas() {
               {id === "todos" ? "Todas" : ORDER_STATUS_LABEL[id]}
             </button>
           ))}
+
+          <span aria-hidden="true" className="my-1 w-px bg-ink/10" />
+
+          {ATAJOS.map((id) => {
+            const cuantas =
+              id === "vencidas" ? totales.vencidas : totales.abandonados;
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={estado === id}
+                onClick={() => {
+                  const next = new URLSearchParams(searchParams);
+                  next.set("estado", id);
+                  setSearchParams(next, { replace: true });
+                }}
+                className={cn(
+                  "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+                  estado === id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
+                )}
+              >
+                {ATAJO_LABEL[id]}
+                {cuantas > 0 && ` ${cuantas}`}
+              </button>
+            );
+          })}
         </div>
 
         <div
@@ -430,7 +518,11 @@ export default function AdminVentas() {
         empty={
           todas.length === 0
             ? "Todavía no entró ninguna orden."
-            : "Ninguna orden coincide con ese filtro."
+            : estado === "vencidas"
+              ? `Ninguna reserva pasó las ${RESERVA_HORAS} h sin acreditarse.`
+              : estado === "abandonados"
+                ? "Nadie se fue de Mercado Pago sin pagar."
+                : "Ninguna orden coincide con ese filtro."
         }
       >
         {visibles.map((order) => (
@@ -478,6 +570,25 @@ export default function AdminVentas() {
 
             <td className="px-4 py-3">
               <StatusBadge kind="pago" value={order.status} />
+              {/* "Pendiente" solo dice que no se cobró; lo que hay que hacer
+                  está en hace cuánto entró y cómo iba a pagar */}
+              {(() => {
+                const stage = pendingStage(order);
+                return stage ? (
+                  <span
+                    className={cn(
+                      "mt-1 block font-mono text-[10px]",
+                      // La vencida se destaca con peso y no con color: el
+                      // naranja a 10px no llega al contraste mínimo (D10)
+                      stage === "vencida"
+                        ? "font-medium text-ink"
+                        : "text-ink/65",
+                    )}
+                  >
+                    {pendingNote(order, stage)}
+                  </span>
+                ) : null;
+              })()}
             </td>
 
             <td className="hidden px-4 py-3 sm:table-cell">
@@ -644,6 +755,26 @@ export default function AdminVentas() {
               <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
                 Gestión
               </h3>
+
+              {(() => {
+                const stage = pendingStage(abierta);
+                if (!stage) return null;
+                const texto: Record<PendingStage, string> = {
+                  reservada: `Transferencia sin acreditar. La reserva de ${RESERVA_HORAS} h vence el ${formatDateTime(reservaVence(abierta).toISOString())}, ${timeUntil(reservaVence(abierta))}.`,
+                  vencida: `La reserva de ${RESERVA_HORAS} h venció ${timeAgo(reservaVence(abierta))} y el pago no llegó. Escribile antes de cancelarla: puede haber transferido y no haber mandado el comprobante.`,
+                  pagando: `Salió a Mercado Pago ${timeAgo(abierta.createdAt)} y todavía no volvió el pago. Puede estar pagando ahora mismo.`,
+                  abandonada: `Salió a Mercado Pago ${timeAgo(abierta.createdAt)} y nunca volvió. Tenés su mail y su WhatsApp acá arriba.`,
+                };
+                return (
+                  <p className="rounded-xl bg-amarillo/25 p-4 text-xs leading-relaxed">
+                    <span className="font-mono uppercase tracking-widest">
+                      {PENDING_STAGE_LABEL[stage]}
+                    </span>
+                    <br />
+                    {texto[stage]}
+                  </p>
+                );
+              })()}
 
               <SelectField
                 id="o-status"

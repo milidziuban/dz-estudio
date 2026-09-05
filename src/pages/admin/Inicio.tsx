@@ -11,11 +11,13 @@ import { useAdminProducts } from "../../hooks/useAdminProducts";
 import { useStoreSettings } from "../../hooks/useStoreSettings";
 import { useVisits } from "../../hooks/useVisits";
 import {
+  RESERVA_HORAS,
   formatCompactPrice,
   formatDate,
   formatPercent,
   isPaid,
   orderRevenue,
+  pendingStage,
   variation,
   type RangeId,
 } from "../../lib/admin";
@@ -108,6 +110,14 @@ export default function AdminInicio() {
   const meta = settings?.precios.metaGananciaMensual ?? 0;
   const avanceMeta = meta ? Math.min(100, (ganancia.mes.profit / meta) * 100) : 0;
 
+  // Las reservas vencidas se cuentan sobre todas las órdenes y no sobre el
+  // período elegido: una transferencia que se cayó hace un mes sigue siendo
+  // algo para cerrar, aunque el gráfico esté mostrando los últimos 7 días.
+  const vencidas = useMemo(
+    () => allOrders.filter((order) => pendingStage(order) === "vencida").length,
+    [allOrders],
+  );
+
   const lowStockThreshold = settings?.distribucion.lowStockThreshold ?? 3;
   const bajoStock = (products.data ?? []).filter((product) =>
     product.variants?.length
@@ -150,12 +160,26 @@ export default function AdminInicio() {
         <RangeTabs value={range} onChange={setRange} />
       </PageHeading>
 
-      {(actual.pendientes > 0 || bajoStock.length > 0) && (
+      {(vencidas > 0 || actual.pendientes > 0 || bajoStock.length > 0) && (
         <div className="mb-6 flex flex-col gap-2 sm:flex-row">
+          {/* Primero lo que rompe una promesa: el sitio dice que la reserva
+              dura 48 h y hasta ahora nada avisaba cuando se cumplían */}
+          {vencidas > 0 && (
+            <Link
+              to="/admin/ventas?estado=vencidas"
+              className="flex-1 rounded-xl bg-amarillo px-4 py-3 text-xs leading-relaxed transition-opacity hover:opacity-90"
+            >
+              ✦ {vencidas}{" "}
+              {vencidas === 1
+                ? "transferencia pasó"
+                : "transferencias pasaron"}{" "}
+              las {RESERVA_HORAS} h reservadas sin acreditarse →
+            </Link>
+          )}
           {actual.pendientes > 0 && (
             <Link
               to="/admin/ventas?estado=pending"
-              className="flex-1 rounded-xl bg-amarillo px-4 py-3 text-xs leading-relaxed transition-opacity hover:opacity-90"
+              className="flex-1 rounded-xl bg-ink/5 px-4 py-3 text-xs leading-relaxed transition-opacity hover:opacity-90"
             >
               ✦ {actual.pendientes}{" "}
               {actual.pendientes === 1 ? "orden pendiente" : "órdenes pendientes"}{" "}

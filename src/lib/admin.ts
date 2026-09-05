@@ -51,6 +51,49 @@ export function orderRevenue(order: Order): number {
   return order.total - order.shippingCost;
 }
 
+// ── Pendientes: qué está esperando cada orden sin pagar ───────
+
+/** Lo que el sitio promete cuando el pago es por transferencia: "te reservamos
+ *  el pedido por 48 horas". Está escrito en el checkout, en la pantalla de
+ *  gracias, en el FAQ y en el mail — si alguna vez cambia, cambia acá. */
+export const RESERVA_HORAS = 48;
+
+/** Una orden de Mercado Pago recién entrada puede estar pagándose ahora mismo:
+ *  la orden se guarda antes de mandar a la pasarela. Pasadas estas horas ya no
+ *  hay nadie del otro lado. */
+export const ABANDONO_HORAS = 2;
+
+/** Las dos cosas distintas que hoy comparten el estado `pending`: la
+ *  transferencia que todavía tiene reserva y quien se fue sin pagar. */
+export type PendingStage = "reservada" | "vencida" | "pagando" | "abandonada";
+
+export const PENDING_STAGE_LABEL: Record<PendingStage, string> = {
+  reservada: "Reserva en pie",
+  vencida: "Reserva vencida",
+  pagando: "En Mercado Pago",
+  abandonada: "Carrito abandonado",
+};
+
+/** En qué anda una orden que sigue en `pending`. null si ya se resolvió. */
+export function pendingStage(
+  order: Order,
+  now: number = Date.now(),
+): PendingStage | null {
+  if (order.status !== "pending") return null;
+  const horas = (now - new Date(order.createdAt).getTime()) / 3_600_000;
+  if (order.paymentMethod === "transferencia") {
+    return horas >= RESERVA_HORAS ? "vencida" : "reservada";
+  }
+  return horas >= ABANDONO_HORAS ? "abandonada" : "pagando";
+}
+
+/** El momento exacto en que se cumplen las 48 h prometidas. */
+export function reservaVence(order: Order): Date {
+  return new Date(
+    new Date(order.createdAt).getTime() + RESERVA_HORAS * 3_600_000,
+  );
+}
+
 // ── Rangos de fecha ───────────────────────────────────────────
 
 export const RANGES = [
@@ -108,6 +151,31 @@ export function formatDate(iso: string): string {
 
 export function formatDateTime(iso: string): string {
   return dateTimeFormatter.format(new Date(iso));
+}
+
+/** "3 min", "5 h", "2 d" — el hueco pelado, sin decir para qué lado. */
+function gap(minutos: number): string {
+  if (minutos < 60) return `${Math.max(1, Math.round(minutos))} min`;
+  const horas = minutos / 60;
+  if (horas < 24) return `${Math.floor(horas)} h`;
+  return `${Math.floor(horas / 24)} d`;
+}
+
+/** "recién", "hace 20 min", "hace 2 d". */
+export function timeAgo(date: string | Date, now: number = Date.now()): string {
+  const minutos = (now - new Date(date).getTime()) / 60_000;
+  if (minutos < 1) return "recién";
+  return `hace ${gap(minutos)}`;
+}
+
+/** "en 6 h", "en 40 min". Si ya pasó, lo dice. */
+export function timeUntil(
+  date: string | Date,
+  now: number = Date.now(),
+): string {
+  const minutos = (new Date(date).getTime() - now) / 60_000;
+  if (minutos <= 0) return "ya se cumplió";
+  return `en ${gap(minutos)}`;
 }
 
 /** "12 ago" — para los ejes del gráfico. */

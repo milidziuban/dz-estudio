@@ -1,18 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { timeAgo } from "../../lib/admin";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import type { OrderAlert } from "../../hooks/useOrderAlerts";
 import AdminIcon from "./AdminIcon";
-
-function timeAgo(iso: string): string {
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (minutes < 1) return "recién";
-  if (minutes < 60) return `hace ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `hace ${hours} h`;
-  return `hace ${Math.floor(hours / 24)} d`;
-}
 
 type NotificationBellProps = {
   alerts: OrderAlert[];
