@@ -111,9 +111,9 @@ function buildXml(baseUrl, pages) {
 
 async function main() {
   loadEnv();
-  const baseUrl = (
-    process.env.VITE_SITE_URL ?? "https://www.dz-estudio.com"
-  ).replace(/\/$/, "");
+  // Mismo dominio que SITE.url en src/lib/site.ts, y por el mismo motivo: no
+  // sale de una variable de entorno. Al cambiarlo, cambiarlo en los dos lados.
+  const baseUrl = "https://www.dz-estudio.com";
 
   let slugs = [];
   let origen = "";

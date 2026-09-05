@@ -5,10 +5,12 @@ export const SITE = {
   tagline: "Maximalismo con criterio",
   description:
     "Almohadones e individuales estampados, diseñados y hechos en Argentina.",
-  // Se toma de VITE_SITE_URL en producción (Vercel); fallback al dominio real.
-  url:
-    (import.meta.env.VITE_SITE_URL as string | undefined) ??
-    "https://www.dz-estudio.com",
+  // El dominio va escrito acá y no sale de una variable de entorno: en Vercel
+  // VITE_SITE_URL estaba cargada como "https://dz-estudio.vercel.app", así que
+  // todos los canonical, los og:url y las fotos de las fichas le decían a
+  // Google que la tienda vive en el dominio de Vercel. Es un dato que no
+  // cambia —el apex redirige a www— y que no gana nada con ser configurable.
+  url: "https://www.dz-estudio.com",
   email: "milagrosdziuban@hotmail.com",
   instagram: "dzestudio_",
   instagramUrl: "https://instagram.com/dzestudio_",
