@@ -79,6 +79,42 @@ function pendingNote(order: Order, stage: PendingStage): string {
 const VISTAS = ["tabla", "kanban"] as const;
 type Vista = (typeof VISTAS)[number];
 
+/** El filtro de fechas se guarda como `YYYY-MM-DD` en la URL. */
+const DIA_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** `YYYY-MM-DD` de un día local. `toISOString()` no sirve: pasa a UTC y en
+ *  Argentina eso corre la fecha un día para atrás. */
+function isoDay(date: Date): string {
+  const mes = String(date.getMonth() + 1).padStart(2, "0");
+  const dia = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${mes}-${dia}`;
+}
+
+/** `YYYY-MM` del mes al que pertenece una orden. */
+function mesKey(date: Date): string {
+  return isoDay(date).slice(0, 7);
+}
+
+/** Primer y último día de un mes `YYYY-MM`, como los espera el filtro. */
+function mesRango(key: string): { desde: string; hasta: string } {
+  const [anio, mes] = key.split("-").map(Number);
+  return {
+    desde: isoDay(new Date(anio, mes - 1, 1)),
+    hasta: isoDay(new Date(anio, mes, 0)),
+  };
+}
+
+const mesFormatter = new Intl.DateTimeFormat("es-AR", {
+  month: "long",
+  year: "numeric",
+});
+
+/** "Septiembre 2026" — el formateador devuelve "septiembre de 2026". */
+function mesLabel(date: Date): string {
+  const texto = mesFormatter.format(date).replace(" de ", " ");
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
 /** Columnas del kanban de despacho, en el orden en que avanza un pedido. */
 const KANBAN_COLUMNAS: ShippingStatus[] = [
   "pendiente",
@@ -105,6 +141,8 @@ export default function AdminVentas() {
 
   const estado = (searchParams.get("estado") ?? "todos") as Filtro;
   const vista = (searchParams.get("vista") ?? "tabla") as Vista;
+  const desde = searchParams.get("desde") ?? "";
+  const hasta = searchParams.get("hasta") ?? "";
   const [busqueda, setBusqueda] = useState("");
   const [abierta, setAbierta] = useState<Order | null>(null);
 
@@ -127,10 +165,70 @@ export default function AdminVentas() {
 
   const todas = orders.data ?? [];
 
+  /** Los dos extremos del filtro, en milisegundos. `null` = sin límite de ese
+   *  lado, así que "desde el 1/9" sin "hasta" también funciona. */
+  const { inicio, fin } = useMemo(() => {
+    return {
+      inicio: DIA_RE.test(desde)
+        ? new Date(`${desde}T00:00:00`).getTime()
+        : null,
+      // El día "hasta" entra entero: si no, las ventas de esa mañana se pierden
+      fin: DIA_RE.test(hasta)
+        ? new Date(`${hasta}T23:59:59.999`).getTime()
+        : null,
+    };
+  }, [desde, hasta]);
+
+  const hayFecha = inicio !== null || fin !== null;
+
+  /** Las órdenes del período elegido: la base de los totales y de la tabla. */
+  const enFecha = useMemo(() => {
+    if (!hayFecha) return todas;
+    return todas.filter((order) => {
+      const momento = new Date(order.createdAt).getTime();
+      if (inicio !== null && momento < inicio) return false;
+      if (fin !== null && momento > fin) return false;
+      return true;
+    });
+  }, [todas, hayFecha, inicio, fin]);
+
+  /** Los meses que tienen al menos una orden, del más nuevo al más viejo:
+   *  es el atajo para "las ventas de septiembre" sin tipear dos fechas. */
+  const meses = useMemo(() => {
+    const porKey = new Map<string, string>();
+    for (const order of todas) {
+      const fecha = new Date(order.createdAt);
+      const key = mesKey(fecha);
+      if (!porKey.has(key)) porKey.set(key, mesLabel(fecha));
+    }
+    return [...porKey.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+  }, [todas]);
+
+  /** Qué opción del select está activa. `""` = todas, `"custom"` = dos fechas
+   *  sueltas que no son un mes calendario completo. */
+  const mesElegido = useMemo(() => {
+    if (!desde && !hasta) return "";
+    if (DIA_RE.test(desde) && DIA_RE.test(hasta)) {
+      const key = desde.slice(0, 7);
+      const rango = mesRango(key);
+      if (rango.desde === desde && rango.hasta === hasta) return key;
+    }
+    return "custom";
+  }, [desde, hasta]);
+
+  const setFechas = (proximoDesde: string, proximoHasta: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (proximoDesde) next.set("desde", proximoDesde);
+    else next.delete("desde");
+    if (proximoHasta) next.set("hasta", proximoHasta);
+    else next.delete("hasta");
+    setSearchParams(next, { replace: true });
+  };
+
   const visibles = useMemo(() => {
     const term = busqueda.trim().toLowerCase();
     const ahora = Date.now();
-    return todas.filter((order) => {
+    return enFecha.filter((order) => {
       if (estado === "vencidas" || estado === "abandonados") {
         if (pendingStage(order, ahora) !== ATAJO_STAGE[estado]) return false;
       } else if (estado !== "todos" && order.status !== estado) {
@@ -144,16 +242,18 @@ export default function AdminVentas() {
         (order.trackingCode ?? "").toLowerCase().includes(term)
       );
     });
-  }, [todas, estado, busqueda]);
+  }, [enFecha, estado, busqueda]);
 
+  // Los totales siguen el filtro de fechas, no la búsqueda ni el estado: es lo
+  // que se copia a la planilla como "lo que facturé en septiembre".
   const totales = useMemo(() => {
-    const pagadas = todas.filter(isPaid);
+    const pagadas = enFecha.filter(isPaid);
     const ahora = Date.now();
-    const stages = todas.map((order) => pendingStage(order, ahora));
+    const stages = enFecha.map((order) => pendingStage(order, ahora));
     return {
       facturado: pagadas.reduce((total, order) => total + orderRevenue(order), 0),
       pagadas: pagadas.length,
-      pendientes: todas.filter((order) => order.status === "pending").length,
+      pendientes: enFecha.filter((order) => order.status === "pending").length,
       vencidas: stages.filter((stage) => stage === "vencida").length,
       abandonados: stages.filter((stage) => stage === "abandonada").length,
       porDespachar: pagadas.filter(
@@ -162,7 +262,7 @@ export default function AdminVentas() {
           order.shippingStatus === "preparando",
       ).length,
     };
-  }, [todas]);
+  }, [enFecha]);
 
   // El kanban gestiona despachos: solo tiene sentido para pedidos ya
   // cobrados, respeta el mismo filtro de búsqueda que la tabla.
@@ -183,6 +283,12 @@ export default function AdminVentas() {
       setMovingId(null);
     }
   };
+
+  /** El archivo dice de qué período es: sirve para no pisar el de agosto con
+   *  el de septiembre en la carpeta de descargas. */
+  const csvNombre = hayFecha
+    ? `dz-ventas-${desde || "inicio"}_${hasta || isoDay(new Date())}.csv`
+    : "dz-ventas.csv";
 
   const abrir = (order: Order) => {
     setAbierta(order);
@@ -236,7 +342,7 @@ export default function AdminVentas() {
           className="px-5 py-2.5"
           onClick={() =>
             downloadCsv(
-              "dz-ventas.csv",
+              csvNombre,
               visibles.map((order) => ({
                 Orden: order.id.slice(0, 8).toUpperCase(),
                 Fecha: formatDateTime(order.createdAt),
@@ -272,7 +378,7 @@ export default function AdminVentas() {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Facturado total"
+          label={hayFecha ? "Facturado del período" : "Facturado total"}
           value={formatCompactPrice(totales.facturado)}
           hint="órdenes cobradas, sin el envío"
         />
@@ -299,7 +405,7 @@ export default function AdminVentas() {
         />
       </div>
 
-      <div className="mb-4 mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mb-3 mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <input
           type="search"
           value={busqueda}
@@ -388,6 +494,75 @@ export default function AdminVentas() {
         </div>
       </div>
 
+      {/* Fechas: el atajo del mes cubre el caso real ("bajame septiembre") y
+          las dos fechas sueltas quedan para cualquier otro corte. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+          Fechas
+        </span>
+
+        <select
+          value={mesElegido}
+          aria-label="Filtrar por mes"
+          onChange={(event) => {
+            const key = event.target.value;
+            if (!key || key === "custom") setFechas("", "");
+            else {
+              const rango = mesRango(key);
+              setFechas(rango.desde, rango.hasta);
+            }
+          }}
+          className="rounded-full border border-ink/20 bg-white px-4 py-2 font-mono text-xs focus:border-ink focus:outline-none"
+        >
+          <option value="">Todas las fechas</option>
+          {meses.map(([key, label]) => (
+            <option key={key} value={key}>
+              {label}
+            </option>
+          ))}
+          {mesElegido === "custom" && (
+            <option value="custom">Rango a medida</option>
+          )}
+        </select>
+
+        <input
+          type="date"
+          value={desde}
+          max={hasta || undefined}
+          aria-label="Desde"
+          onChange={(event) => setFechas(event.target.value, hasta)}
+          className="rounded-full border border-ink/20 bg-white px-4 py-2 font-mono text-xs focus:border-ink focus:outline-none"
+        />
+        <span aria-hidden="true" className="font-mono text-xs text-ink/45">
+          →
+        </span>
+        <input
+          type="date"
+          value={hasta}
+          min={desde || undefined}
+          aria-label="Hasta"
+          onChange={(event) => setFechas(desde, event.target.value)}
+          className="rounded-full border border-ink/20 bg-white px-4 py-2 font-mono text-xs focus:border-ink focus:outline-none"
+        />
+
+        {hayFecha && (
+          <button
+            type="button"
+            onClick={() => setFechas("", "")}
+            className="rounded-full px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ink/65 underline-offset-4 transition-colors hover:text-ink hover:underline"
+          >
+            Limpiar
+          </button>
+        )}
+
+        {hayFecha && (
+          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+            {enFecha.length} {enFecha.length === 1 ? "orden" : "órdenes"} en el
+            período
+          </span>
+        )}
+      </div>
+
       {vista === "kanban" ? (
         <div className="space-y-3">
           <p className="rounded-xl bg-white px-4 py-3 text-xs leading-relaxed text-ink/65">
@@ -410,7 +585,9 @@ export default function AdminVentas() {
             <div className="rounded-2xl bg-white px-4 py-16 text-center text-sm text-ink/65">
               {todas.length === 0
                 ? "Todavía no entró ninguna orden."
-                : "Ningún pedido pagado coincide con ese filtro."}
+                : enFecha.length === 0
+                  ? "No entró ninguna orden en ese período."
+                  : "Ningún pedido pagado coincide con ese filtro."}
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-4">
@@ -518,11 +695,13 @@ export default function AdminVentas() {
         empty={
           todas.length === 0
             ? "Todavía no entró ninguna orden."
-            : estado === "vencidas"
-              ? `Ninguna reserva pasó las ${RESERVA_HORAS} h sin acreditarse.`
-              : estado === "abandonados"
-                ? "Nadie se fue de Mercado Pago sin pagar."
-                : "Ninguna orden coincide con ese filtro."
+            : enFecha.length === 0
+              ? "No entró ninguna orden en ese período."
+              : estado === "vencidas"
+                ? `Ninguna reserva pasó las ${RESERVA_HORAS} h sin acreditarse.`
+                : estado === "abandonados"
+                  ? "Nadie se fue de Mercado Pago sin pagar."
+                  : "Ninguna orden coincide con ese filtro."
         }
       >
         {visibles.map((order) => (
