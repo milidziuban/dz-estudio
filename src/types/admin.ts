@@ -98,6 +98,9 @@ export type Customer = {
   totalSpent: number;
   firstOrderAt: string;
   lastOrderAt: string;
+  /** La última orden cobrada: es la que dice hace cuánto no compra.
+   *  null si todavía no pagó ninguna. */
+  lastPaidOrderAt: string | null;
 };
 
 export type DiscountKind = "percent" | "fixed" | "free-shipping";

@@ -1,6 +1,7 @@
 import type { TrendPoint } from "../components/admin/TrendChart";
 import {
   dayKey,
+  daysSince,
   formatDayMonth,
   isPaid,
   orderRevenue,
@@ -312,6 +313,7 @@ export function customersFromOrders(orders: Order[]): Customer[] {
         totalSpent: pagada ? orderRevenue(order) : 0,
         firstOrderAt: order.createdAt,
         lastOrderAt: order.createdAt,
+        lastPaidOrderAt: pagada ? order.createdAt : null,
       });
       continue;
     }
@@ -320,6 +322,7 @@ export function customersFromOrders(orders: Order[]): Customer[] {
     if (pagada) {
       current.paidCount += 1;
       current.totalSpent += orderRevenue(order);
+      current.lastPaidOrderAt = order.createdAt;
     }
     current.lastOrderAt = order.createdAt;
     // Los datos de contacto más recientes son los que valen
@@ -330,6 +333,28 @@ export function customersFromOrders(orders: Order[]): Customer[] {
   }
 
   return [...map.values()].sort((a, b) => b.totalSpent - a.totalSpent);
+}
+
+/** A partir de acá el cliente cuenta como dormido y entra en la lista de
+ *  WhatsApp del mes. Dos meses es el corte: menos que eso todavía es alguien
+ *  que compró recién. */
+export const DIAS_DORMIDO = 60;
+/** Entre este corte y el anterior, el cliente se está enfriando. */
+export const DIAS_TIBIO = 30;
+
+export type CustomerTemp = "sin-compra" | "reciente" | "tibio" | "dormido";
+
+/** Hace cuánto no compra, y qué tan lejos quedó. `dias` es null cuando nunca
+ *  pagó una orden: no es lo mismo que hace mucho que no compra. */
+export function customerLapse(
+  customer: Customer,
+  now: number = Date.now(),
+): { dias: number | null; temp: CustomerTemp } {
+  if (!customer.lastPaidOrderAt) return { dias: null, temp: "sin-compra" };
+  const dias = daysSince(customer.lastPaidOrderAt, now);
+  if (dias >= DIAS_DORMIDO) return { dias, temp: "dormido" };
+  if (dias >= DIAS_TIBIO) return { dias, temp: "tibio" };
+  return { dias, temp: "reciente" };
 }
 
 // ── Stock ─────────────────────────────────────────────────────

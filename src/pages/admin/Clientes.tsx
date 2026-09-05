@@ -12,14 +12,23 @@ import {
   downloadCsv,
   formatCompactPrice,
   formatDate,
+  formatDaysAgo,
 } from "../../lib/admin";
-import { customersFromOrders } from "../../lib/admin-stats";
+import {
+  DIAS_DORMIDO,
+  customerLapse,
+  customersFromOrders,
+} from "../../lib/admin-stats";
+import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import type { Customer } from "../../types/admin";
+
+type Filtro = "todos" | "dormidos";
 
 export default function AdminClientes() {
   const orders = useAdminOrders();
   const [busqueda, setBusqueda] = useState("");
+  const [filtro, setFiltro] = useState<Filtro>("todos");
   const [abierto, setAbierto] = useState<Customer | null>(null);
 
   const todos = useMemo(
@@ -27,16 +36,39 @@ export default function AdminClientes() {
     [orders.data],
   );
 
+  /** Hace cuánto no compra cada uno, con un solo "ahora" para toda la tabla. */
+  const lapsos = useMemo(() => {
+    const ahora = Date.now();
+    return new Map(
+      todos.map((customer) => [customer.email, customerLapse(customer, ahora)]),
+    );
+  }, [todos]);
+
+  const dormidos = useMemo(
+    () =>
+      todos
+        .filter((customer) => lapsos.get(customer.email)?.temp === "dormido")
+        // Los que hace más que no compran van primero: es el orden en el que
+        // conviene escribirles.
+        .sort(
+          (a, b) =>
+            new Date(a.lastPaidOrderAt!).getTime() -
+            new Date(b.lastPaidOrderAt!).getTime(),
+        ),
+    [todos, lapsos],
+  );
+
   const visibles = useMemo(() => {
+    const base = filtro === "dormidos" ? dormidos : todos;
     const term = busqueda.trim().toLowerCase();
-    if (!term) return todos;
-    return todos.filter(
+    if (!term) return base;
+    return base.filter(
       (customer) =>
         customer.email.includes(term) ||
         customer.nombre.toLowerCase().includes(term) ||
         customer.provincia.toLowerCase().includes(term),
     );
-  }, [todos, busqueda]);
+  }, [todos, dormidos, filtro, busqueda]);
 
   const resumen = useMemo(() => {
     const compradores = todos.filter((customer) => customer.paidCount > 0);
@@ -83,14 +115,14 @@ export default function AdminClientes() {
             <em className="font-serif font-normal italic text-pink">compra</em>
           </>
         }
-        description="La lista sale de las órdenes: cada email es un cliente, con lo que gastó y cuándo fue la última vez."
+        description="La lista sale de las órdenes: cada email es un cliente, con lo que gastó y hace cuánto que no compra."
       >
         <Button
           variant="secondary"
           className="px-5 py-2.5"
           onClick={() =>
             downloadCsv(
-              "dz-clientes.csv",
+              filtro === "dormidos" ? "dz-clientes-dormidos.csv" : "dz-clientes.csv",
               visibles.map((customer) => ({
                 Nombre: customer.nombre,
                 Email: customer.email,
@@ -102,6 +134,10 @@ export default function AdminClientes() {
                 Total_comprado_sin_envio: customer.totalSpent,
                 Primera_compra: formatDate(customer.firstOrderAt),
                 Ultima_compra: formatDate(customer.lastOrderAt),
+                Ultima_compra_cobrada: customer.lastPaidOrderAt
+                  ? formatDate(customer.lastPaidOrderAt)
+                  : "",
+                Dias_sin_comprar: lapsos.get(customer.email)?.dias ?? "",
               })),
             )
           }
@@ -110,7 +146,7 @@ export default function AdminClientes() {
         </Button>
       </PageHeading>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           label="Clientes"
           value={String(resumen.total)}
@@ -129,11 +165,14 @@ export default function AdminClientes() {
         <StatCard
           label="Mejor cliente"
           value={
-            visibles[0]?.totalSpent
-              ? formatCompactPrice(visibles[0].totalSpent)
-              : "—"
+            todos[0]?.totalSpent ? formatCompactPrice(todos[0].totalSpent) : "—"
           }
           hint={todos[0]?.nombre}
+        />
+        <StatCard
+          label="Para escribirles"
+          value={String(dormidos.length)}
+          hint={`compraron y hace ${DIAS_DORMIDO}+ días que no vuelven`}
         />
       </div>
 
@@ -146,6 +185,29 @@ export default function AdminClientes() {
           aria-label="Buscar clientes"
           className="w-full rounded-full border border-ink/20 bg-white px-5 py-2.5 font-mono text-xs focus:border-ink focus:outline-none sm:max-w-sm"
         />
+
+        <div
+          role="group"
+          aria-label="Filtrar clientes"
+          className="flex flex-wrap gap-1 rounded-full bg-white p-1"
+        >
+          {(["todos", "dormidos"] as const).map((id) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={filtro === id}
+              onClick={() => setFiltro(id)}
+              className={cn(
+                "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+                filtro === id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
+              )}
+            >
+              {id === "todos" ? "Todos" : "Para escribirles"}
+              {id === "dormidos" && dormidos.length > 0 && ` ${dormidos.length}`}
+            </button>
+          ))}
+        </div>
+
         <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:ml-auto">
           {visibles.length} {visibles.length === 1 ? "cliente" : "clientes"}
         </p>
@@ -155,19 +217,23 @@ export default function AdminClientes() {
         columns={[
           { label: "Cliente" },
           { label: "Dónde", hideOnMobile: true },
-          { label: "Órdenes", align: "right" },
+          { label: "Órdenes", align: "right", hideOnMobile: true },
           { label: "Compró", align: "right" },
-          { label: "Última", align: "right", hideOnMobile: true },
+          { label: "Sin comprar", align: "right" },
         ]}
         isLoading={orders.isLoading}
         isEmpty={visibles.length === 0}
         empty={
           todos.length === 0
             ? "Todavía no hay clientes: aparecen cuando entra la primera orden."
-            : "Nadie coincide con esa búsqueda."
+            : filtro === "dormidos" && !busqueda.trim()
+              ? `Nadie pasó los ${DIAS_DORMIDO} días sin comprar. Por ahora no hay a quién escribirle.`
+              : "Nadie coincide con esa búsqueda."
         }
       >
-        {visibles.map((customer) => (
+        {visibles.map((customer) => {
+          const lapso = lapsos.get(customer.email);
+          return (
           <tr
             key={customer.email}
             onClick={() => setAbierto(customer)}
@@ -185,7 +251,7 @@ export default function AdminClientes() {
               {customer.ciudad ? `${customer.ciudad}, ` : ""}
               {customer.provincia || "—"}
             </td>
-            <td className="px-4 py-3 text-right font-mono text-xs">
+            <td className="hidden px-4 py-3 text-right font-mono text-xs sm:table-cell">
               {customer.paidCount}
               {customer.ordersCount !== customer.paidCount && (
                 <span className="text-ink/65"> / {customer.ordersCount}</span>
@@ -194,11 +260,26 @@ export default function AdminClientes() {
             <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs">
               {customer.totalSpent ? formatPrice(customer.totalSpent) : "—"}
             </td>
-            <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-[11px] text-ink/65 sm:table-cell">
-              {formatDate(customer.lastOrderAt)}
+            <td className="whitespace-nowrap px-4 py-3 text-right">
+              <span
+                className={cn(
+                  "block font-mono text-[11px]",
+                  lapso?.temp === "dormido" ? "text-ink" : "text-ink/65",
+                )}
+              >
+                {lapso?.dias === null || lapso === undefined
+                  ? "nunca compró"
+                  : formatDaysAgo(lapso.dias)}
+              </span>
+              {customer.lastPaidOrderAt && (
+                <span className="block font-mono text-[10px] text-ink/65">
+                  {formatDate(customer.lastPaidOrderAt)}
+                </span>
+              )}
             </td>
           </tr>
-        ))}
+          );
+        })}
       </AdminTable>
 
       <AdminDrawer
@@ -240,6 +321,13 @@ export default function AdminClientes() {
               </p>
               <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
                 Cliente desde {formatDate(abierto.firstOrderAt)}
+              </p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                {abierto.lastPaidOrderAt
+                  ? `Última compra ${formatDaysAgo(
+                      lapsos.get(abierto.email)?.dias ?? 0,
+                    )} · ${formatDate(abierto.lastPaidOrderAt)}`
+                  : "Todavía no le entró ninguna compra cobrada"}
               </p>
               <a
                 href={`mailto:${abierto.email}`}

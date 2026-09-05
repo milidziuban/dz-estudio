@@ -178,6 +178,28 @@ export function timeUntil(
   return `en ${gap(minutos)}`;
 }
 
+/** Días enteros que pasaron desde una fecha. Nunca negativo. */
+export function daysSince(date: string | Date, now: number = Date.now()): number {
+  const dias = (now - new Date(date).getTime()) / 86_400_000;
+  return Math.max(0, Math.floor(dias));
+}
+
+/** "hoy", "ayer", "hace 12 días", "hace 3 meses". Pasado el mes se cuenta en
+ *  meses: "hace 154 días" no le dice nada a nadie. */
+export function formatDaysAgo(dias: number): string {
+  if (dias <= 0) return "hoy";
+  if (dias === 1) return "ayer";
+  if (dias < 31) return `hace ${dias} días`;
+  if (dias < 365) {
+    // Redondeando para abajo: "hace 1 mes" a los 45 días es más honesto que
+    // decir 2 cuando todavía no se cumplieron.
+    const meses = Math.floor(dias / 30);
+    return `hace ${meses} ${meses === 1 ? "mes" : "meses"}`;
+  }
+  const anios = Math.floor(dias / 365);
+  return `hace ${anios} ${anios === 1 ? "año" : "años"}`;
+}
+
 /** "12 ago" — para los ejes del gráfico. */
 export function formatDayMonth(date: Date): string {
   return new Intl.DateTimeFormat("es-AR", {
