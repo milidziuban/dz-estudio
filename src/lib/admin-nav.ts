@@ -48,6 +48,11 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     title: "Crecimiento",
     items: [
       { to: "/admin/descuentos", label: "Descuentos", icon: "descuentos" },
+      {
+        to: "/admin/contenido",
+        label: "Contenido y redes",
+        icon: "contenido",
+      },
       { to: "/admin/marketing", label: "Marketing", icon: "marketing" },
     ],
   },

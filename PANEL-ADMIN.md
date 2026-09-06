@@ -17,6 +17,7 @@ supabase/migrations/20260819140000_seguimiento_pedido.sql
 supabase/migrations/20260819150000_stock_al_despachar.sql
 supabase/migrations/20260819160000_notas_del_pedido.sql
 supabase/migrations/20260819170000_notificaciones_ventas.sql
+supabase/migrations/20260906120000_calendario_de_contenido.sql
 ```
 
 La primera deja el esquema de `products` como lo espera el código (`peso`,
@@ -27,6 +28,11 @@ columnas que no existen.
 Crea la tabla `admins`, la función `is_admin()`, las policies de escritura y las
 tablas nuevas (`page_views`, `discounts`, `store_settings`,
 `newsletter_subscribers`) más el bucket de Storage `productos`.
+
+La última, `calendario_de_contenido`, agrega la tabla `content_posts` y el bucket
+`contenido` que usa la pantalla **Contenido y redes**, y deja cargada la semana
+del lanzamiento tal como está en el vault. Sin ella, esa pantalla entra pero
+avisa que falta la migración.
 
 Es idempotente: se puede correr dos veces sin romper nada.
 
@@ -99,6 +105,7 @@ Qué queda público a propósito:
 | `discounts` | lectura solo de los vigentes | todo |
 | `page_views` | insert | lectura |
 | `newsletter_subscribers` | insert | todo |
+| `content_posts` | nada | todo |
 | Storage `productos` | lectura | subir / borrar |
 
 Los `insert` públicos son necesarios (el visitante no está logueado) y por eso
@@ -120,6 +127,9 @@ Estos cambios se ven en el sitio sin deploy:
 - **Descuentos → promociones automáticas**: los porcentajes y el mínimo de las
   dos promos que se aplican solas en el carrito.
 - **Marketing → marquesina**: las frases de la franja negra.
+- **Contenido y redes**: el calendario de publicaciones. No toca la tienda: es
+  la agenda de Instagram y Facebook —día, hora, foto, guion, texto y hashtags—
+  con el registro de lo que ya salió.
 - **Centro de distribución**: dirección y horario del punto de retiro, umbral de
   poco stock.
 
@@ -157,14 +167,15 @@ desactivó a mano hay que prenderlo en **Database → Replication**.
 
 ```
 src/pages/admin/          Inicio, Estadisticas, Productos, Ventas, Clientes,
-                          Descuentos, Marketing, MetodosPago, MetodosEnvio,
-                          Distribucion, Login
+                          Descuentos, Contenido, Marketing, MetodosPago,
+                          MetodosEnvio, Distribucion, Login
 src/components/admin/     Layout, sidebar, tablas, drawers, gráfico, guard
 src/hooks/                useAdminAuth, useAdminOrders, useAdminProducts,
                           useDiscounts, useSubscribers, useStoreSettings,
-                          useVisits
+                          useVisits, useContentPosts
 src/lib/admin.ts          Formato, rangos de fecha, export CSV
 src/lib/admin-stats.ts    KPIs, series del gráfico, clientes, tráfico
+src/lib/contenido.ts      Etiquetas, grilla del mes y fechas del calendario
 src/lib/visits.ts         Registro de visitas propio
 ```
 

@@ -32,6 +32,7 @@ const AdminPrecios = lazy(adminLoaders.precios);
 const AdminVentas = lazy(adminLoaders.ventas);
 const AdminClientes = lazy(adminLoaders.clientes);
 const AdminDescuentos = lazy(adminLoaders.descuentos);
+const AdminContenido = lazy(adminLoaders.contenido);
 const AdminMarketing = lazy(adminLoaders.marketing);
 const AdminPagos = lazy(adminLoaders.pagos);
 const AdminEnvios = lazy(adminLoaders.envios);
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="ventas" element={<AdminVentas />} />
           <Route path="clientes" element={<AdminClientes />} />
           <Route path="descuentos" element={<AdminDescuentos />} />
+          <Route path="contenido" element={<AdminContenido />} />
           <Route path="marketing" element={<AdminMarketing />} />
           <Route path="pagos" element={<AdminPagos />} />
           <Route path="envios" element={<AdminEnvios />} />

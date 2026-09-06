@@ -40,6 +40,14 @@ export default function AdminMarketing() {
         description="La marquesina de la tienda, los suscriptores de la newsletter y por dónde te encuentran."
       />
 
+      <p className="mb-6 rounded-xl bg-cream px-4 py-3 text-xs leading-relaxed text-ink/65">
+        ✦ El calendario de lo que se publica —día, hora, foto y texto— está en{" "}
+        <a href="/admin/contenido" className="font-semibold underline">
+          Contenido y redes
+        </a>
+        .
+      </p>
+
       <div className="grid gap-3 sm:grid-cols-3">
         <StatCard
           label="Suscriptores"

@@ -266,3 +266,50 @@ export type ProductDraft = {
   images: { src: string; fit: "cover" | "contain"; background?: ColorToken }[];
   variants: AdminProductVariant[];
 };
+
+// ── Calendario de contenido ───────────────────────────────────
+
+/** La mezcla semanal que recomienda el vault: 2 de producto, 1 de proceso,
+ *  1 de uso, 1 de cercanía. `otro` es para las tareas de preparación. */
+export type ContentKind =
+  | "producto"
+  | "proceso"
+  | "uso"
+  | "cercania"
+  | "cliente"
+  | "promo"
+  | "otro";
+
+/** `tarea` no se publica: es la preparación que igual ocupa un día del
+ *  calendario (archivar los posts de prueba, avisar por WhatsApp). */
+export type ContentFormat = "feed" | "carrusel" | "reel" | "historia" | "tarea";
+
+export type ContentChannel = "instagram" | "facebook" | "ambos";
+
+/** `foto` = la foto ya está sacada, falta el texto.
+ *  `listo` = foto y texto listos, solo queda subirlo. */
+export type ContentStatus = "idea" | "foto" | "listo" | "publicado" | "pospuesto";
+
+export type ContentPost = {
+  id: string;
+  createdAt: string;
+  /** Clave estable de las piezas que vinieron del vault. null si se creó acá. */
+  ref: string | null;
+  /** Día y hora de publicación, en ISO */
+  scheduledAt: string;
+  title: string;
+  kind: ContentKind;
+  format: ContentFormat;
+  channel: ContentChannel;
+  status: ContentStatus;
+  /** Qué es la pieza: el guion, las tomas, la idea */
+  brief: string | null;
+  /** El texto tal cual va a Instagram */
+  copy: string | null;
+  hashtags: string | null;
+  /** La foto o el video que hay que subir */
+  mediaUrl: string | null;
+  /** Qué pasó con la pieza una vez publicada */
+  result: string | null;
+  publishedAt: string | null;
+};
