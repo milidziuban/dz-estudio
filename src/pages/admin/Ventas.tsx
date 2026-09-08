@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
+import OrderRemito from "../../components/admin/OrderRemito";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
 import StatCard from "../../components/admin/StatCard";
@@ -145,6 +146,8 @@ export default function AdminVentas() {
   const hasta = searchParams.get("hasta") ?? "";
   const [busqueda, setBusqueda] = useState("");
   const [abierta, setAbierta] = useState<Order | null>(null);
+  // La orden cuyo remito está en pantalla, lista para mandar a la impresora.
+  const [remito, setRemito] = useState<Order | null>(null);
 
   // Kanban: qué tarjeta se está arrastrando / soltando, y el error de la
   // última movida si el guardado falla (el resto del panel usa el mismo patrón).
@@ -788,7 +791,7 @@ export default function AdminVentas() {
         title={abierta ? `Orden ${abierta.id.slice(0, 8).toUpperCase()}` : ""}
         subtitle={abierta ? formatDateTime(abierta.createdAt) : undefined}
         footer={
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button
               className="flex-1 disabled:opacity-50"
               disabled={updateOrder.isPending}
@@ -796,8 +799,18 @@ export default function AdminVentas() {
             >
               {updateOrder.isPending ? "Guardando…" : "Guardar cambios ✦"}
             </Button>
+            {/* El remito sale de la ficha, que es donde ya está toda la orden:
+                imprimirlo evita copiar la dirección a mano para la etiqueta. */}
             <Button
               variant="secondary"
+              className="px-5"
+              onClick={() => setRemito(abierta)}
+            >
+              Remito
+            </Button>
+            <Button
+              variant="secondary"
+              className="px-5"
               onClick={() => {
                 setAbierta(null);
                 setPatch(null);
@@ -1019,6 +1032,8 @@ export default function AdminVentas() {
           </div>
         )}
       </AdminDrawer>
+
+      <OrderRemito order={remito} onClose={() => setRemito(null)} />
     </>
   );
 }
