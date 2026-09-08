@@ -45,3 +45,54 @@
     @apply outline outline-2 outline-offset-2 outline-ink;
   }
 }
+
+/* Remito imprimible (panel → Ventas → una orden)
+ *
+ * La hoja se monta por portal en el body, fuera de `#root`. Así, para imprimir
+ * alcanza con apagar `#root`: se van el sidebar, la tabla, el drawer y sus
+ * botones de una sola vez, sin depender de que cada pantalla se acuerde de
+ * marcarse. Lo que queda es el remito, negro sobre blanco y sin el fondo cream,
+ * que en papel es tinta tirada.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  #root {
+    display: none !important;
+  }
+
+  .remito-overlay {
+    position: static !important;
+    overflow: visible !important;
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  .remito-hoja {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Los botones de la vista previa no van al papel */
+  .remito-no-print {
+    display: none !important;
+  }
+
+  /* Un pedido por hoja: nada de cortar el detalle a la mitad */
+  .remito-hoja table,
+  .remito-hoja section {
+    break-inside: avoid;
+  }
+}
