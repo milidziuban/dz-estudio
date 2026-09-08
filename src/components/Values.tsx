@@ -5,7 +5,7 @@ const values = [
   {
     symbol: "✦",
     title: "Envíos a todo el país",
-    text: "Andreani, a sucursal o a domicilio.",
+    text: "El costo lo coordinamos por WhatsApp antes de despachar.",
   },
   {
     symbol: "✧",

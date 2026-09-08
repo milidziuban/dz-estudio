@@ -10,7 +10,10 @@ import {
   DEFAULT_PROMOS,
   INSTALLMENTS,
 } from "../lib/promos";
-import { useStoreSettings } from "../hooks/useStoreSettings";
+import {
+  SETTINGS_DEFAULTS,
+  useStoreSettings,
+} from "../hooks/useStoreSettings";
 import { cartWhatsappUrl } from "../lib/whatsapp";
 import Button from "./Button";
 import CartItemRow from "./CartItemRow";
@@ -31,6 +34,15 @@ export default function CartDrawer() {
   const discount = bestDiscount(resolved, subtotal, false, promos);
   const faltan = comboFaltan(resolved, promos);
   const total = subtotal - (discount?.amount ?? 0);
+
+  // Mientras el envío se coordine por WhatsApp, el carrito no puede prometer
+  // que el costo "se calcula al final": no se calcula en la tienda. Se mira
+  // la configuración y no un cartel fijo, para que el día que se prendan las
+  // transportistas el texto vuelva solo.
+  const envios = settings?.envios ?? SETTINGS_DEFAULTS.envios;
+  const cotizaEnLaTienda = envios.options.some(
+    (option) => option.enabled && option.mode !== "a-coordinar" && option.cost > 0,
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -129,9 +141,11 @@ export default function CartDrawer() {
                     </dd>
                   </div>
                 )}
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-3">
                   <dt className="uppercase text-xs">Envío</dt>
-                  <dd className="text-xs">Se calcula al final</dd>
+                  <dd className="text-xs">
+                    {cotizaEnLaTienda ? "Se calcula al final" : "Se coordina aparte"}
+                  </dd>
                 </div>
                 <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">
                   <dt className="uppercase">Total</dt>

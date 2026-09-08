@@ -29,6 +29,7 @@ export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
 
 export const SHIPPING_METHOD_LABEL: Record<string, string> = {
   retiro: "Retiro en depósito",
+  "envio-a-coordinar": "Envío a coordinar",
   "andreani-sucursal": "Andreani sucursal",
   "andreani-domicilio": "Andreani domicilio",
   "correo-sucursal": "Correo Argentino sucursal",

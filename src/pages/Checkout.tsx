@@ -15,6 +15,7 @@ import { stashPurchase, trackBeginCheckout } from "../lib/analytics";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import {
   checkoutSchema,
+  esACoordinar,
   PESO_GRAMOS_DEFAULT,
   PROVINCIAS,
   type CheckoutData,
@@ -111,10 +112,29 @@ export default function Checkout() {
   // Envío gratis a partir del monto configurado (null = sin envío gratis)
   const envioGratis =
     envios.freeShippingFrom !== null && subtotal >= envios.freeShippingFrom;
-  const costFor = (option: (typeof shippingOptions)[number]) =>
-    envioGratis ? 0 : (liveCostFor(option) ?? option.cost);
+
+  /** Cuánto sale el envío. `null` = a coordinar: todavía no lo sabemos, no
+   *  se muestra ningún número y no entra en el total. */
+  const costFor = (option: (typeof shippingOptions)[number]): number | null =>
+    esACoordinar(option)
+      ? null
+      : envioGratis
+        ? 0
+        : (liveCostFor(option) ?? option.cost);
+
+  /** Lo que va a la derecha de cada opción. Nunca "$0" ni "Gratis" para el
+   *  envío a coordinar: eso se lee como envío gratis y no lo es. */
+  const priceLabel = (option: (typeof shippingOptions)[number]): string => {
+    if (isQuoting(option)) return "Calculando…";
+    const costo = costFor(option);
+    if (costo === null) return "A coordinar";
+    return costo === 0 ? "Gratis" : formatPrice(costo);
+  };
+
   const selectedOption = shippingOptions.find((o) => o.id === envioSel);
+  // undefined = todavía no eligió · null = a coordinar
   const shippingCost = selectedOption ? costFor(selectedOption) : undefined;
+  const envioACoordinar = shippingCost === null;
 
   // Las promos de Tienda Nube no se combinan: se aplica la más conveniente
   const discount = bestDiscount(
@@ -413,16 +433,24 @@ export default function Checkout() {
                           </span>
                         </span>
                       </span>
-                      <span className="font-mono text-sm font-medium tracking-wider">
-                        {isQuoting(option)
-                          ? "Calculando…"
-                          : costFor(option) === 0
-                            ? "Gratis"
-                            : formatPrice(costFor(option))}
+                      <span
+                        className={cn(
+                          "whitespace-nowrap font-mono text-sm font-medium tracking-wider",
+                          costFor(option) === null && "text-ink/65",
+                        )}
+                      >
+                        {priceLabel(option)}
                       </span>
                     </label>
                   ))}
                 </div>
+                {envioACoordinar && (
+                  <p className="mt-3 rounded-xl bg-amarillo/30 px-4 py-3 text-xs leading-relaxed">
+                    ✦ Ahora pagás solo los productos. Te escribimos por
+                    WhatsApp con el costo del envío y lo cobramos antes de
+                    despachar.
+                  </p>
+                )}
                 {hasLiveOptions && !esRetiro && cpWatched.trim().length < 4 && (
                   <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
                     Correo Argentino cotiza con tu código postal: el precio se
@@ -700,9 +728,11 @@ export default function Checkout() {
                   <dd>
                     {shippingCost === undefined
                       ? "A definir"
-                      : shippingCost === 0
-                        ? "Gratis"
-                        : formatPrice(shippingCost)}
+                      : shippingCost === null
+                        ? "A coordinar"
+                        : shippingCost === 0
+                          ? "Gratis"
+                          : formatPrice(shippingCost)}
                   </dd>
                 </div>
                 <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">
@@ -710,6 +740,13 @@ export default function Checkout() {
                   <dd>{formatPrice(total)}</dd>
                 </div>
               </dl>
+
+              {envioACoordinar && (
+                <p className="mt-3 text-xs leading-relaxed text-ink/65">
+                  El total es de los productos. El envío se cobra aparte,
+                  cuando sepamos cuánto sale.
+                </p>
+              )}
 
               {pagoSel !== "transferencia" && (
                 <p className="mt-4 text-xs leading-relaxed text-ink/65">

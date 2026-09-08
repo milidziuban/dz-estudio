@@ -80,8 +80,8 @@ export default function Footer() {
             </li>
           </ul>
           <p className="mt-6 text-xs text-cream/60">
-            Envíos: Andreani a sucursal o domicilio · Retiro gratis en{" "}
-            {SITE.retiro.direccion}
+            Envíos a todo el país, el costo se coordina por WhatsApp ·
+            Retiro gratis en {SITE.retiro.direccion}
           </p>
         </div>
       </div>

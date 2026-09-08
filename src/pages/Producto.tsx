@@ -312,7 +312,8 @@ export default function Producto() {
               <li className="flex gap-2.5">
                 <span aria-hidden="true">✦</span>
                 <span>
-                  Envíos a todo el país con Andreani, a sucursal o a domicilio.
+                  Envíos a todo el país. El costo del envío lo coordinamos por
+                  WhatsApp antes de despachar.
                 </span>
               </li>
               <li className="flex gap-2.5">

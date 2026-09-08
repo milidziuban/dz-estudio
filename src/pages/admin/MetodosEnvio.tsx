@@ -59,6 +59,11 @@ export default function AdminMetodosEnvio() {
                         Cotiza en vivo
                       </span>
                     )}
+                    {option.mode === "a-coordinar" && (
+                      <span className="rounded-full bg-amarillo/40 px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-ink">
+                        Se cobra aparte
+                      </span>
+                    )}
                   </div>
                   <Toggle
                     label="Ofrecer"
@@ -76,23 +81,25 @@ export default function AdminMetodosEnvio() {
                       setOption(index, { label: event.target.value })
                     }
                   />
-                  <TextField
-                    id={`e-cost-${option.id}`}
-                    label={
-                      option.mode === "vivo"
-                        ? "Costo de respaldo (ARS)"
-                        : "Costo (ARS)"
-                    }
-                    type="number"
-                    min={0}
-                    step={100}
-                    value={option.cost}
-                    onChange={(event) =>
-                      setOption(index, {
-                        cost: Number(event.target.value) || 0,
-                      })
-                    }
-                  />
+                  {option.mode !== "a-coordinar" && (
+                    <TextField
+                      id={`e-cost-${option.id}`}
+                      label={
+                        option.mode === "vivo"
+                          ? "Costo de respaldo (ARS)"
+                          : "Costo (ARS)"
+                      }
+                      type="number"
+                      min={0}
+                      step={100}
+                      value={option.cost}
+                      onChange={(event) =>
+                        setOption(index, {
+                          cost: Number(event.target.value) || 0,
+                        })
+                      }
+                    />
+                  )}
                   <TextField
                     id={`e-detail-${option.id}`}
                     label="Aclaración"
@@ -106,9 +113,11 @@ export default function AdminMetodosEnvio() {
                 </div>
 
                 <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
-                  {option.mode === "vivo"
-                    ? "Mientras la cotización en vivo esté configurada, este costo no se usa — solo entra si la transportista no responde."
-                    : `En el checkout: ${option.cost === 0 ? "Gratis" : formatPrice(option.cost)}`}
+                  {option.mode === "a-coordinar"
+                    ? "En el checkout: A coordinar. No muestra precio ni suma al total — el envío lo cobrás vos después de despachar."
+                    : option.mode === "vivo"
+                      ? "Mientras la cotización en vivo esté configurada, este costo no se usa — solo entra si la transportista no responde."
+                      : `En el checkout: ${option.cost === 0 ? "Gratis" : formatPrice(option.cost)}`}
                 </p>
               </li>
             ))}

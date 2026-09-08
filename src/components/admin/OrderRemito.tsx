@@ -12,6 +12,7 @@ import {
   formatDateTime,
   orderRevenue,
 } from "../../lib/admin";
+import { envioACoordinarPorId } from "../../lib/checkout";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import { SITE } from "../../lib/site";
@@ -64,6 +65,9 @@ export default function OrderRemito({ order, onClose }: OrderRemitoProps) {
   // a nadie que pase por el depósito. Acá se dice con todas las letras, en vez
   // de imprimir un bloque vacío que parezca un dato que se perdió.
   const retira = order.shippingMethod === "retiro";
+  // El envío a coordinar no se cobró en la tienda. En la hoja con la que se
+  // despacha, "Sin cargo" sería exactamente el error que hace despachar gratis.
+  const envioSinCobrar = envioACoordinarPorId(order.shippingMethod);
   const direccion = order.shippingAddress;
   const hayDireccion = Boolean(direccion?.direccion);
 
@@ -244,17 +248,24 @@ export default function OrderRemito({ order, onClose }: OrderRemitoProps) {
             )}
             <div className="flex justify-between">
               <dt className="text-ink/65">Envío</dt>
-              <dd>
-                {order.shippingCost
-                  ? formatPrice(order.shippingCost)
-                  : "Sin cargo"}
+              <dd className={envioSinCobrar ? "font-medium" : undefined}>
+                {envioSinCobrar
+                  ? "A cobrar"
+                  : order.shippingCost
+                    ? formatPrice(order.shippingCost)
+                    : "Sin cargo"}
               </dd>
             </div>
             <div className="flex justify-between border-t border-ink/20 pt-1.5 text-sm font-medium">
-              <dt>Total</dt>
+              <dt>{envioSinCobrar ? "Cobrado" : "Total"}</dt>
               <dd>{formatPrice(order.total)}</dd>
             </div>
           </dl>
+          {envioSinCobrar && (
+            <p className="mt-2 border border-ink px-2 py-1.5 text-[11px] font-medium">
+              ✦ Falta cobrar el envío. Este total es solo de los productos.
+            </p>
+          )}
         </section>
 
         {order.customerNotes && (

@@ -13,9 +13,9 @@ import type { Product } from "../types/product";
  *  servido — ver `index.html`.
  *
  *  Regla de oro: acá solo va lo que la página ya dice de verdad. Nada de
- *  reseñas inventadas, ni costos de envío —todavía no sabemos cuánto cobran
- *  Andreani y el Correo—, ni una política de devolución que el sitio no
- *  promete. Un dato de más acá es una penalización allá.
+ *  reseñas inventadas, ni costos de envío —la tienda no los cotiza: el envío
+ *  se coordina y se cobra aparte—, ni una política de devolución que el sitio
+ *  no promete. Un dato de más acá es una penalización allá.
  */
 
 export type JsonLd = Record<string, unknown>;

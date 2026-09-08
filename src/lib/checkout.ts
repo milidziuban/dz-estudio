@@ -27,11 +27,23 @@ export const PROVINCIAS = [
   "Tucumán",
 ] as const;
 
-// Métodos de envío. Retiro y Andreani tienen costo fijo (Andreani todavía
-// no tiene credenciales de API cargadas — son las que da el comercial de
-// cuenta, no se autogestionan). Correo Argentino cotiza en vivo por código
-// postal a través de la edge function `shipping-quote`; el costo acá abajo
-// es el que se usa si esa cotización no está configurada o falla.
+/** Cómo se cobra cada opción de envío.
+ *  - "fijo": el costo es el número que define el panel.
+ *  - "vivo": lo cotiza la transportista en el checkout (edge function
+ *    `shipping-quote`); el número del panel es el de respaldo.
+ *  - "a-coordinar": la tienda no muestra ningún precio ni lo suma al total.
+ *    El pedido se paga solo por producto y el envío se cobra aparte, después
+ *    de pasarle el costo a la clienta. */
+export type ShippingMode = "fijo" | "vivo" | "a-coordinar";
+
+// Métodos de envío.
+//
+// 07/09/2026 — Hasta tener las tarifas reales de Andreani y del Correo, la
+// tienda no cotiza envíos: se ofrecen dos opciones, retiro y "a coordinar".
+// Las cuatro de las transportistas quedan acá con `enabled: false` — no se
+// borran, se prenden de un clic desde /admin cuando estén los números. La
+// cotización en vivo (`shipping-quote`, `useShippingQuote`) sigue en su
+// lugar, dormida, esperando a que se prendan.
 export const SHIPPING_OPTIONS = [
   {
     id: "retiro",
@@ -39,6 +51,15 @@ export const SHIPPING_OPTIONS = [
     detail: "Tacuarí 7618, Guadalupe · Santa Fe Capital · lun a vie de 9 a 20",
     mode: "fijo",
     cost: 0,
+    enabled: true,
+  },
+  {
+    id: "envio-a-coordinar",
+    label: "Envío a coordinar",
+    detail: "Te escribimos por WhatsApp con el costo antes de despachar",
+    mode: "a-coordinar",
+    cost: 0,
+    enabled: true,
   },
   {
     id: "andreani-sucursal",
@@ -46,6 +67,7 @@ export const SHIPPING_OPTIONS = [
     detail: "3 a 6 días hábiles",
     mode: "fijo",
     cost: 7200,
+    enabled: false,
     provider: "andreani",
     service: "sucursal",
   },
@@ -55,6 +77,7 @@ export const SHIPPING_OPTIONS = [
     detail: "3 a 6 días hábiles",
     mode: "fijo",
     cost: 9500,
+    enabled: false,
     provider: "andreani",
     service: "domicilio",
   },
@@ -64,6 +87,7 @@ export const SHIPPING_OPTIONS = [
     detail: "Cotización en vivo por código postal",
     mode: "vivo",
     cost: 6500,
+    enabled: false,
     provider: "correo-argentino",
     service: "sucursal",
   },
@@ -73,10 +97,22 @@ export const SHIPPING_OPTIONS = [
     detail: "Cotización en vivo por código postal",
     mode: "vivo",
     cost: 8500,
+    enabled: false,
     provider: "correo-argentino",
     service: "domicilio",
   },
 ] as const;
+
+/** El envío de esta opción no se cotiza en la tienda: se cobra aparte. */
+export const esACoordinar = (option: { mode: string }): boolean =>
+  option.mode === "a-coordinar";
+
+/** Lo mismo, pero cuando lo único que hay a mano es el id que quedó guardado
+ *  en la orden (el panel, el seguimiento del pedido). El modo lo define el
+ *  código: `store_settings` cambia textos y costos, no de qué tipo es cada
+ *  opción. */
+export const envioACoordinarPorId = (id: string): boolean =>
+  SHIPPING_OPTIONS.some((option) => option.id === id && esACoordinar(option));
 
 export type ShippingId = (typeof SHIPPING_OPTIONS)[number]["id"];
 
@@ -108,7 +144,8 @@ type CampoDireccion = (typeof CAMPOS_DIRECCION)[number];
 /**
  * La dirección es opcional en el esquema base y se exige recién en el
  * refinamiento: quien retira en el depósito no tiene por qué cargar calle,
- * ciudad, provincia ni código postal.
+ * ciudad, provincia ni código postal. El envío a coordinar sí los pide todos:
+ * el paquete viaja igual y sin dirección no hay con qué cotizarlo después.
  */
 export const checkoutSchema = z
   .object({
@@ -125,6 +162,7 @@ export const checkoutSchema = z
     envio: z.enum(
       [
         "retiro",
+        "envio-a-coordinar",
         "andreani-sucursal",
         "andreani-domicilio",
         "correo-sucursal",

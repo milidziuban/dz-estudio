@@ -44,7 +44,8 @@ export function checkoutWhatsappUrl(
   items: ResolvedCartItem[],
   subtotal: number,
   discount: AppliedDiscount | null,
-  shippingCost: number | undefined,
+  /** undefined = todavía no eligió envío · null = a coordinar */
+  shippingCost: number | null | undefined,
   total: number,
 ): string {
   const envio = SHIPPING_OPTIONS.find((o) => o.id === data.envio);
@@ -62,11 +63,17 @@ export function checkoutWhatsappUrl(
     ...(envio && shippingCost !== undefined
       ? [
           `Envío (${envio.label}): ${
-            shippingCost === 0 ? "gratis" : formatPrice(shippingCost)
+            shippingCost === null
+              ? "a coordinar"
+              : shippingCost === 0
+                ? "gratis"
+                : formatPrice(shippingCost)
           }`,
         ]
       : []),
-    `Total: ${formatPrice(total)}`,
+    shippingCost === null
+      ? `Total de los productos: ${formatPrice(total)}`
+      : `Total: ${formatPrice(total)}`,
     "",
     ...(nombre ? [`Nombre: ${nombre}`] : []),
     ...(data.email ? [`Email: ${data.email}`] : []),

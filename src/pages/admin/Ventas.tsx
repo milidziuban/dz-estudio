@@ -32,6 +32,7 @@ import {
   timeUntil,
   type PendingStage,
 } from "../../lib/admin";
+import { envioACoordinarPorId } from "../../lib/checkout";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import { SITE } from "../../lib/site";
@@ -741,6 +742,11 @@ export default function AdminVentas() {
                   ? "Retira en el depósito"
                   : order.shippingAddress?.provincia}
               </span>
+              {envioACoordinarPorId(order.shippingMethod) && (
+                <span className="mt-1 inline-block rounded-full bg-amarillo px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-ink">
+                  Falta cobrar envío
+                </span>
+              )}
             </td>
 
             <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs">
@@ -855,6 +861,12 @@ export default function AdminVentas() {
                   {SHIPPING_METHOD_LABEL[abierta.shippingMethod] ??
                     abierta.shippingMethod}
                 </p>
+                {envioACoordinarPorId(abierta.shippingMethod) && (
+                  <p className="mt-2 rounded-xl bg-amarillo/30 px-3 py-2 text-[11px] leading-relaxed">
+                    ✦ El envío de esta orden no se cobró en la tienda. Pasale el
+                    costo por WhatsApp y cobralo antes de despachar.
+                  </p>
+                )}
 
                 <div className="mt-4 flex flex-wrap gap-3">
                   {whatsappLink(abierta) && (

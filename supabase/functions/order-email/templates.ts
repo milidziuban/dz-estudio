@@ -42,6 +42,8 @@ export type MailOrder = {
   envioLabel: string;
   envioDetalle: string | null;
   esRetiro: boolean;
+  /** El envío no se cobró en la tienda: se cobra aparte. */
+  envioACoordinar: boolean;
   direccion: string | null;
   trackingCode: string | null;
   notas: string | null;
@@ -135,7 +137,11 @@ function orderDetail(order: MailOrder): string {
 
   const envio = money(
     order.envioLabel,
-    order.shippingCost > 0 ? formatPrice(order.shippingCost) : "Gratis",
+    order.envioACoordinar
+      ? "A coordinar"
+      : order.shippingCost > 0
+        ? formatPrice(order.shippingCost)
+        : "Gratis",
   );
 
   const destino = order.esRetiro
@@ -227,7 +233,13 @@ function detalleTexto(order: MailOrder): string {
     order.discount > 0
       ? `  ${order.discountLabel ?? "Descuento"}: - ${formatPrice(order.discount)}`
       : null,
-    `  ${order.envioLabel}: ${order.shippingCost > 0 ? formatPrice(order.shippingCost) : "Gratis"}`,
+    `  ${order.envioLabel}: ${
+      order.envioACoordinar
+        ? "a coordinar"
+        : order.shippingCost > 0
+          ? formatPrice(order.shippingCost)
+          : "Gratis"
+    }`,
     `  TOTAL: ${formatPrice(order.total)}`,
   ].filter(Boolean);
 

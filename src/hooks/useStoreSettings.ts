@@ -48,7 +48,7 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       detail: option.detail,
       mode: option.mode,
       cost: option.cost,
-      enabled: true,
+      enabled: option.enabled,
       ...("provider" in option ? { provider: option.provider } : {}),
       ...("service" in option ? { service: option.service } : {}),
     })),

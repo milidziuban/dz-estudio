@@ -12,6 +12,7 @@ import {
   errorMessage,
   formatDate,
 } from "../lib/admin";
+import { envioACoordinarPorId } from "../lib/checkout";
 import { formatPrice } from "../lib/format";
 import { SITE } from "../lib/site";
 import { useOrderTracking, type OrderTracking } from "../hooks/useOrderTracking";
@@ -207,6 +208,14 @@ function OrderSummary({ order }: { order: OrderTracking }) {
           {formatPrice(order.total)}
         </span>
       </div>
+
+      {/* El envío a coordinar no entró en lo que se pagó: si el total figura
+          pelado, parece que el envío ya está cubierto. */}
+      {envioACoordinarPorId(order.shippingMethod) && (
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+          Es el total de los productos · el envío se cobra aparte
+        </p>
+      )}
 
       <p className="mt-6 text-xs leading-relaxed text-ink/65">
         ¿Algo no cierra?{" "}

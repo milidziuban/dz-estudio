@@ -1,4 +1,4 @@
-import type { ShippingId } from "../lib/checkout";
+import type { ShippingId, ShippingMode } from "../lib/checkout";
 import type { ColorToken, Product } from "./product";
 
 /** Variante con el número real de unidades: eso solo lo ve el panel — la
@@ -166,10 +166,13 @@ export type ShippingOptionSetting = {
   label: string;
   detail: string;
   /** "vivo": el costo real lo calcula la transportista en el checkout.
-   *  "fijo": el costo es este número, lo define el panel. */
-  mode: "fijo" | "vivo";
-  /** Costo fijo (mode "fijo") o de respaldo si la cotización en vivo
-   *  no está configurada o falla (mode "vivo"). */
+   *  "fijo": el costo es este número, lo define el panel.
+   *  "a-coordinar": la tienda no muestra precio ni lo suma al total, el envío
+   *  se cobra aparte (ver `ShippingMode` en src/lib/checkout.ts). */
+  mode: ShippingMode;
+  /** Costo fijo (mode "fijo") o de respaldo si la cotización en vivo no está
+   *  configurada o falla (mode "vivo"). En "a-coordinar" no se usa: queda en
+   *  0 y el panel ni siquiera lo pide. */
   cost: number;
   enabled: boolean;
   /** Solo en mode "vivo": a qué transportista y servicio cotizar. */

@@ -10,15 +10,15 @@ const CATEGORIES: { id: string; symbol: string; title: string; items: QA[] }[] =
       items: [
         {
           q: "¿A dónde envían?",
-          a: "A todo el país con Andreani, a sucursal o a domicilio. Si estás en Santa Fe Capital podés retirar sin costo por el depósito de Tacuarí 7618, Guadalupe, de lunes a viernes de 9 a 20.",
+          a: "A todo el país. El envío lo coordinamos por WhatsApp después de la compra: te pasamos el costo antes de despachar. Si estás en Santa Fe Capital podés retirar sin costo por el depósito de Tacuarí 7618, Guadalupe, de lunes a viernes de 9 a 20.",
         },
         {
           q: "¿Cuánto tarda?",
-          a: "Andreani entrega entre 3 y 6 días hábiles, según la provincia. Los pedidos se despachan dentro de las 48 horas de acreditado el pago.",
+          a: "Los pedidos se despachan dentro de las 48 horas de acreditado el pago. El plazo de entrega depende de la provincia y de la transportista: te lo confirmamos cuando coordinamos el envío.",
         },
         {
           q: "¿Cuánto cuesta el envío?",
-          a: "El costo se calcula en el checkout según el método y tu código postal. El retiro por el depósito es siempre gratis.",
+          a: "Depende de a dónde va y de cuánto pesa el paquete, así que no lo cobramos en el checkout: ahí pagás los productos y nada más. Después te escribimos por WhatsApp con el costo del envío y lo cobramos antes de despachar. El retiro por el depósito es siempre gratis.",
         },
         {
           q: "¿Puedo seguir mi pedido?",

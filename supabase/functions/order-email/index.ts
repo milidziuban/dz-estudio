@@ -156,6 +156,9 @@ Deno.serve(async (req) => {
       cp?: string;
     };
     const esRetiro = order.shipping_method === "retiro";
+    // El modo lo define el código, no store_settings: ahí se cambian textos y
+    // costos, no de qué tipo es cada opción.
+    const envioACoordinar = order.shipping_method === "envio-a-coordinar";
     const direccion = esRetiro
       ? null
       : [
@@ -191,6 +194,7 @@ Deno.serve(async (req) => {
       envioLabel: envioOption?.label ?? order.shipping_method,
       envioDetalle: envioOption?.detail ?? null,
       esRetiro,
+      envioACoordinar,
       direccion,
       trackingCode: order.tracking_code ?? null,
       notas: order.customer_notes ?? null,
