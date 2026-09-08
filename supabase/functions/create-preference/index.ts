@@ -59,7 +59,10 @@ Deno.serve(async (req) => {
     const mpSettings = (pagos?.value as { mercadopago?: Record<string, number> })
       ?.mercadopago;
     const maxInstallments = Number(mpSettings?.maxInstallments) || 6;
-    const defaultInstallments = Number(mpSettings?.installments) || 3;
+    // Cuántas cuotas vienen preseleccionadas. Con las sin interés apagadas
+    // (installments en 0) arranca en 1: preseleccionar 3 sugeriría una promo
+    // que la tienda no está dando.
+    const defaultInstallments = Number(mpSettings?.installments) || 1;
 
     // El trigger SQL ya validó shipping_method y fijó shipping_cost si la
     // opción es de costo fijo. Si es "vivo" (Correo Argentino), acá lo

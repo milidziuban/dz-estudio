@@ -36,23 +36,42 @@ export const TRANSFER_PROMO = {
 
 /**
  * Cuotas que ofrece el checkout de Mercado Pago.
+ *
  * `sinInteres` son las que absorbe la tienda: se activan en la cuenta de MP
- * (Tu negocio → Costos y cuotas), acá solo se anuncian. De ahí hasta `max`
- * entran por Cuotas Simples, con el costo financiero a cargo del cliente.
- * `max` sí es real: es el tope que viaja en la preferencia de pago.
+ * (Tu negocio → Costos y cuotas) y acá solo se anuncian. Hoy están en cero —
+ * la tienda no las está ofreciendo — así que ningún texto promete "sin
+ * interés". Para volver a darlas: activarlas en la cuenta y poner acá cuántas
+ * son; los textos se rearman solos.
+ * `max` sí es real: es el tope que viaja en la preferencia de pago. Esas
+ * cuotas entran por Cuotas Simples, con el costo financiero a cargo del
+ * cliente.
  * `minAmount` es el piso que pone Mercado Pago para las cuotas sin interés:
- * por debajo de ese monto, sea el producto o el carrito, no se ofrecen.
+ * por debajo de ese monto, sea el producto o el carrito, no se ofrecen. Solo
+ * pesa mientras `sinInteres` sea mayor que cero.
  */
+// Anotado como `number` a propósito: si fuera el literal 0, TypeScript daría
+// por muerta la rama de "sin interés" y habría que reescribir los textos para
+// volver a activarla.
+const INSTALLMENTS_SIN_INTERES: number = 0;
+const INSTALLMENTS_MAX = 6;
 const INSTALLMENTS_MIN_AMOUNT = 45000;
 
+const SIN_INTERES_DESDE = `${INSTALLMENTS_SIN_INTERES} cuotas sin interés desde ${formatPrice(
+  INSTALLMENTS_MIN_AMOUNT,
+)}`;
+
 export const INSTALLMENTS = {
-  sinInteres: 3,
-  max: 6,
+  sinInteres: INSTALLMENTS_SIN_INTERES,
+  max: INSTALLMENTS_MAX,
   minAmount: INSTALLMENTS_MIN_AMOUNT,
   /** Titular corto: marquesina, badges, grilla de producto */
-  label: `3 cuotas sin interés desde ${formatPrice(INSTALLMENTS_MIN_AMOUNT)}`,
+  label: INSTALLMENTS_SIN_INTERES
+    ? SIN_INTERES_DESDE
+    : `Hasta ${INSTALLMENTS_MAX} cuotas con tarjeta`,
   /** Frase completa: carrito, checkout, medios de pago */
-  detail: `3 cuotas sin interés desde ${formatPrice(INSTALLMENTS_MIN_AMOUNT)}, o hasta 6 con Cuotas Simples`,
+  detail: INSTALLMENTS_SIN_INTERES
+    ? `${SIN_INTERES_DESDE}, o hasta ${INSTALLMENTS_MAX} con Cuotas Simples`
+    : `Hasta ${INSTALLMENTS_MAX} cuotas con tarjeta de crédito, por Cuotas Simples`,
 } as const;
 
 /** Configuración editable de las dos promos automáticas. Los porcentajes van

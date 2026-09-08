@@ -68,12 +68,16 @@ export default function AdminMetodosPago() {
                 <code className="font-mono">lib/promos.ts</code>), no en un
                 campo de acá — si Mercado Pago lo cambia, se actualiza ahí.
               </p>
+              <p className="mt-2">
+                En <strong>0</strong> la tienda deja de anunciarlas: los textos
+                pasan a hablar solo del tope y de las Cuotas Simples.
+              </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <TextField
                   id="mp-installments"
                   label="Cuotas sin interés"
                   type="number"
-                  min={1}
+                  min={0}
                   max={24}
                   value={mercadopago.installments}
                   onChange={(event) =>
@@ -81,7 +85,7 @@ export default function AdminMetodosPago() {
                       ...pagos.value,
                       mercadopago: {
                         ...mercadopago,
-                        installments: Number(event.target.value) || 1,
+                        installments: Number(event.target.value) || 0,
                       },
                     })
                   }

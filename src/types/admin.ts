@@ -142,7 +142,8 @@ export type PageView = {
 export type PagosSettings = {
   mercadopago: {
     enabled: boolean;
-    /** Cuotas sin interés que anuncia la tienda (las activa la cuenta de MP) */
+    /** Cuotas sin interés que anuncia la tienda (las activa la cuenta de MP).
+     *  En 0 no se anuncian: los textos hablan solo de Cuotas Simples. */
     installments: number;
     installmentsLabel: string;
     /** Tope real de cuotas que ofrece el checkout de MP */

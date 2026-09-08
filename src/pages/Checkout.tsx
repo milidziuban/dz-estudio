@@ -750,8 +750,8 @@ export default function Checkout() {
 
               {pagoSel !== "transferencia" && (
                 <p className="mt-4 text-xs leading-relaxed text-ink/65">
-                  {INSTALLMENTS.detail}, con tarjeta de crédito. Pagando por
-                  transferencia se te aplica 10% off.
+                  {INSTALLMENTS.detail}. Pagando por transferencia se te
+                  aplica 10% off.
                 </p>
               )}
 
