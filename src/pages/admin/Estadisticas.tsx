@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import AdminTable from "../../components/admin/AdminTable";
 import PageHeading from "../../components/admin/PageHeading";
+import ProductFunnelTable from "../../components/admin/ProductFunnelTable";
 import QueryError from "../../components/admin/QueryError";
 import RangeTabs from "../../components/admin/RangeTabs";
 import StatCard from "../../components/admin/StatCard";
 import TrendChart from "../../components/admin/TrendChart";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
+import { useProductFunnel } from "../../hooks/useProductFunnel";
 import { useVisits } from "../../hooks/useVisits";
 import {
   PAYMENT_LABEL,
@@ -75,6 +77,9 @@ export default function AdminEstadisticas() {
   const [range, setRange] = useState<RangeId>("30d");
   const orders = useAdminOrders();
   const visits = useVisits(range);
+  // Mismo rango que el resto de la pantalla: el hook recorta por fecha y por
+  // nada más, igual que los totales de Ventas.
+  const funnel = useProductFunnel(range);
 
   const allOrders = orders.data ?? [];
   const allVisits = visits.data ?? [];
@@ -135,15 +140,6 @@ export default function AdminEstadisticas() {
       };
     });
 
-    // Solo las páginas de producto, para ver qué se mira más
-    const productos = topPaths(
-      currentVisits.filter((visit) => visit.path.startsWith("/producto/")),
-      6,
-    ).map((item) => ({
-      label: item.label.replace("/producto/", ""),
-      count: item.count,
-    }));
-
     const porPago = new Map<string, number>();
     const porEnvio = new Map<string, number>();
     const porProvincia = new Map<string, number>();
@@ -176,7 +172,6 @@ export default function AdminEstadisticas() {
       tabla,
       paginas: topPaths(currentVisits, 6),
       origenes: topReferrers(currentVisits, 6),
-      productos,
       porPago: toRanking(porPago),
       porEnvio: toRanking(porEnvio),
       porProvincia: toRanking(porProvincia).slice(0, 6),
@@ -259,7 +254,16 @@ export default function AdminEstadisticas() {
             />
           </section>
 
-          <div className="mt-3 grid gap-3 lg:grid-cols-3">
+          {/* La pregunta de la semana del lanzamiento: qué se mira mucho y se
+              vende poco. Va arriba de los rankings de tráfico porque es lo
+              que hay que mirar primero. */}
+          <ProductFunnelTable
+            funnel={funnel.funnel}
+            isLoading={funnel.isLoading}
+            range={range}
+          />
+
+          <div className="mt-8 grid gap-3 lg:grid-cols-2">
             <section className="rounded-2xl bg-white p-6">
               <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
                 Páginas más vistas
@@ -276,15 +280,6 @@ export default function AdminEstadisticas() {
               <RankingList
                 items={data.origenes}
                 emptyLabel="Sin orígenes registrados."
-              />
-            </section>
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Productos más mirados
-              </h2>
-              <RankingList
-                items={data.productos}
-                emptyLabel="Sin visitas a productos."
               />
             </section>
           </div>
