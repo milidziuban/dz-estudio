@@ -34,7 +34,7 @@ export default function ProductImage({
         src={image.src}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        fetchpriority={priority ? "high" : "auto"}
         className={cn(
           "h-full w-full",
           image.fit === "contain" ? "object-contain p-4" : "object-cover",

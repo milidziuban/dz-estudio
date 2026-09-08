@@ -44,7 +44,7 @@ export default function Hero() {
             alt="Tres almohadones DZ Estudio: rombos bordó y rosa, rombos celeste y marrón, y rayas blanco y negro"
             width={1400}
             height={1057}
-            fetchPriority="high"
+            fetchpriority="high"
             className="w-full max-w-md md:max-w-none"
           />
         </div>
