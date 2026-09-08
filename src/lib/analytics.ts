@@ -1,7 +1,19 @@
 // Google Analytics 4 — el ID se configura con VITE_GA_ID en el .env.
 // Si no hay ID, todo es no-op (útil en desarrollo).
+//
+// Cada evento del embudo se mide dos veces desde acá: en GA4 y en el pixel de
+// Meta (`meta-pixel.ts`). Las pantallas siguen llamando a una sola función y no
+// saben que hay dos medidores; agregar un tercero se hace en este archivo.
 import type { ResolvedCartItem } from "./cart";
 import type { Product, ProductVariant } from "../types/product";
+import {
+  initMetaPixel,
+  metaAddToCart,
+  metaInitiateCheckout,
+  metaPageView,
+  metaPurchase,
+  metaViewContent,
+} from "./meta-pixel";
 
 declare global {
   interface Window {
@@ -15,6 +27,10 @@ export const GA_ID = import.meta.env.VITE_GA_ID as string | undefined;
 let initialized = false;
 
 export function initAnalytics() {
+  // Antes del corte por GA_ID: son dos medidores independientes y el pixel
+  // tiene que prenderse aunque el .env no tenga cargado el ID de GA4.
+  initMetaPixel();
+
   if (!GA_ID || initialized) return;
   initialized = true;
 
@@ -34,6 +50,7 @@ export function initAnalytics() {
 
 export function trackPageView(path: string) {
   trackEvent("page_view", { page_path: path });
+  metaPageView();
 }
 
 function trackEvent(name: string, params: Record<string, unknown>) {
@@ -83,11 +100,13 @@ function gaItems(items: ResolvedCartItem[]): GaItem[] {
 }
 
 export function trackViewItem(product: Product, variant?: ProductVariant) {
+  const item = gaItem(product, variant, 1);
   trackEvent("view_item", {
     currency: CURRENCY,
     value: product.price,
-    items: [gaItem(product, variant, 1)],
+    items: [item],
   });
+  metaViewContent(item);
 }
 
 export function trackAddToCart(
@@ -95,19 +114,23 @@ export function trackAddToCart(
   variant: ProductVariant | undefined,
   qty: number,
 ) {
+  const item = gaItem(product, variant, qty);
   trackEvent("add_to_cart", {
     currency: CURRENCY,
     value: product.price * qty,
-    items: [gaItem(product, variant, qty)],
+    items: [item],
   });
+  metaAddToCart(item);
 }
 
 export function trackBeginCheckout(items: ResolvedCartItem[], value: number) {
+  const lineas = gaItems(items);
   trackEvent("begin_checkout", {
     currency: CURRENCY,
     value,
-    items: gaItems(items),
+    items: lineas,
   });
+  metaInitiateCheckout(lineas, value);
 }
 
 // ── La compra ─────────────────────────────────────────────────
@@ -165,6 +188,9 @@ export function trackStashedPurchase(): boolean {
   try {
     const payload = JSON.parse(raw) as PurchasePayload;
     trackEvent("purchase", { currency: CURRENCY, ...payload });
+    // El pixel se cuelga acá y no de un camino propio: el borrado de arriba es
+    // el único candado contra medir la venta dos veces, y así lo comparten.
+    metaPurchase(payload.transaction_id, payload.items, payload.value);
     return true;
   } catch {
     return false;
@@ -172,7 +198,8 @@ export function trackStashedPurchase(): boolean {
 }
 
 /** Descarta el pedido guardado sin medirlo: se usa cuando Mercado Pago
- *  devuelve el pago en proceso. */
+ *  devuelve el pago en proceso. Ni `purchase` de GA4 ni `Purchase` del pixel:
+ *  una compra que todavía no está cobrada no es una venta. */
 export function discardStashedPurchase() {
   try {
     sessionStorage.removeItem(PURCHASE_KEY);

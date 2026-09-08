@@ -10,6 +10,7 @@ import { useSettingsDraft } from "../../hooks/useStoreSettings";
 import { useDeleteSubscriber, useSubscribers } from "../../hooks/useSubscribers";
 import { downloadCsv, formatDate } from "../../lib/admin";
 import { GA_ID } from "../../lib/analytics";
+import { META_PIXEL_ID } from "../../lib/meta-pixel";
 import { SITE } from "../../lib/site";
 
 export default function AdminMarketing() {
@@ -48,7 +49,7 @@ export default function AdminMarketing() {
         .
       </p>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <StatCard
           label="Suscriptores"
           value={lista.length.toLocaleString("es-AR")}
@@ -59,12 +60,30 @@ export default function AdminMarketing() {
           value={delMes.toLocaleString("es-AR")}
           hint="nuevas suscripciones"
         />
+      </div>
+
+      {/* Los dos medidores son de solo lectura a propósito: sus IDs no se
+          editan desde acá, se leen del código. Un campo que se guarda y no
+          cambia nada es peor que no tenerlo. */}
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <StatCard
           label="Google Analytics"
           value={GA_ID ? "Activo" : "Sin configurar"}
           hint={GA_ID ?? "falta VITE_GA_ID en el .env"}
         />
+        <StatCard
+          label="Pixel de Meta"
+          value={META_PIXEL_ID ? "Activo" : "Apagado"}
+          hint={META_PIXEL_ID ?? "META_PIXEL_ID está en null"}
+        />
       </div>
+      <p className="mt-2 text-[11px] leading-relaxed text-ink/65">
+        Estos dos números no se editan desde el panel. El de Google sale de{" "}
+        <code className="font-mono">VITE_GA_ID</code> en las variables de Vercel;
+        el del pixel está escrito en{" "}
+        <code className="font-mono">src/lib/meta-pixel.ts</code> —no cambia
+        nunca, y ahí se apaga poniéndolo en <code className="font-mono">null</code>.
+      </p>
 
       <div className="mt-3 space-y-3">
         <SettingsSection
