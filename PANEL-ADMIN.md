@@ -148,6 +148,12 @@ Lo que todavía **no** está conectado, y hay que tenerlo presente:
   Distribución — el número de `stock` no se mueve hasta que sale del depósito.
 - **Visitas**: se cuentan desde que se corre la migración. GA4 sigue midiendo
   aparte y con más detalle.
+- **Conversión por producto** (Estadísticas → "Qué se mira y qué se vende"):
+  cruza las vistas de cada ficha con las órdenes cobradas del mismo rango. El
+  producto sale del `path` de `page_views` (`/producto/<slug>`), así que una
+  ficha renombrada aparece con el slug viejo y el cartel "fuera del catálogo".
+  La conversión es órdenes ÷ vistas: quien compra sin pasar por la ficha suma
+  orden sin sumar vista y puede pasarse del 100%.
 
 ## Notificaciones de ventas nuevas
 
@@ -172,9 +178,10 @@ src/pages/admin/          Inicio, Estadisticas, Productos, Ventas, Clientes,
 src/components/admin/     Layout, sidebar, tablas, drawers, gráfico, guard
 src/hooks/                useAdminAuth, useAdminOrders, useAdminProducts,
                           useDiscounts, useSubscribers, useStoreSettings,
-                          useVisits, useContentPosts
+                          useVisits, useContentPosts, useProductFunnel
 src/lib/admin.ts          Formato, rangos de fecha, export CSV
-src/lib/admin-stats.ts    KPIs, series del gráfico, clientes, tráfico
+src/lib/admin-stats.ts    KPIs, series del gráfico, clientes, tráfico y el
+                          cruce de vistas contra ventas por producto
 src/lib/contenido.ts      Etiquetas, grilla del mes y fechas del calendario
 src/lib/visits.ts         Registro de visitas propio
 ```

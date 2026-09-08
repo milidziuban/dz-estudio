@@ -455,3 +455,187 @@ export function topReferrers(visits: PageView[], limit = 8): PathCount[] {
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
 }
+
+// ── Vistas y conversión por producto ──────────────────────────
+
+/** Con lo que la tienda rutea las fichas. `page_views` no guarda el producto:
+ *  guarda el `path`, y el slug es lo que viene después de este prefijo. */
+const PRODUCT_PATH = "/producto/";
+
+/**
+ * Slug de la ficha que mira una visita, o null si esa visita no es una ficha.
+ *
+ * Saca query, hash y la barra final: `/producto/tote-domingo/?utm=ig` y
+ * `/producto/tote-domingo` son la misma ficha. Hoy `trackVisit` guarda
+ * `location.pathname` pelado, pero alcanza con que alguien llegue de una
+ * campaña con `?utm=` para que el mismo producto se parta en dos filas.
+ */
+export function productSlugFromPath(path: string): string | null {
+  const clean = path.split("?")[0].split("#")[0].replace(/\/+$/, "");
+  if (!clean.startsWith(PRODUCT_PATH)) return null;
+  return clean.slice(PRODUCT_PATH.length) || null;
+}
+
+/** Debajo de estas vistas no hay con qué opinar: cinco visitas sin compra
+ *  puede ser un día flojo, no un problema del producto. */
+export const MIN_VISTAS_SENAL = 10;
+
+/** Lo que la tabla marca en pantalla. */
+export type ProductSignal = "mirado-sin-vender" | "convierte-poco";
+
+export type ProductFunnelRow = {
+  slug: string;
+  name: string;
+  /** false cuando el slug aparece en visitas o ventas pero ya no está en el
+   *  catálogo: una ficha vieja, renombrada o borrada. */
+  inCatalog: boolean;
+  /** Vistas de la ficha en el período. No son sesiones: la visita repetida
+   *  de la misma persona cuenta cada vez. */
+  views: number;
+  /** Sesiones distintas que abrieron la ficha */
+  sessions: number;
+  /** Unidades vendidas en órdenes cobradas */
+  units: number;
+  /** Órdenes cobradas que incluyeron el producto. Una orden cuenta una sola
+   *  vez aunque lleve dos variantes del mismo producto. */
+  orders: number;
+  /** órdenes ÷ vistas, en % */
+  conversion: number;
+  signal: ProductSignal | null;
+};
+
+export type ProductFunnel = {
+  rows: ProductFunnelRow[];
+  /** Totales de ficha del período, para la línea de resumen */
+  views: number;
+  units: number;
+  orders: number;
+  /** El promedio contra el que se compara cada fila: órdenes de ficha ÷
+   *  vistas de ficha del período, en %. */
+  conversion: number;
+};
+
+type FunnelAcc = Omit<ProductFunnelRow, "conversion" | "signal" | "sessions"> & {
+  sessionIds: Set<string>;
+};
+
+/**
+ * Cruza las visitas a fichas con las ventas cobradas para contestar la
+ * pregunta de la semana del lanzamiento: qué producto se mira mucho y se
+ * vende poco.
+ *
+ * Tres límites que la pantalla tiene que decir en voz alta:
+ *
+ * - La conversión es **órdenes ÷ vistas**, no sobre sesiones: la misma persona
+ *   que vuelve tres veces a la ficha cuenta tres veces en el denominador. Es
+ *   la cuenta más dura de las dos.
+ * - Quien compra sin pasar por la ficha —carrito guardado, link directo al
+ *   checkout— suma orden sin sumar vista, así que un producto puede dar más
+ *   de 100%.
+ * - Si en el período no se vendió nada, ninguna fila se marca: con cero ventas
+ *   en toda la tienda, "se mira y no se vende" no dice nada del producto.
+ */
+export function productFunnel(
+  products: AdminProduct[],
+  orders: Order[],
+  visits: PageView[],
+): ProductFunnel {
+  const acc = new Map<string, FunnelAcc>();
+
+  const ensure = (
+    slug: string,
+    name: string | null,
+    fromCatalog: boolean,
+  ): FunnelAcc => {
+    const current = acc.get(slug);
+    if (current) {
+      // El nombre del catálogo gana siempre; el de la orden solo rellena
+      // mientras el producto no esté en el catálogo.
+      if (fromCatalog) {
+        current.name = name ?? current.name;
+        current.inCatalog = true;
+      } else if (!current.inCatalog && name) {
+        current.name = name;
+      }
+      return current;
+    }
+    const created: FunnelAcc = {
+      slug,
+      name: name ?? slug,
+      inCatalog: fromCatalog,
+      views: 0,
+      units: 0,
+      orders: 0,
+      sessionIds: new Set<string>(),
+    };
+    acc.set(slug, created);
+    return created;
+  };
+
+  // El catálogo entero entra aunque no tenga una sola vista: un producto que
+  // nadie mira es un dato, no una fila que convenga esconder.
+  for (const product of products) ensure(product.slug, product.name, true);
+
+  for (const visit of visits) {
+    const slug = productSlugFromPath(visit.path);
+    if (!slug) continue;
+    const row = ensure(slug, null, false);
+    row.views += 1;
+    row.sessionIds.add(visit.sessionId);
+  }
+
+  for (const order of orders.filter(isPaid)) {
+    const enLaOrden = new Set<string>();
+    for (const item of order.items) {
+      const row = ensure(item.slug, item.name, false);
+      row.units += item.qty;
+      enLaOrden.add(item.slug);
+    }
+    for (const slug of enLaOrden) acc.get(slug)!.orders += 1;
+  }
+
+  const totals = { views: 0, units: 0, orders: 0 };
+  for (const row of acc.values()) {
+    totals.views += row.views;
+    totals.units += row.units;
+    totals.orders += row.orders;
+  }
+  const promedio = totals.views ? (totals.orders / totals.views) * 100 : 0;
+
+  const rows: ProductFunnelRow[] = [...acc.values()].map((row) => {
+    const conversion = row.views ? (row.orders / row.views) * 100 : 0;
+
+    let signal: ProductSignal | null = null;
+    if (row.views >= MIN_VISTAS_SENAL && totals.orders > 0) {
+      if (row.orders === 0) signal = "mirado-sin-vender";
+      // La mitad del promedio: no marcamos cualquier diferencia, solo la que
+      // se nota. Con el promedio en 2%, salta lo que está abajo de 1%.
+      else if (conversion < promedio / 2) signal = "convierte-poco";
+    }
+
+    return {
+      slug: row.slug,
+      name: row.name,
+      inCatalog: row.inCatalog,
+      views: row.views,
+      sessions: row.sessionIds.size,
+      units: row.units,
+      orders: row.orders,
+      conversion,
+      signal,
+    };
+  });
+
+  // Orden por defecto: primero lo marcado y, dentro de cada grupo, lo más
+  // visto. Los dos rótulos pesan igual — entre una ficha muy mirada que
+  // convierte al 1% y una poco mirada que no vendió nunca, la primera es la
+  // que mueve el número. Las columnas siguen siendo ordenables a mano.
+  rows.sort((a, b) => {
+    const marcadas = Number(b.signal !== null) - Number(a.signal !== null);
+    if (marcadas) return marcadas;
+    if (b.views !== a.views) return b.views - a.views;
+    return a.name.localeCompare(b.name, "es-AR");
+  });
+
+  return { rows, ...totals, conversion: promedio };
+}
