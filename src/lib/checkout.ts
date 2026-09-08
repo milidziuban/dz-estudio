@@ -36,7 +36,7 @@ export const SHIPPING_OPTIONS = [
   {
     id: "retiro",
     label: "Retiro en el depósito",
-    detail: "Tacuarí 7618, Guadalupe · Santa Fe Capital · lun a vie de 9 a 18",
+    detail: "Tacuarí 7618, Guadalupe · Santa Fe Capital · lun a vie de 9 a 20",
     mode: "fijo",
     cost: 0,
   },

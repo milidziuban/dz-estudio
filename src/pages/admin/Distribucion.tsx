@@ -186,7 +186,7 @@ export default function AdminDistribucion() {
                   <TextField
                     id={`d-horario-${location.id}`}
                     label="Horario"
-                    placeholder="Lunes a viernes de 9 a 18"
+                    placeholder="Lunes a viernes de 9 a 20"
                     value={location.horario}
                     onChange={(event) =>
                       setLocation(index, { horario: event.target.value })

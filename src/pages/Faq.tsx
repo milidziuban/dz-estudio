@@ -10,7 +10,7 @@ const CATEGORIES: { id: string; symbol: string; title: string; items: QA[] }[] =
       items: [
         {
           q: "¿A dónde envían?",
-          a: "A todo el país con Andreani, a sucursal o a domicilio. Si estás en Santa Fe Capital podés retirar sin costo por el depósito de Tacuarí 7618, Guadalupe, de lunes a viernes de 9 a 18.",
+          a: "A todo el país con Andreani, a sucursal o a domicilio. Si estás en Santa Fe Capital podés retirar sin costo por el depósito de Tacuarí 7618, Guadalupe, de lunes a viernes de 9 a 20.",
         },
         {
           q: "¿Cuánto tarda?",

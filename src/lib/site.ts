@@ -22,7 +22,7 @@ export const SITE = {
   retiro: {
     nombre: "Depósito Santa Fe Ciudad",
     direccion: "Tacuarí 7618, Guadalupe, Santa Fe Capital",
-    horario: "Lunes a viernes de 9 a 18",
+    horario: "Lunes a viernes de 9 a 20",
   },
   cuit: "27-41860878-7",
 } as const;
