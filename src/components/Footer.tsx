@@ -4,8 +4,7 @@ import PaymentMethods from "./PaymentMethods";
 
 const navItems = [
   { label: "Tienda", to: "/tienda" },
-  // { label: "Sobre nosotros", to: "/sobre-nosotros" },
-  { label: "FAQ", to: "/faq" },
+  // { label: "FAQ", to: "/faq" }, — oculta, ver lib/routes.ts
   { label: "Contacto", to: "/contacto" },
   { label: "Seguí tu pedido", to: "/pedido" },
 ];

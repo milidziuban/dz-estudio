@@ -10,8 +10,10 @@ export const pageLoaders = {
   checkout: () => import("../pages/Checkout"),
   checkoutExito: () => import("../pages/CheckoutExito"),
   checkoutError: () => import("../pages/CheckoutError"),
-  sobreNosotros: () => import("../pages/SobreNosotros"),
-  faq: () => import("../pages/Faq"),
+  // FAQ oculta desde el 08/09/2026: prometía pagar con tarjeta directo en
+  // el checkout, que no existe. El archivo queda; vuelve cuando el texto esté
+  // revisado (R5 en el backlog). "Sobre nosotros" se borró, no se ocultó.
+  // faq: () => import("../pages/Faq"),
   contacto: () => import("../pages/Contacto"),
   pedido: () => import("../pages/Pedido"),
   notFound: () => import("../pages/NotFound"),
@@ -50,10 +52,6 @@ function pageFor(pathname: string): PageKey | null {
       return "checkoutExito";
     case "/checkout/error":
       return "checkoutError";
-    case "/sobre-nosotros":
-      return "sobreNosotros";
-    case "/faq":
-      return "faq";
     case "/contacto":
       return "contacto";
     case "/pedido":

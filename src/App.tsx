@@ -17,8 +17,7 @@ const Producto = lazy(pageLoaders.producto);
 const Checkout = lazy(pageLoaders.checkout);
 const CheckoutExito = lazy(pageLoaders.checkoutExito);
 const CheckoutError = lazy(pageLoaders.checkoutError);
-const SobreNosotros = lazy(pageLoaders.sobreNosotros);
-const Faq = lazy(pageLoaders.faq);
+// const Faq = lazy(pageLoaders.faq); — oculta, ver lib/routes.ts
 const Contacto = lazy(pageLoaders.contacto);
 const Pedido = lazy(pageLoaders.pedido);
 const NotFound = lazy(pageLoaders.notFound);
@@ -53,8 +52,7 @@ export default function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/checkout/exito" element={<CheckoutExito />} />
           <Route path="/checkout/error" element={<CheckoutError />} />
-          <Route path="/sobre-nosotros" element={<SobreNosotros />} />
-          <Route path="/faq" element={<Faq />} />
+          {/* <Route path="/faq" element={<Faq />} /> — oculta, ver lib/routes.ts */}
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/pedido" element={<Pedido />} />
           <Route path="*" element={<NotFound />} />

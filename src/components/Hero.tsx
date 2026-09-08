@@ -18,7 +18,8 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 max-w-md text-lg leading-relaxed">
-            Encontrá distintos almohadones e individuales impermeables estampados.
+            Encontrá almohadones estampados en pana e individuales
+            impermeables.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

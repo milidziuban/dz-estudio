@@ -30,11 +30,12 @@ const OUT = resolve(root, "dist/sitemap.xml");
 /** Las páginas que no salen de la base. `changefreq` y `priority` son una
  *  sugerencia: Google las ignora hace años, pero no molestan y dejan escrito
  *  qué esperamos que se mire seguido. */
+// Lo que no está acá, Google no lo indexa: "Sobre nosotros" se borró y la
+// FAQ está oculta (08/09/2026). Sacar una página del menú no alcanza —si
+// queda en el sitemap, Google la encuentra igual.
 const STATIC_PAGES = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/tienda", changefreq: "daily", priority: "0.9" },
-  { path: "/sobre-nosotros", changefreq: "monthly", priority: "0.6" },
-  { path: "/faq", changefreq: "monthly", priority: "0.5" },
   { path: "/contacto", changefreq: "monthly", priority: "0.5" },
 ];
 
