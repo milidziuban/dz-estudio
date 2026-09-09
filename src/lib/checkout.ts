@@ -126,15 +126,49 @@ export const PAQUETE_DEFAULT_CM = { largoCm: 40, anchoCm: 30, altoCm: 10 };
 /** Peso a usar cuando un producto no tiene peso_gramos cargado. */
 export const PESO_GRAMOS_DEFAULT = 400;
 
-// El CUIT es el que publica la tienda de Tienda Nube; el resto son
-// ⚠️ placeholders: reemplazar por los datos bancarios reales antes de producción.
+// Los datos bancarios de verdad viven en `store_settings` y se editan en
+// /admin/pagos. Acá va el respaldo, y el respaldo va VACÍO a propósito:
+// hasta hoy tenía "[TU BANCO]" y "[ALIAS]", así que si esa lectura fallaba
+// —no reintenta— la clienta veía "Transferí a [ALIAS]" en la mitad de las
+// ventas. Con los campos vacíos, el checkout muestra el aviso de pedir los
+// datos por WhatsApp en vez de un CBU inventado.
+// El CUIT es el que publica la tienda de Tienda Nube y sí es real.
 export const BANK_INFO = {
-  banco: "[TU BANCO]",
-  titular: "[TITULAR DE LA CUENTA]",
+  banco: "",
+  titular: "",
   cuit: "27-41860878-7",
-  cbu: "[CBU]",
-  alias: "[ALIAS]",
+  cbu: "",
+  alias: "",
 };
+
+/** Sin CBU ni alias no hay a dónde transferir: la pantalla lo tiene que
+ *  decir, no completar con lo que tenga a mano. */
+export const faltanDatosBancarios = (banco: {
+  cbu: string;
+  alias: string;
+}): boolean => !banco.cbu.trim() || !banco.alias.trim();
+
+/** Lo que la pantalla de gracias necesita saber del pedido que se acaba de
+ *  pagar. Volviendo de Mercado Pago no hay estado del router —solo query
+ *  params—, así que el dato viaja por sessionStorage, que sobrevive al
+ *  redirect y se pisa con cada pedido nuevo. */
+const ENVIO_A_COORDINAR_KEY = "dz-envio-a-coordinar";
+
+export function guardarEnvioACoordinar(aCoordinar: boolean): void {
+  try {
+    sessionStorage.setItem(ENVIO_A_COORDINAR_KEY, aCoordinar ? "1" : "0");
+  } catch {
+    // Storage bloqueado: se pierde el aviso, nunca la compra.
+  }
+}
+
+export function envioACoordinarDelUltimoPedido(): boolean {
+  try {
+    return sessionStorage.getItem(ENVIO_A_COORDINAR_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 /** Campos de dirección: se piden solo si el pedido viaja. */
 const CAMPOS_DIRECCION = ["direccion", "ciudad", "provincia", "cp"] as const;

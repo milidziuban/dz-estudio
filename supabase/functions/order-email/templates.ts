@@ -348,11 +348,21 @@ export function pagoConfirmadoEmail(
     ? `Te avisamos por acá cuando esté listo para que lo pases a buscar por ${escape(site.retiro.direccion)}.`
     : "Lo preparamos en el depósito y te escribimos de nuevo cuando salga, con el código de seguimiento.";
 
+  // El resumen dice "A coordinar" al lado del envío, pero eso no alcanza para
+  // avisar que viene un segundo cobro: la clienta ya pagó y esto es lo único
+  // que le queda por escrito.
+  const avisoEnvio = order.envioACoordinar
+    ? paragraph(
+        "Lo que pagaste es el producto. El envío se cobra aparte: te escribimos por WhatsApp con el costo antes de despachar.",
+      )
+    : "";
+
   const inner = `
     ${heading(`¡Listo, ${order.nombre}!`, "Ya es tuyo.")}
     <div style="height:20px;"></div>
     ${paragraph("El pago entró. Empezamos a preparar tu pedido.")}
     ${paragraph(queSigue)}
+    ${avisoEnvio}
     <div style="height:12px;"></div>
     ${orderDetail(order)}
     ${paragraph("Guardá este mail: acá está todo lo que pediste y cuánto pagaste.")}
@@ -366,6 +376,12 @@ export function pagoConfirmadoEmail(
     order.esRetiro
       ? `Te avisamos por acá cuando esté listo para que lo pases a buscar por ${site.retiro.direccion}.`
       : "Lo preparamos en el depósito y te escribimos de nuevo cuando salga, con el código de seguimiento.",
+    ...(order.envioACoordinar
+      ? [
+          "",
+          "Lo que pagaste es el producto. El envío se cobra aparte: te escribimos por WhatsApp con el costo antes de despachar.",
+        ]
+      : []),
     "",
     detalleTexto(order),
     "",

@@ -16,6 +16,8 @@ import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import {
   checkoutSchema,
   esACoordinar,
+  faltanDatosBancarios,
+  guardarEnvioACoordinar,
   PESO_GRAMOS_DEFAULT,
   PROVINCIAS,
   type CheckoutData,
@@ -297,6 +299,12 @@ export default function Checkout() {
       shipping: shippingCost ?? 0,
       discount: discount?.amount ?? 0,
     });
+
+    // Que la pantalla de gracias sepa que el envío se cobra aparte. Va por
+    // sessionStorage porque volviendo de Mercado Pago no hay estado del
+    // router: la clienta acaba de pagar y tiene que leer ahí que falta un
+    // segundo cobro.
+    guardarEnvioACoordinar(envioACoordinar);
 
     const orderNumber = orderId.slice(0, 8).toUpperCase();
 
@@ -655,6 +663,24 @@ export default function Checkout() {
                       Pago procesado por Mercado Pago — no guardamos datos de tu
                       tarjeta
                     </p>
+                  </div>
+                ) : faltanDatosBancarios(banco) ? (
+                  // La lectura de /admin/pagos no reintenta: si falla, antes
+                  // se veía "Transferí a [ALIAS]". Mejor pedirlos que
+                  // inventarlos.
+                  <div className="mt-6 rounded-2xl bg-lila p-6">
+                    <p className="text-sm leading-relaxed">
+                      No pudimos cargar los datos para transferir. Confirmá el
+                      pedido igual y escribinos por WhatsApp: te los pasamos y
+                      te lo reservamos 48 horas.
+                    </p>
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="mt-6 w-full py-4 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {isSubmitting ? "Guardando pedido…" : "Confirmar pedido ✦"}
+                    </Button>
                   </div>
                 ) : (
                   <div className="mt-6 rounded-2xl bg-lila p-6">

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import Card from "../components/Card";
@@ -11,6 +11,10 @@ import {
   SETTINGS_DEFAULTS,
   useStoreSettings,
 } from "../hooks/useStoreSettings";
+import {
+  envioACoordinarDelUltimoPedido,
+  faltanDatosBancarios,
+} from "../lib/checkout";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
 
@@ -28,8 +32,13 @@ export default function CheckoutExito() {
   const clearCart = useCart((s) => s.clear);
   // El alias bancario se edita en /admin/pagos
   const { data: settings } = useStoreSettings();
-  const alias = (settings?.pagos ?? SETTINGS_DEFAULTS.pagos).transferencia
-    .alias;
+  const banco = (settings?.pagos ?? SETTINGS_DEFAULTS.pagos).transferencia;
+  const alias = banco.alias;
+  const sinDatosBancarios = faltanDatosBancarios(banco);
+
+  // El envío de este pedido se cobra aparte. Se lee una sola vez al montar:
+  // el dato lo dejó el checkout antes de mandar a Mercado Pago.
+  const [envioACoordinar] = useState(envioACoordinarDelUltimoPedido);
 
   // Regreso de Mercado Pago: llega por query params, sin router state
   const mpStatus =
@@ -117,11 +126,34 @@ export default function CheckoutExito() {
                 ✧ Falta un paso
               </p>
               <p className="mt-2 text-sm leading-relaxed">
-                Transferí el total a{" "}
-                <span className="font-mono">{alias}</span> y mandanos
-                el comprobante por WhatsApp. Te reservamos todo por 48 horas —
-                después vuelve a la tienda y ya sabés cómo es esto de las
-                ediciones limitadas.
+                {sinDatosBancarios ? (
+                  <>
+                    Pedinos los datos para transferir por WhatsApp y mandanos
+                    el comprobante. Te reservamos todo por 48 horas — después
+                    vuelve a la tienda y ya sabés cómo es esto de las ediciones
+                    limitadas.
+                  </>
+                ) : (
+                  <>
+                    Transferí el total a{" "}
+                    <span className="font-mono">{alias}</span> y mandanos el
+                    comprobante por WhatsApp. Te reservamos todo por 48 horas —
+                    después vuelve a la tienda y ya sabés cómo es esto de las
+                    ediciones limitadas.
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
+          {envioACoordinar && (
+            <div className="mt-4 rounded-2xl bg-celeste p-6 text-left">
+              <p className="font-mono text-xs font-medium uppercase tracking-widest">
+                ✦ Falta el envío
+              </p>
+              <p className="mt-2 text-sm leading-relaxed">
+                Lo que pagaste es el producto. El envío se cobra aparte: te
+                escribimos por WhatsApp con el costo antes de despachar.
               </p>
             </div>
           )}
