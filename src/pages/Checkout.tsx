@@ -42,13 +42,63 @@ const STEP_FIELDS: Record<number, (keyof CheckoutData)[]> = {
   2: ["envio", "direccion", "ciudad", "provincia", "cp"],
 };
 
+/** Qué se le muestra a la clienta cuando el pedido no se puede guardar. */
+type ErrorDePedido = { titulo: string; ayuda: string };
+
+const ERROR_GENERICO: ErrorDePedido = {
+  titulo: "No pudimos guardar el pedido",
+  ayuda:
+    "Reintentá en un momento — tus datos siguen acá. Si sigue sin andar, mandanos el detalle por WhatsApp y lo cerramos a mano.",
+};
+
+/** El error del insert lo levanta `recalculate_order_totals` (ver la migración
+ *  20260908150000). Viene con `hint`, que dice de qué se trata, y `details`,
+ *  que trae el producto y cuántos quedan en JSON. El texto se escribe acá y no
+ *  parseando el mensaje de Postgres, que está redactado para los logs. */
+function errorDePedido(error: {
+  hint?: string | null;
+  details?: string | null;
+}): ErrorDePedido {
+  if (error.hint === "fuera-de-venta") {
+    return {
+      titulo: "Uno de los productos del carrito ya no está a la venta",
+      ayuda:
+        "Sacalo del carrito y seguí con el resto. Si lo querés igual, escribinos y lo vemos.",
+    };
+  }
+
+  if (error.hint === "sin-stock") {
+    // Si el JSON viniera raro, mejor el texto genérico que un pedido roto.
+    try {
+      const { nombre, quedan } = JSON.parse(error.details ?? "") as {
+        nombre: string;
+        quedan: number;
+      };
+      return {
+        titulo:
+          quedan === 0
+            ? `Nos quedamos sin ${nombre}`
+            : `${quedan === 1 ? "Queda" : "Quedan"} ${quedan} de ${nombre}`,
+        ayuda:
+          quedan === 0
+            ? "Sacalo del carrito y seguí con el resto. Si lo querés igual, escribinos y vemos cuándo podemos tenerlo."
+            : "Ajustá la cantidad en el carrito y seguí con la compra. Si querés más, escribinos y lo vemos.",
+      };
+    } catch {
+      return ERROR_GENERICO;
+    }
+  }
+
+  return ERROR_GENERICO;
+}
+
 export default function Checkout() {
   const items = useCart((s) => s.items);
   const clearCart = useCart((s) => s.clear);
   const { data: products = [], isLoading } = useProducts();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<ErrorDePedido | null>(null);
 
   const {
     register,
@@ -235,9 +285,7 @@ export default function Checkout() {
     });
 
     if (error) {
-      setSubmitError(
-        "No pudimos guardar el pedido. Reintentá en un momento — tus datos siguen acá.",
-      );
+      setSubmitError(errorDePedido(error));
       return;
     }
 
@@ -262,9 +310,11 @@ export default function Checkout() {
       );
 
       if (fnError || !pref?.init_point) {
-        setSubmitError(
-          "No pudimos conectar con Mercado Pago. Probá de nuevo o elegí transferencia.",
-        );
+        setSubmitError({
+          titulo: "No pudimos conectar con Mercado Pago",
+          ayuda:
+            "Probá de nuevo, o volvé y elegí transferencia — que además te deja 10% off. El pedido ya quedó guardado.",
+        });
         return;
       }
 
@@ -649,10 +699,11 @@ export default function Checkout() {
                     className="mt-4 rounded-2xl bg-orange p-5 text-cream"
                     role="alert"
                   >
-                    <p className="text-sm font-semibold">✕ {submitError}</p>
+                    <p className="text-sm font-semibold">
+                      ✕ {submitError.titulo}
+                    </p>
                     <p className="mt-2 text-sm leading-relaxed">
-                      No te quedes sin el pedido: mandanos el detalle por
-                      WhatsApp y lo cerramos a mano.
+                      {submitError.ayuda}
                     </p>
                     <a
                       href={checkoutWhatsappUrl(
