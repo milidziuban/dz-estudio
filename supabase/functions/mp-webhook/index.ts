@@ -11,8 +11,16 @@ const STATUS_MAP: Record<string, string> = {
   approved: "paid",
   rejected: "rejected",
   cancelled: "cancelled",
-  refunded: "cancelled",
+  // La base distingue devolución de cancelación desde la migración del
+  // panel, y el panel tiene el badge "Devuelta": mapearla a `cancelled`
+  // borraba esa diferencia justo en el caso donde la plata volvió.
+  refunded: "refunded",
+  charged_back: "refunded",
 };
+
+/** Los únicos estados que pueden pisar una orden ya pagada: los que
+ *  significan que la plata volvió. */
+const PISAN_UNA_ORDEN_PAGADA = new Set(["paid", "refunded"]);
 
 Deno.serve(async (req) => {
   try {
@@ -53,10 +61,23 @@ Deno.serve(async (req) => {
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       );
-      await supabase
+      // Una orden pagada no baja de estado. El mismo pedido puede tener
+      // varios intentos de pago —todos con el mismo `external_reference`— y
+      // MP reintenta cada notificación: si la del intento rechazado llega
+      // después de la aprobada, la orden volvía a "rechazada" con la plata
+      // adentro y desaparecía de las ventas cobradas. El filtro va en el
+      // update y no en un if después de leer, así dos notificaciones que
+      // entran a la vez no se pisan entre la lectura y la escritura.
+      let update = supabase
         .from("orders")
         .update({ status, mp_payment_id: String(paymentId) })
         .eq("id", orderId);
+
+      if (!PISAN_UNA_ORDEN_PAGADA.has(status)) {
+        update = update.neq("status", "paid");
+      }
+
+      await update;
 
       // Pago aprobado: mail de confirmación. MP reintenta la misma
       // notificación varias veces; `order-email` es idempotente, así que
