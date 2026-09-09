@@ -39,6 +39,12 @@ type ProductRow = {
   stock: number | null;
 };
 
+/** Lo que la tienda necesita de `products`. Tiene que coincidir con el
+ *  `grant select (…) to anon` de la base: pedir una columna de más falla, y
+ *  la tienda se cae al catálogo espejo. */
+// prettier-ignore
+const COLUMNAS_PUBLICAS = "id,slug,name,category,colors,price,description,medidas,peso,peso_gramos,material,cuidados,variants,images,in_stock,stock";
+
 function mapVariant(row: ProductVariantRow): ProductVariant {
   return {
     id: row.id,
@@ -75,9 +81,14 @@ export function useProducts() {
     queryKey: ["products"],
     queryFn: async (): Promise<Product[]> => {
       try {
+        // Columnas por nombre y no `*`: `cost` y `sku` son datos del panel y
+        // no tienen por qué viajar al navegador. El permiso de `anon` también
+        // está recortado en la base (migración `costo_fuera_de_la_tienda`),
+        // que es lo que lo hace de verdad — este `select` es el que hace que
+        // la consulta siga siendo válida.
         const { data, error } = await supabase
           .from("products")
-          .select("*")
+          .select(COLUMNAS_PUBLICAS)
           .order("id");
         if (error) throw error;
         if (data?.length) return (data as ProductRow[]).map(mapRow);
