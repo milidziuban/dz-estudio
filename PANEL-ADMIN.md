@@ -9,6 +9,7 @@ esté en la tabla `admins` de Supabase.
 Supabase → SQL Editor → pegar completo y Run, **en este orden**:
 
 ```
+supabase/migrations/20260714120000_catalogo_2026_07.sql
 supabase/migrations/20260817120000_catalogo_tiendanube.sql
 supabase/migrations/20260818120000_panel_admin.sql
 supabase/migrations/20260819120000_envio_correo_argentino.sql
@@ -17,24 +18,49 @@ supabase/migrations/20260819140000_seguimiento_pedido.sql
 supabase/migrations/20260819150000_stock_al_despachar.sql
 supabase/migrations/20260819160000_notas_del_pedido.sql
 supabase/migrations/20260819170000_notificaciones_ventas.sql
+supabase/migrations/20260819180000_precio_seguro_en_ordenes.sql
+supabase/migrations/20260902235717_mails_de_pedido.sql
 supabase/migrations/20260906120000_calendario_de_contenido.sql
+supabase/migrations/20260908120000_envio_a_coordinar.sql
+supabase/migrations/20260908130000_sin_cuotas_sin_interes.sql
+supabase/migrations/20260908140000_combo_stock_y_orden_limpia.sql
+supabase/migrations/20260908150000_aviso_de_stock.sql
+supabase/migrations/20260909120000_costo_fuera_de_la_tienda.sql
+supabase/migrations/20260909130000_margen_fuera_de_la_tienda.sql
+supabase/migrations/20260909221453_cupones_fuera_de_la_tienda.sql
 ```
 
-La primera deja el esquema de `products` como lo espera el código (`peso`,
-`variants`, `in_stock`) y carga el catálogo real de Tienda Nube. Si se la saltea,
-el panel lista los productos pero **no deja guardar ninguno**: el update habla de
+`catalogo_tiendanube` deja el esquema de `products` como lo espera el código
+(`peso`, `variants`, `in_stock`) y carga el catálogo real. Si se la saltea, el
+panel lista los productos pero **no deja guardar ninguno**: el update habla de
 columnas que no existen.
 
-Crea la tabla `admins`, la función `is_admin()`, las policies de escritura y las
-tablas nuevas (`page_views`, `discounts`, `store_settings`,
-`newsletter_subscribers`) más el bucket de Storage `productos`.
+`panel_admin` es la que arma el panel: la tabla `admins`, la función
+`is_admin()`, las policies de escritura y las tablas nuevas (`page_views`,
+`discounts`, `store_settings`, `newsletter_subscribers`) más el bucket de
+Storage `productos`.
 
-La última, `calendario_de_contenido`, agrega la tabla `content_posts` y el bucket
+`calendario_de_contenido` agrega la tabla `content_posts` y el bucket
 `contenido` que usa la pantalla **Contenido y redes**, y deja cargada la semana
 del lanzamiento tal como está en el vault. Sin ella, esa pantalla entra pero
 avisa que falta la migración.
 
-Es idempotente: se puede correr dos veces sin romper nada.
+Las de septiembre son arreglos sobre lo anterior —envío a coordinar, stock de
+los combos, el costo y el margen fuera de la tienda, los cupones fuera de la
+tienda— y cada una explica arriba de todo qué cambia y por qué.
+
+Todas se pueden correr dos veces sin romper nada, **menos la primera**:
+`catalogo_2026_07` vacía `products` y la vuelve a cargar. Sirve para levantar
+la base de cero; sobre una tienda andando borra todo lo que hayas editado
+desde el panel.
+
+**Una migración nueva se anota, no solo se corre.** Supabase lleva su propio
+historial en `supabase_migrations.schema_migrations`, y el nombre del archivo
+del repo tiene que estar ahí igual, versión y todo. Aplicándola por MCP queda
+anotada sola, pero con la hora en que se corrió: al archivo hay que ponerle ese
+mismo nombre. Pegándola en el SQL Editor no queda anotada, y esa fila se agrega
+a mano. Si las dos listas se separan, `supabase db push` deja de correr y todo
+hay que aplicarlo por MCP — pasó, y se emparejó el 09/09.
 
 ## 2. Crear tu usuario
 
