@@ -200,6 +200,10 @@ export default function Checkout() {
   // `begin_checkout`, una sola vez por visita. Espera a que el carrito esté
   // resuelto: los productos llegan por query y en el primer render no están.
   const inicioMedido = useRef(false);
+
+  /** El pedido que ya entró en la base, con la huella de lo que se guardó.
+   *  Sirve para que un reintento no lo duplique — ver `onSubmit`. */
+  const ordenGuardada = useRef<{ id: string; huella: string } | null>(null);
   useEffect(() => {
     if (inicioMedido.current || resolved.length === 0) return;
     inicioMedido.current = true;
@@ -246,9 +250,6 @@ export default function Checkout() {
   const onSubmit = async (data: CheckoutData) => {
     setSubmitError(null);
 
-    // id generado en el cliente: la anon key puede insertar órdenes
-    // pero no leerlas (RLS), así que no podemos pedir el id de vuelta
-    const orderId = crypto.randomUUID();
     const orderItems = resolved.map(({ product, variant, qty }) => ({
       slug: product.slug,
       name: product.name,
@@ -258,37 +259,56 @@ export default function Checkout() {
       qty,
     }));
 
-    const { error } = await supabase.from("orders").insert({
-      id: orderId,
-      customer_email: data.email,
-      customer_name: `${data.nombre} ${data.apellido}`,
-      customer_phone: data.telefono,
-      // La columna es `not null`: en retiro va el objeto vacío, y el panel y
-      // los mails muestran el depósito a partir de `shipping_method`.
-      shipping_address:
-        data.envio === "retiro"
-          ? {}
-          : {
-              direccion: data.direccion,
-              ciudad: data.ciudad,
-              provincia: data.provincia,
-              cp: data.cp,
-            },
-      shipping_method: data.envio,
-      customer_notes: data.notas || null,
-      items: orderItems,
-      subtotal,
-      discount: discount?.amount ?? 0,
-      discount_label: discount?.label ?? null,
-      shipping_cost: shippingCost ?? 0,
-      total,
-      payment_method: data.pago,
-      status: "pending",
-    });
+    // id generado en el cliente: la anon key puede insertar órdenes pero no
+    // leerlas (RLS), así que no podemos pedir el id de vuelta.
+    //
+    // Y por lo mismo tampoco puede editarlas: si Mercado Pago no contesta y la
+    // clienta toca "Pagar" de nuevo, un id nuevo dejaría dos pedidos pendientes
+    // por la misma compra. Así que el id se guarda junto con una huella de lo
+    // que se insertó, y el reintento reusa los dos: mismo pedido, mismo id, un
+    // solo insert. Si entre un intento y otro cambió algo —el formulario, el
+    // carrito, el costo del envío— la huella deja de coincidir y entra un
+    // pedido nuevo; el anterior nunca se pagó.
+    const huella = JSON.stringify([data, orderItems, total, shippingCost]);
+    const guardada = ordenGuardada.current;
+    const orderId =
+      guardada?.huella === huella ? guardada.id : crypto.randomUUID();
 
-    if (error) {
-      setSubmitError(errorDePedido(error));
-      return;
+    if (guardada?.huella !== huella) {
+      const { error } = await supabase.from("orders").insert({
+        id: orderId,
+        customer_email: data.email,
+        customer_name: `${data.nombre} ${data.apellido}`,
+        customer_phone: data.telefono,
+        // La columna es `not null`: en retiro va el objeto vacío, y el panel y
+        // los mails muestran el depósito a partir de `shipping_method`.
+        shipping_address:
+          data.envio === "retiro"
+            ? {}
+            : {
+                direccion: data.direccion,
+                ciudad: data.ciudad,
+                provincia: data.provincia,
+                cp: data.cp,
+              },
+        shipping_method: data.envio,
+        customer_notes: data.notas || null,
+        items: orderItems,
+        subtotal,
+        discount: discount?.amount ?? 0,
+        discount_label: discount?.label ?? null,
+        shipping_cost: shippingCost ?? 0,
+        total,
+        payment_method: data.pago,
+        status: "pending",
+      });
+
+      if (error) {
+        setSubmitError(errorDePedido(error));
+        return;
+      }
+
+      ordenGuardada.current = { id: orderId, huella };
     }
 
     // El pedido queda guardado para medir la compra en la pantalla de gracias:
