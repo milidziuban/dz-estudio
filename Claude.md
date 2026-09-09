@@ -49,9 +49,9 @@ Ejemplo: `Maximalismo, <em>editado</em>` donde `<em>` va en Instrument Serif ita
 ### Elementos gráficos signature
 
 1. **Marquesina superior fija** — franja negra con texto DM Mono deslizándose horizontalmente. Separadores `✦` en rosa.
-2. **Sello editorial circular** — badge redondo amarillo (sin borde) con "edición limitada" en Instrument Serif italic + número en DM Mono.
-3. **Logo extendido** (`/logo-extendido.svg`, rosa) en navbar y footer; monogramas rosa/blanco como favicon según modo claro/oscuro.
-4. El borde festoneado (`ScallopBorder.tsx`) y el damero quedan disponibles pero NO se usan en la UI — el estilo actual es limpio y flat.
+2. **Logo extendido** (`/logo-extendido.svg`, rosa) en navbar y footer; monogramas rosa/blanco como favicon según modo claro/oscuro.
+3. El borde festoneado (`ScallopBorder.tsx`) y el damero quedan disponibles pero NO se usan en la UI — el estilo actual es limpio y flat.
+4. El sello circular de edición limitada se descartó el 09/09/2026: no va a usarse, y el componente se borró. No volver a proponerlo.
 
 ### Componentes UI (estética limpia, referencia: rhodeskin.com / mosquiano.com)
 
