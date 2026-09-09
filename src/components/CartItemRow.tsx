@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import type { ResolvedCartItem } from "../lib/cart";
 import { formatPrice } from "../lib/format";
+import { avisoDeUnidades, unidadesDisponibles } from "../lib/stock";
 import ProductImage from "./ProductImage";
 
 type CartItemRowProps = {
@@ -12,8 +13,12 @@ export default function CartItemRow({ item }: CartItemRowProps) {
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const close = useCart((s) => s.close);
-  const { key, product, variant, qty } = item;
+  const { key, product, variant, qty, max } = item;
   const label = variant ? `${product.name} — ${variant.label}` : product.name;
+
+  // `qty` ya viene topeada al stock (resolveCartItems). Acá solo se frena el
+  // botón de sumar y se dice por qué, que es lo que la clienta ve.
+  const aviso = qty >= max ? avisoDeUnidades(unidadesDisponibles(product, variant)) : null;
 
   return (
     <li className="flex gap-4 border-b border-ink/10 py-4">
@@ -60,12 +65,18 @@ export default function CartItemRow({ item }: CartItemRowProps) {
           {formatPrice(product.price)} c/u
         </p>
 
+        {aviso && (
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-petroleo">
+            {aviso}
+          </p>
+        )}
+
         <div className="mt-auto flex items-center justify-between pt-2">
           <div className="flex items-center rounded-full border border-ink/25">
             <button
               type="button"
               aria-label={`Restar una unidad de ${label}`}
-              onClick={() => setQty(key, qty - 1)}
+              onClick={() => setQty(key, qty - 1, max)}
               className="px-3 py-1 font-bold hover:text-pink"
             >
               −
@@ -76,8 +87,9 @@ export default function CartItemRow({ item }: CartItemRowProps) {
             <button
               type="button"
               aria-label={`Sumar una unidad de ${label}`}
-              onClick={() => setQty(key, qty + 1)}
-              className="px-3 py-1 font-bold hover:text-pink"
+              disabled={qty >= max}
+              onClick={() => setQty(key, qty + 1, max)}
+              className="px-3 py-1 font-bold hover:text-pink disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:text-ink/30"
             >
               +
             </button>

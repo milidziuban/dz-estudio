@@ -15,6 +15,11 @@ import { cn } from "../lib/cn";
 import { COLOR_HEX } from "../lib/colors";
 import { formatPrice } from "../lib/format";
 import { comboBanner, DEFAULT_PROMOS, INSTALLMENTS } from "../lib/promos";
+import {
+  avisoDeUnidades,
+  topeDeCantidad,
+  unidadesDisponibles,
+} from "../lib/stock";
 import { SITE } from "../lib/site";
 import {
   productBreadcrumbJsonLd,
@@ -137,12 +142,20 @@ export default function Producto() {
   const selectedVariant = product.variants?.find((v) => v.id === variantId);
   const variantSoldOut = selectedVariant?.inStock === false;
   const canAdd = product.inStock && !variantSoldOut;
+
+  // Cuántas se pueden pedir de esta variante. El selector frena acá, así la
+  // clienta no llega al final del checkout con 5 de algo que tiene 3.
+  const disponibles = unidadesDisponibles(product, selectedVariant);
+  const tope = topeDeCantidad(disponibles);
+  const aviso = canAdd ? avisoDeUnidades(disponibles) : null;
+  // Puede quedar arriba del tope si se cambió a una variante con menos stock.
+  const qtyEnRango = Math.min(qty, tope);
   // null si a esta categoría no le corre el combo
   const avisoCombo = comboBanner(product.category, promos);
 
   const handleAdd = () => {
-    addToCart(product.slug, variantId, qty);
-    trackAddToCart(product, selectedVariant, qty);
+    addToCart(product.slug, variantId, qtyEnRango, tope);
+    trackAddToCart(product, selectedVariant, qtyEnRango);
     openCart();
   };
 
@@ -287,13 +300,14 @@ export default function Producto() {
                   className="min-w-10 text-center font-mono text-sm font-medium"
                   aria-live="polite"
                 >
-                  {qty}
+                  {qtyEnRango}
                 </span>
                 <button
                   type="button"
                   aria-label="Sumar una unidad"
-                  onClick={() => setQty((q) => q + 1)}
-                  className="px-4 py-3 text-lg font-bold hover:text-pink"
+                  disabled={qtyEnRango >= tope}
+                  onClick={() => setQty((q) => Math.min(q + 1, tope))}
+                  className="px-4 py-3 text-lg font-bold hover:text-pink disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:text-ink/30"
                 >
                   +
                 </button>
@@ -306,6 +320,12 @@ export default function Producto() {
                 {canAdd ? "Agregar al carrito ✦" : "Sin stock"}
               </Button>
             </div>
+
+            {aviso && (
+              <p className="mt-3 font-mono text-xs uppercase tracking-widest text-petroleo">
+                ✦ {aviso}
+              </p>
+            )}
 
             {/* Envío y pago: lo que el cliente pregunta antes de comprar */}
             <ul className="mt-6 space-y-2 text-sm">
@@ -370,7 +390,7 @@ export default function Producto() {
         visible={canAdd && mostrarBarra}
         name={product.name}
         price={product.price}
-        qty={qty}
+        qty={qtyEnRango}
         variantLabel={selectedVariant?.label}
         onAdd={handleAdd}
       />

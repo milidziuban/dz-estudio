@@ -22,6 +22,7 @@ export default function CartDrawer() {
   const isOpen = useCart((s) => s.isOpen);
   const close = useCart((s) => s.close);
   const items = useCart((s) => s.items);
+  const limitar = useCart((s) => s.limitar);
   const { data: products = [], isLoading } = useProducts();
   const { data: settings } = useStoreSettings();
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
@@ -43,6 +44,15 @@ export default function CartDrawer() {
   const cotizaEnLaTienda = envios.options.some(
     (option) => option.enabled && option.mode !== "a-coordinar" && option.cost > 0,
   );
+
+  // El drawer está montado en todas las páginas de la tienda, así que es el
+  // lugar donde el carrito guardado se pone al día con el stock de hoy: sin
+  // esto el número del header seguiría contando unidades que ya no existen.
+  useEffect(() => {
+    if (isLoading || products.length === 0) return;
+    limitar(Object.fromEntries(resolved.map((item) => [item.key, item.max])));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, items, isLoading, limitar]);
 
   useEffect(() => {
     if (!isOpen) return;

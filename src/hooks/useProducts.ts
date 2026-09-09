@@ -10,9 +10,9 @@ import type {
   ProductVariant,
 } from "../types/product";
 
-/** Tal como llega de la base: trae `stock` (número real), que acá se
- *  reduce a `inStock` (boolean) — el número de unidades es un dato del
- *  panel, no de la tienda. */
+/** Tal como llega de la base. El `stock` se usa dos veces: como boolean
+ *  (`inStock`, para apagar la variante agotada) y como número, para que la
+ *  ficha y el carrito no dejen pedir más de lo que hay. */
 type ProductVariantRow = {
   id: string;
   label: string;
@@ -36,6 +36,7 @@ type ProductRow = {
   variants: ProductVariantRow[] | null;
   images: ProductImage[];
   in_stock: boolean;
+  stock: number | null;
 };
 
 function mapVariant(row: ProductVariantRow): ProductVariant {
@@ -44,6 +45,7 @@ function mapVariant(row: ProductVariantRow): ProductVariant {
     label: row.label,
     color: row.color,
     inStock: inStockFromCount(row.stock),
+    stock: row.stock ?? null,
   };
 }
 
@@ -64,6 +66,7 @@ function mapRow(row: ProductRow): Product {
     variants: row.variants?.length ? row.variants.map(mapVariant) : undefined,
     images: row.images,
     inStock: row.in_stock,
+    stock: row.stock ?? null,
   };
 }
 

@@ -26,9 +26,11 @@ export type ProductVariant = {
   id: string;
   label: string;
   color: ColorToken;
-  /** false = esta variante puntual no tiene stock. Ausente = disponible.
-   *  El número real de unidades es un dato del panel, no viaja acá. */
+  /** false = esta variante puntual no tiene stock. Ausente = disponible. */
   inStock?: boolean;
+  /** Unidades que quedan de esta variante. null/ausente = sin control de
+   *  stock. Viaja a la tienda para poder topear la cantidad que se pide. */
+  stock?: number | null;
 };
 
 export type Product = {
@@ -49,6 +51,10 @@ export type Product = {
   cuidados?: string;
   /** Solo en los productos que tienen variantes cargadas en Tienda Nube */
   variants?: ProductVariant[];
+  /** Unidades que quedan cuando el producto NO tiene variantes; con
+   *  variantes el stock se controla por variante. null/ausente = sin
+   *  control de stock. */
+  stock?: number | null;
   images: ProductImage[];
   inStock: boolean;
 };
