@@ -1,5 +1,6 @@
 // Configuración central del sitio.
-// ⚠️ Reemplazar los placeholders marcados antes de salir a producción.
+// Es de donde el sitio lee el mail, el Instagram, el WhatsApp y el punto de
+// retiro: cambiarlo acá y no en cada pantalla.
 export const SITE = {
   name: "DZ Estudio",
   tagline: "Maximalismo con criterio",
