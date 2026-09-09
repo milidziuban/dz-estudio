@@ -55,7 +55,9 @@ export type SiteInfo = {
   instagramUrl: string;
   whatsapp: string;
   whatsappUrl: string;
-  retiro: { nombre: string; direccion: string; horario: string };
+  /** `horario` es opcional a propósito: si el panel no lo tiene cargado, el
+   *  mail no inventa uno. Ver la nota en index.ts. */
+  retiro: { nombre: string; direccion: string; horario?: string };
 };
 
 export type BankInfo = {
@@ -402,9 +404,13 @@ export function despachadoEmail(
       ${block(
         COLORS.verde,
         `${label("Dónde")}
-         <p style="margin:0 0 14px;font-family:${SANS};font-size:15px;line-height:1.5;color:${COLORS.ink};font-weight:700;">${escape(site.retiro.direccion)}</p>
-         ${label("Cuándo")}
-         <p style="margin:0;font-family:${SANS};font-size:15px;line-height:1.5;color:${COLORS.ink};">${escape(site.retiro.horario)}</p>`,
+         <p style="margin:0${site.retiro.horario ? " 0 14px" : ""};font-family:${SANS};font-size:15px;line-height:1.5;color:${COLORS.ink};font-weight:700;">${escape(site.retiro.direccion)}</p>
+         ${
+           site.retiro.horario
+             ? `${label("Cuándo")}
+         <p style="margin:0;font-family:${SANS};font-size:15px;line-height:1.5;color:${COLORS.ink};">${escape(site.retiro.horario)}</p>`
+             : ""
+         }`,
       )}
       ${paragraph("Antes de salir, escribinos por WhatsApp así te esperamos con todo listo.")}
     `
@@ -430,7 +436,7 @@ export function despachadoEmail(
           "Tu pedido está armado y listo para retirar.",
           "",
           `  Dónde: ${site.retiro.direccion}`,
-          `  Cuándo: ${site.retiro.horario}`,
+          ...(site.retiro.horario ? [`  Cuándo: ${site.retiro.horario}`] : []),
           "",
           "Antes de salir, escribinos por WhatsApp así te esperamos con todo listo.",
         ]

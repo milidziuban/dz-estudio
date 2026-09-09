@@ -145,7 +145,12 @@ Deno.serve(async (req) => {
         direccion:
           retiroLocation?.direccion ??
           "Tacuarí 7618, Guadalupe, Santa Fe Capital",
-        horario: retiroLocation?.horario ?? "Lunes a viernes de 9 a 18",
+        // Sin respaldo escrito a mano: el 07/09 el horario pasó a 9-20 en
+        // todo el sitio y acá quedó "de 9 a 18", diciéndole a la clienta que
+        // fuera a buscar el pedido dos horas antes de que cierre. Si el panel
+        // no tiene el horario cargado, el mail no muestra la línea: falta un
+        // dato, no dice uno equivocado.
+        horario: retiroLocation?.horario,
       },
     };
 
