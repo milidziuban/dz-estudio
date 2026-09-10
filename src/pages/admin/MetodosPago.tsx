@@ -4,6 +4,7 @@ import SettingsSection from "../../components/admin/SettingsSection";
 import Toggle from "../../components/admin/Toggle";
 import TextField from "../../components/TextField";
 import { useSettingsDraft } from "../../hooks/useStoreSettings";
+import { INSTALLMENTS } from "../../lib/promos";
 
 export default function AdminMetodosPago() {
   const pagos = useSettingsDraft("pagos");
@@ -107,20 +108,27 @@ export default function AdminMetodosPago() {
                     })
                   }
                 />
-                <TextField
-                  id="mp-installments-label"
-                  label="Cómo se anuncia"
-                  value={mercadopago.installmentsLabel}
-                  onChange={(event) =>
-                    pagos.update({
-                      ...pagos.value,
-                      mercadopago: {
-                        ...mercadopago,
-                        installmentsLabel: event.target.value,
-                      },
-                    })
-                  }
-                />
+              </div>
+
+              {/* Antes acá había un campo "Cómo se anuncia" que no leía
+                  ninguna pantalla de la tienda: se escribía, se guardaba y no
+                  cambiaba nada. En su lugar va lo que la tienda dice de
+                  verdad, que se arma solo con los dos números de arriba. */}
+              <div className="mt-4 rounded-xl bg-white p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+                  Cómo se anuncia hoy en la tienda
+                </p>
+                <p className="mt-2 text-sm text-ink">{INSTALLMENTS.detail}</p>
+                <p className="mt-1 text-[11px] text-ink/65">
+                  En la marquesina y en las fichas, más corto:{" "}
+                  <span className="text-ink">{INSTALLMENTS.label}</span>
+                </p>
+                <p className="mt-2 text-[11px] leading-relaxed">
+                  No es un campo: la frase se arma sola en{" "}
+                  <code className="font-mono">lib/promos.ts</code> a partir de
+                  las cuotas sin interés y del tope. Si acá dice algo distinto
+                  de lo que querés ofrecer, se cambia ahí y no en el panel.
+                </p>
               </div>
             </div>
 
