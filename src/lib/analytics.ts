@@ -1,9 +1,11 @@
 // Google Analytics 4 — el ID se configura con VITE_GA_ID en el .env.
 // Si no hay ID, todo es no-op (útil en desarrollo).
 //
-// Cada evento del embudo se mide dos veces desde acá: en GA4 y en el pixel de
-// Meta (`meta-pixel.ts`). Las pantallas siguen llamando a una sola función y no
-// saben que hay dos medidores; agregar un tercero se hace en este archivo.
+// Cada evento del embudo se mide tres veces desde acá: en GA4, en el pixel de
+// Meta (`meta-pixel.ts`) y —los dos pasos del medio— en la base de la tienda
+// (`store-events.ts`), que es la única de las tres que se lee desde /admin.
+// Las pantallas siguen llamando a una sola función y no saben que hay tres
+// medidores; agregar un cuarto se hace en este archivo.
 import type { ResolvedCartItem } from "./cart";
 import type { Product, ProductVariant } from "../types/product";
 import {
@@ -14,6 +16,7 @@ import {
   metaPurchase,
   metaViewContent,
 } from "./meta-pixel";
+import { trackStoreEvent } from "./store-events";
 
 declare global {
   interface Window {
@@ -115,12 +118,15 @@ export function trackAddToCart(
   qty: number,
 ) {
   const item = gaItem(product, variant, qty);
+  const value = product.price * qty;
   trackEvent("add_to_cart", {
     currency: CURRENCY,
-    value: product.price * qty,
+    value,
     items: [item],
   });
   metaAddToCart(item);
+  // Fire-and-forget: la fila del embudo no puede demorar el drawer.
+  void trackStoreEvent("add_to_cart", { slug: product.slug, qty, value });
 }
 
 export function trackBeginCheckout(items: ResolvedCartItem[], value: number) {
@@ -131,6 +137,12 @@ export function trackBeginCheckout(items: ResolvedCartItem[], value: number) {
     items: lineas,
   });
   metaInitiateCheckout(lineas, value);
+  // Sin `slug`: el carrito puede tener varios productos y el paso que interesa
+  // medir acá es el del checkout, no el de cada línea.
+  void trackStoreEvent("begin_checkout", {
+    qty: items.reduce((total, item) => total + item.qty, 0),
+    value,
+  });
 }
 
 // ── La compra ─────────────────────────────────────────────────

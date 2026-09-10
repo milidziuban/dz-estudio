@@ -27,6 +27,17 @@ function getSession(): { id: string; isNew: boolean } {
   }
 }
 
+/** El id de sesión de esta pestaña, para que los eventos del embudo
+ *  (`store-events.ts`) se puedan cruzar con las visitas.
+ *
+ *  Lo llama siempre algo que pasa después del primer render —un click en
+ *  "Agregar al carrito", entrar al checkout—, así que para cuando corre, el
+ *  `trackVisit` del montaje ya resolvió la sesión y ya decidió si mandaba el
+ *  referrer. */
+export function sessionId(): string {
+  return getSession().id;
+}
+
 let lastPath: string | null = null;
 
 export async function trackVisit(path: string): Promise<void> {

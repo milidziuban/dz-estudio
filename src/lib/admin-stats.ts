@@ -9,7 +9,13 @@ import {
   rangeStart,
   type RangeId,
 } from "./admin";
-import type { AdminProduct, Customer, Order, PageView } from "../types/admin";
+import type {
+  AdminProduct,
+  Customer,
+  Order,
+  PageView,
+  StoreEvent,
+} from "../types/admin";
 
 // ── Períodos ──────────────────────────────────────────────────
 
@@ -52,11 +58,14 @@ export function periodFor(
 
 // ── Series para el gráfico ────────────────────────────────────
 
-export type Bucket = "day" | "week" | "month";
+export type Bucket = "hour" | "day" | "week" | "month";
 
-/** Con más de mes y medio, un día por barra no se lee: agrupamos. */
+/** Con más de mes y medio, un día por barra no se lee: agrupamos. Y en un
+ *  solo día pasa al revés: una barra sola no dice nada, así que se abre por
+ *  hora, que es donde se ve a qué hora pegó el posteo. */
 export function bucketFor(from: Date, to: Date): Bucket {
   const days = (to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000);
+  if (days <= 2) return "hour";
   if (days <= 45) return "day";
   if (days <= 200) return "week";
   return "month";
@@ -65,6 +74,11 @@ export function bucketFor(from: Date, to: Date): Bucket {
 /** Inicio del bucket al que cae una fecha. Es la clave con la que se agrupa. */
 export function bucketStart(date: Date, bucket: Bucket): Date {
   const out = new Date(date);
+  // La hora se conserva solo en el bucket por hora; el resto arranca a las 00.
+  if (bucket === "hour") {
+    out.setMinutes(0, 0, 0);
+    return out;
+  }
   out.setHours(0, 0, 0, 0);
   if (bucket === "week") {
     // Semanas de lunes a domingo (getDay: 0 = domingo)
@@ -75,6 +89,16 @@ export function bucketStart(date: Date, bucket: Bucket): Date {
   return out;
 }
 
+/** Clave con la que se agrupa una fecha ya llevada al inicio de su bucket.
+ *  Por hora el día no alcanza: sin el sufijo, las 24 barras de hoy caerían
+ *  todas en la misma. */
+export function bucketKey(date: Date, bucket: Bucket): string {
+  const base = dayKey(date);
+  return bucket === "hour"
+    ? `${base}T${String(date.getHours()).padStart(2, "0")}`
+    : base;
+}
+
 const monthFormatter = new Intl.DateTimeFormat("es-AR", {
   month: "short",
   year: "2-digit",
@@ -82,6 +106,8 @@ const monthFormatter = new Intl.DateTimeFormat("es-AR", {
 
 function bucketLabel(date: Date, bucket: Bucket): string {
   if (bucket === "month") return monthFormatter.format(date);
+  // "14 h" y no "14:00": el bucket es la hora entera, no un instante.
+  if (bucket === "hour") return `${date.getHours()} h`;
   return formatDayMonth(date);
 }
 
@@ -98,15 +124,16 @@ export function buildSeries(
   const cursor = bucketStart(period.from, bucket);
   const end = bucketStart(period.to, bucket);
   while (cursor <= end) {
-    const key = dayKey(cursor);
+    const key = bucketKey(cursor, bucket);
     points.set(key, { key, label: bucketLabel(cursor, bucket), value: 0 });
-    if (bucket === "day") cursor.setDate(cursor.getDate() + 1);
+    if (bucket === "hour") cursor.setHours(cursor.getHours() + 1);
+    else if (bucket === "day") cursor.setDate(cursor.getDate() + 1);
     else if (bucket === "week") cursor.setDate(cursor.getDate() + 7);
     else cursor.setMonth(cursor.getMonth() + 1);
   }
 
   for (const entry of entries) {
-    const key = dayKey(bucketStart(entry.date, bucket));
+    const key = bucketKey(bucketStart(entry.date, bucket), bucket);
     const point = points.get(key);
     if (point) point.value += entry.value;
   }
@@ -153,6 +180,125 @@ export function visitsIn(
   to: Date | null,
 ): PageView[] {
   return visits.filter((visit) => inRange(visit.createdAt, from, to));
+}
+
+export function eventsIn(
+  events: StoreEvent[],
+  from: Date | null,
+  to: Date | null,
+): StoreEvent[] {
+  return events.filter((event) => inRange(event.createdAt, from, to));
+}
+
+// ── Embudo ────────────────────────────────────────────────────
+
+export type FunnelStep = {
+  id: string;
+  label: string;
+  /** Cuántas llegaron hasta acá */
+  count: number;
+  /** % sobre el paso anterior. null en el primero. */
+  desdeElAnterior: number | null;
+  /** % sobre el primer paso */
+  desdeElInicio: number;
+  /** Qué se está contando, cuando no es obvio */
+  nota?: string;
+};
+
+/**
+ * El camino completo, contado por sesión: cuántas entraron, cuántas abrieron
+ * una ficha, cuántas agregaron al carrito, cuántas empezaron el checkout.
+ *
+ * El último paso es el único que no se cuenta por sesión: las órdenes no
+ * guardan el id de sesión, así que son órdenes cobradas del período y no
+ * "sesiones que compraron". La diferencia importa cuando alguien compra dos
+ * veces en la misma visita —suma dos— o cuando cierra y vuelve más tarde.
+ */
+export function funnelFor(
+  visits: PageView[],
+  events: StoreEvent[],
+  orders: Order[],
+): FunnelStep[] {
+  const sesiones = new Set(visits.map((visit) => visit.sessionId));
+  const fichas = new Set(
+    visits
+      .filter((visit) => visit.path.startsWith("/producto/"))
+      .map((visit) => visit.sessionId),
+  );
+  const sesionesDe = (kind: StoreEvent["kind"]) =>
+    new Set(
+      events.filter((event) => event.kind === kind).map((e) => e.sessionId),
+    );
+
+  const crudos = [
+    { id: "sesiones", label: "Entraron a la tienda", count: sesiones.size },
+    { id: "ficha", label: "Abrieron una ficha", count: fichas.size },
+    {
+      id: "carrito",
+      label: "Agregaron al carrito",
+      count: sesionesDe("add_to_cart").size,
+    },
+    {
+      id: "checkout",
+      label: "Empezaron el checkout",
+      count: sesionesDe("begin_checkout").size,
+    },
+    {
+      id: "compra",
+      label: "Compraron",
+      count: orders.filter(isPaid).length,
+      nota: "órdenes cobradas, no sesiones",
+    },
+  ];
+
+  const inicio = crudos[0].count;
+  return crudos.map((paso, i) => {
+    const anterior = i === 0 ? null : crudos[i - 1].count;
+    return {
+      ...paso,
+      desdeElAnterior:
+        anterior === null || anterior === 0
+          ? null
+          : (paso.count / anterior) * 100,
+      desdeElInicio: inicio === 0 ? 0 : (paso.count / inicio) * 100,
+    };
+  });
+}
+
+/**
+ * Qué se agrega al carrito y no se termina comprando, por producto.
+ *
+ * Se cuenta en sesiones y no en unidades: dos clicks en la misma visita son
+ * una sola persona dudando, no dos. Sirve para separar el producto que no
+ * gusta —nadie lo agrega— del que sí gusta pero algo lo frena después: el
+ * precio, el envío, el stock.
+ */
+export function abandonoPorProducto(
+  events: StoreEvent[],
+  orders: Order[],
+): { slug: string; agregados: number; vendidos: number }[] {
+  const sesionesPorSlug = new Map<string, Set<string>>();
+  for (const event of events) {
+    if (event.kind !== "add_to_cart" || !event.slug) continue;
+    const set = sesionesPorSlug.get(event.slug) ?? new Set<string>();
+    set.add(event.sessionId);
+    sesionesPorSlug.set(event.slug, set);
+  }
+
+  const vendidosPorSlug = new Map<string, number>();
+  for (const order of orders.filter(isPaid)) {
+    for (const item of order.items) {
+      vendidosPorSlug.set(item.slug, (vendidosPorSlug.get(item.slug) ?? 0) + 1);
+    }
+  }
+
+  return [...sesionesPorSlug.entries()]
+    .map(([slug, sesiones]) => ({
+      slug,
+      agregados: sesiones.size,
+      vendidos: vendidosPorSlug.get(slug) ?? 0,
+    }))
+    .sort((a, b) => b.agregados - a.agregados);
 }
 
 export function kpisFor(orders: Order[], visits: PageView[]): Kpis {

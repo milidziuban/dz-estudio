@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import AdminTable from "../../components/admin/AdminTable";
+import FunnelChart from "../../components/admin/FunnelChart";
 import PageHeading from "../../components/admin/PageHeading";
 import ProductFunnelTable from "../../components/admin/ProductFunnelTable";
 import QueryError from "../../components/admin/QueryError";
@@ -8,11 +9,11 @@ import StatCard from "../../components/admin/StatCard";
 import TrendChart from "../../components/admin/TrendChart";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
 import { useProductFunnel } from "../../hooks/useProductFunnel";
+import { useStoreEvents } from "../../hooks/useStoreEvents";
 import { useVisits } from "../../hooks/useVisits";
 import {
   PAYMENT_LABEL,
   SHIPPING_METHOD_LABEL,
-  dayKey,
   downloadCsv,
   formatCompactPrice,
   formatPercent,
@@ -23,8 +24,11 @@ import {
 } from "../../lib/admin";
 import {
   bucketFor,
+  bucketKey,
   bucketStart,
   buildSeries,
+  eventsIn,
+  funnelFor,
   kpisFor,
   ordersIn,
   periodFor,
@@ -77,12 +81,25 @@ export default function AdminEstadisticas() {
   const [range, setRange] = useState<RangeId>("30d");
   const orders = useAdminOrders();
   const visits = useVisits(range);
+  const events = useStoreEvents(range);
   // Mismo rango que el resto de la pantalla: el hook recorta por fecha y por
   // nada más, igual que los totales de Ventas.
   const funnel = useProductFunnel(range);
 
   const allOrders = orders.data ?? [];
   const allVisits = visits.data ?? [];
+  const allEvents = events.data ?? [];
+
+  // El embudo se arma aparte del memo grande: depende de `store_events`, que
+  // carga por su cuenta y puede no estar (la migración es del 10/09).
+  const embudo = useMemo(() => {
+    const period = periodFor(range, allOrders, allVisits);
+    return funnelFor(
+      visitsIn(allVisits, period.from, period.to),
+      eventsIn(allEvents, period.from, period.to),
+      ordersIn(allOrders, period.from, period.to),
+    );
+  }, [range, allOrders, allVisits, allEvents]);
 
   const data = useMemo(() => {
     const period = periodFor(range, allOrders, allVisits);
@@ -103,7 +120,8 @@ export default function AdminEstadisticas() {
     // contar ids distintos dentro de cada tramo.
     const sesionesPorBucket = new Map<string, Set<string>>();
     for (const visit of currentVisits) {
-      const key = dayKey(bucketStart(new Date(visit.createdAt), bucket));
+      const fecha = new Date(visit.createdAt);
+      const key = bucketKey(bucketStart(fecha, bucket), bucket);
       const set = sesionesPorBucket.get(key) ?? new Set<string>();
       set.add(visit.sessionId);
       sesionesPorBucket.set(key, set);
@@ -184,7 +202,13 @@ export default function AdminEstadisticas() {
     : 0;
 
   const bucketLabel =
-    data.bucket === "day" ? "Día" : data.bucket === "week" ? "Semana" : "Mes";
+    data.bucket === "hour"
+      ? "Hora"
+      : data.bucket === "day"
+        ? "Día"
+        : data.bucket === "week"
+          ? "Semana"
+          : "Mes";
 
   return (
     <>
@@ -252,6 +276,34 @@ export default function AdminEstadisticas() {
               summaryLabel="Total del período"
               summaryValue={`${actual.visitas.toLocaleString("es-AR")} vistas`}
             />
+          </section>
+
+          <section className="mt-3 rounded-2xl bg-white p-6">
+            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
+                El camino hasta la compra
+              </h2>
+              <p className="font-mono text-[11px] text-ink/65">
+                por sesión, en el período elegido
+              </p>
+            </div>
+
+            {events.error ? (
+              <QueryError
+                error={events.error}
+                what="los pasos del carrito y del checkout"
+                migration="supabase/migrations/20260910203819_embudo_en_la_base.sql"
+              />
+            ) : (
+              <>
+                <FunnelChart steps={embudo} />
+                <p className="mt-5 text-[11px] leading-relaxed text-ink/65">
+                  Los dos pasos del medio se miden desde el 10/09: antes de esa
+                  fecha el período va a mostrarlos en cero aunque haya habido
+                  ventas.
+                </p>
+              </>
+            )}
           </section>
 
           {/* La pregunta de la semana del lanzamiento: qué se mira mucho y se

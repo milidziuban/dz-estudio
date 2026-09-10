@@ -98,6 +98,9 @@ export function reservaVence(order: Order): Date {
 // ── Rangos de fecha ───────────────────────────────────────────
 
 export const RANGES = [
+  // "Hoy" existe para los días que no se parecen al resto: un lanzamiento, un
+  // posteo que pegó. Diluidos en 7 días esos números no se leen.
+  { id: "hoy", label: "Hoy", days: 1 },
   { id: "7d", label: "7 días", days: 7 },
   { id: "30d", label: "30 días", days: 30 },
   { id: "90d", label: "90 días", days: 90 },

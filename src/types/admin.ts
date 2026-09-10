@@ -137,6 +137,18 @@ export type PageView = {
   isNewSession: boolean;
 };
 
+/** Los dos pasos del medio del embudo. Comparten `sessionId` con `PageView`,
+ *  que es lo que permite contar por sesión y no por evento suelto. */
+export type StoreEvent = {
+  createdAt: string;
+  kind: "add_to_cart" | "begin_checkout";
+  sessionId: string;
+  /** Solo en `add_to_cart`: en el checkout el carrito puede tener varios */
+  slug: string | null;
+  qty: number | null;
+  value: number | null;
+};
+
 // ── store_settings ────────────────────────────────────────────
 
 export type PagosSettings = {

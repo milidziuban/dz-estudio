@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import AhoraMismo from "../../components/admin/AhoraMismo";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
 import RangeTabs from "../../components/admin/RangeTabs";
@@ -129,11 +130,13 @@ export default function AdminInicio() {
   );
 
   const bucketLabel =
-    stats.bucket === "day"
-      ? "por día"
-      : stats.bucket === "week"
-        ? "por semana"
-        : "por mes";
+    stats.bucket === "hour"
+      ? "por hora"
+      : stats.bucket === "day"
+        ? "por día"
+        : stats.bucket === "week"
+          ? "por semana"
+          : "por mes";
 
   if (orders.error) {
     return (
@@ -197,6 +200,13 @@ export default function AdminInicio() {
           )}
         </div>
       )}
+
+      {/* Va antes que los KPIs a propósito: las tarjetas de abajo miran un
+          período cerrado y esto mira el minuto que corre, que es lo único
+          sobre lo que todavía se puede hacer algo. */}
+      <div className="mb-3">
+        <AhoraMismo />
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
