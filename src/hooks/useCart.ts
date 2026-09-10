@@ -28,7 +28,8 @@ type CartState = {
    *  se corta ahí, que es donde la iba a cortar el checkout. */
   add: (slug: string, variantId?: string, qty?: number, max?: number) => void;
   setQty: (key: string, qty: number, max?: number) => void;
-  /** Baja las líneas guardadas al stock real, cuando el catálogo ya cargó. */
+  /** Baja las líneas guardadas al stock real y descarta las que ya no están
+   *  en el catálogo, cuando el catálogo ya cargó. */
   limitar: (maximos: Record<string, number>) => void;
   remove: (key: string) => void;
   clear: () => void;
@@ -68,13 +69,30 @@ export const useCart = create<CartState>()(
       limitar: (maximos) =>
         set((state) => {
           // El carrito vive en el navegador y puede tener meses: entre que se
-          // guardó y hoy, el stock pudo bajar. Si nada sobra se devuelve el
-          // mismo estado, para no re-renderizar de gusto.
-          const items = state.items.map((item) => {
-            const max = maximos[itemKey(item)];
-            return max !== undefined && item.qty > max ? { ...item, qty: max } : item;
-          });
-          return items.some((item, i) => item !== state.items[i]) ? { items } : state;
+          // guardó y hoy, el stock pudo bajar y el producto pudo salir del
+          // catálogo.
+          //
+          // La línea cuyo producto ya no está se cae del carrito. `maximos`
+          // llega armado desde el catálogo ya resuelto, así que "no tiene
+          // máximo" significa "ese slug no existe más": `resolveCartItems` ya
+          // la descarta para mostrarla y para cobrarla, y si igual quedara
+          // guardada el número del header seguiría contando una unidad que no
+          // aparece en ninguna otra pantalla. Se llama solo con el catálogo
+          // cargado (ver CartDrawer), que es lo que hace seguro borrar por
+          // ausencia: con la lista vacía no se borraría un carrito entero.
+          //
+          // Si nada sobra se devuelve el mismo estado, para no re-renderizar
+          // de gusto.
+          const items = state.items
+            .filter((item) => maximos[itemKey(item)] !== undefined)
+            .map((item) => {
+              const max = maximos[itemKey(item)];
+              return item.qty > max ? { ...item, qty: max } : item;
+            });
+          const cambio =
+            items.length !== state.items.length ||
+            items.some((item, i) => item !== state.items[i]);
+          return cambio ? { items } : state;
         }),
       remove: (key) =>
         set((state) => ({
