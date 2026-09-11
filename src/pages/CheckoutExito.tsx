@@ -17,6 +17,11 @@ import {
 } from "../lib/checkout";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
+import { SITE } from "../lib/site";
+import {
+  comprobanteWhatsappUrl,
+  pedirDatosWhatsappUrl,
+} from "../lib/whatsapp";
 
 type OrderState = {
   orderNumber?: string;
@@ -30,10 +35,9 @@ export default function CheckoutExito() {
   const { state } = useLocation() as { state: OrderState | null };
   const [searchParams] = useSearchParams();
   const clearCart = useCart((s) => s.clear);
-  // El alias bancario se edita en /admin/pagos
+  // Los datos bancarios se editan en /admin/pagos
   const { data: settings } = useStoreSettings();
   const banco = (settings?.pagos ?? SETTINGS_DEFAULTS.pagos).transferencia;
-  const alias = banco.alias;
   const sinDatosBancarios = faltanDatosBancarios(banco);
 
   // El envío de este pedido se cobra aparte. Se lee una sola vez al montar:
@@ -106,11 +110,13 @@ export default function CheckoutExito() {
               tardar unas horas.
             </p>
           ) : (
+            // Gmail suele archivar estos mails en Promociones: si la clienta
+            // no lo encuentra, el detalle está igual en esta pantalla.
             <p className="mt-6 leading-relaxed">
               {state?.email
                 ? `Te mandamos el detalle a ${state.email}.`
                 : "Te mandamos el detalle por email."}{" "}
-              Ya casi lo tenés.
+              Si no lo ves, fijate en Promociones o en Spam.
             </p>
           )}
 
@@ -121,27 +127,67 @@ export default function CheckoutExito() {
           )}
 
           {pago === "transferencia" && (
+            // Esta pantalla es lo único seguro que le queda a la clienta: el
+            // mail puede caer en Promociones y el checkout ya quedó atrás. Van
+            // los datos completos, el número de WhatsApp escrito y el botón
+            // con el mensaje armado con el número de pedido.
             <div className="mt-8 rounded-2xl bg-lila p-6 text-left">
               <p className="font-mono text-xs font-medium uppercase tracking-widest">
                 ✧ Falta un paso
               </p>
-              <p className="mt-2 text-sm leading-relaxed">
-                {sinDatosBancarios ? (
-                  <>
-                    Pedinos los datos para transferir por WhatsApp y mandanos
-                    el comprobante. Te reservamos todo por 48 horas — después
+              {sinDatosBancarios ? (
+                <p className="mt-2 text-sm leading-relaxed">
+                  Pedinos los datos para transferir por WhatsApp y mandanos el
+                  comprobante. Te reservamos todo por 48 horas — después vuelve
+                  a la tienda y ya sabés cómo es esto de las ediciones
+                  limitadas.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-2 text-sm leading-relaxed">
+                    Transferí el total a esta cuenta y mandanos el comprobante
+                    por WhatsApp. Te reservamos todo por 48 horas — después
                     vuelve a la tienda y ya sabés cómo es esto de las ediciones
                     limitadas.
-                  </>
-                ) : (
-                  <>
-                    Transferí el total a{" "}
-                    <span className="font-mono">{alias}</span> y mandanos el
-                    comprobante por WhatsApp. Te reservamos todo por 48 horas —
-                    después vuelve a la tienda y ya sabés cómo es esto de las
-                    ediciones limitadas.
-                  </>
-                )}
+                  </p>
+                  <dl className="mt-4 space-y-1.5 font-mono text-xs tracking-wider">
+                    <div className="flex justify-between gap-4">
+                      <dt className="uppercase text-ink/70">Alias</dt>
+                      <dd>{banco.alias}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="uppercase text-ink/70">CBU</dt>
+                      <dd className="break-all">{banco.cbu}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="uppercase text-ink/70">Titular</dt>
+                      <dd className="text-right">{banco.titular}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="uppercase text-ink/70">CUIT</dt>
+                      <dd>{banco.cuit}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="uppercase text-ink/70">Banco</dt>
+                      <dd>{banco.banco}</dd>
+                    </div>
+                  </dl>
+                </>
+              )}
+              <Button
+                href={
+                  sinDatosBancarios
+                    ? pedirDatosWhatsappUrl(orderNumber, nombre)
+                    : comprobanteWhatsappUrl(orderNumber, nombre)
+                }
+                className="mt-6 w-full py-4 text-center"
+              >
+                {sinDatosBancarios
+                  ? "Pedir los datos por WhatsApp ✦"
+                  : "Mandar el comprobante ✦"}
+              </Button>
+              <p className="mt-3 text-center font-mono text-xs tracking-wider">
+                WhatsApp {SITE.whatsapp}
               </p>
             </div>
           )}

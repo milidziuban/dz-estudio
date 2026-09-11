@@ -17,6 +17,39 @@ function build(lines: string[]): string {
   return `${SITE.whatsappUrl}?text=${encodeURIComponent(text)}`;
 }
 
+/**
+ * Después de confirmar por transferencia: el mensaje con el que la clienta
+ * manda el comprobante. Lleva el número de pedido para que del otro lado se
+ * sepa a qué orden corresponde sin preguntar.
+ */
+export function comprobanteWhatsappUrl(
+  orderNumber?: string,
+  nombre?: string,
+): string {
+  return build([
+    `¡Hola DZ Estudio!${nombre ? ` Soy ${nombre}.` : ""}`,
+    `Te mando el comprobante de la transferencia del pedido${
+      orderNumber ? ` #${orderNumber}` : " que acabo de hacer"
+    }.`,
+  ]);
+}
+
+/**
+ * La lectura de los datos bancarios falló y la pantalla de gracias los pide
+ * por WhatsApp en vez de inventarlos (ver `faltanDatosBancarios`).
+ */
+export function pedirDatosWhatsappUrl(
+  orderNumber?: string,
+  nombre?: string,
+): string {
+  return build([
+    `¡Hola DZ Estudio!${nombre ? ` Soy ${nombre}.` : ""}`,
+    `Hice el pedido${
+      orderNumber ? ` #${orderNumber}` : ""
+    } para pagar por transferencia y no me cargaron los datos de la cuenta. ¿Me los pasás?`,
+  ]);
+}
+
 /** Pedido armado desde el carrito, sin pasar por el checkout. */
 export function cartWhatsappUrl(
   items: ResolvedCartItem[],

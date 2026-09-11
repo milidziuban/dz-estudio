@@ -8,12 +8,15 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   to?: string;
   /** State del Link, para pasar datos sin que viajen por la URL */
   state?: unknown;
+  /** Link externo (WhatsApp, Mercado Pago): se abre en otra pestaña */
+  href?: string;
 };
 
 export default function Button({
   variant = "primary",
   to,
   state,
+  href,
   className,
   children,
   onClick,
@@ -39,6 +42,20 @@ export default function Button({
       >
         {children}
       </Link>
+    );
+  }
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={classes}
+        onClick={onClick as MouseEventHandler | undefined}
+      >
+        {children}
+      </a>
     );
   }
 

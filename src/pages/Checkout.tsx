@@ -691,8 +691,11 @@ export default function Checkout() {
                   <div className="mt-6 rounded-2xl bg-lila p-6">
                     <p className="text-sm leading-relaxed">
                       No pudimos cargar los datos para transferir. Confirmá el
-                      pedido igual y escribinos por WhatsApp: te los pasamos y
-                      te lo reservamos 48 horas.
+                      pedido igual y escribinos por WhatsApp al{" "}
+                      <span className="font-mono font-medium">
+                        {SITE.whatsapp}
+                      </span>
+                      : te los pasamos y te lo reservamos 48 horas.
                     </p>
                     <Button
                       type="submit"
@@ -728,6 +731,12 @@ export default function Checkout() {
                       <div className="flex justify-between gap-4">
                         <dt className="uppercase text-ink/70">Alias</dt>
                         <dd>{banco.alias}</dd>
+                      </div>
+                      {/* El comprobante va por WhatsApp: el número tiene que
+                          estar al lado del CBU, no en otra página. */}
+                      <div className="flex justify-between gap-4 border-t border-ink/15 pt-1.5">
+                        <dt className="uppercase text-ink/70">WhatsApp</dt>
+                        <dd>{SITE.whatsapp}</dd>
                       </div>
                     </dl>
                     <Button

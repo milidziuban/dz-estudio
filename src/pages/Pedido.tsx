@@ -127,7 +127,7 @@ export default function Pedido() {
                   rel="noopener noreferrer"
                   className="font-semibold underline"
                 >
-                  escribinos por WhatsApp
+                  escribinos por WhatsApp al {SITE.whatsapp}
                 </a>
                 .
               </p>
@@ -225,7 +225,7 @@ function OrderSummary({ order }: { order: OrderTracking }) {
           rel="noopener noreferrer"
           className="font-semibold text-ink underline"
         >
-          Escribinos por WhatsApp
+          Escribinos por WhatsApp al {SITE.whatsapp}
         </a>{" "}
         con este código a mano.
       </p>
