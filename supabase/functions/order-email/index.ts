@@ -1,29 +1,53 @@
 // ============================================================
 // Edge Function: order-email
-// Manda los tres mails del pedido con Resend.
+// Manda los mails del pedido con Resend: tres a la clienta y el aviso
+// interno de pedido nuevo a quien administra la tienda.
 //
-// Quien llama solo dice QUÉ orden y CUÁL de los tres mails. El contenido
-// (precios, datos bancarios, dirección) sale siempre de la base con
-// service role: nada de lo que se manda viene del body.
+// Quien llama solo dice QUÉ orden y CUÁL mail. El contenido (precios,
+// datos bancarios, dirección) sale siempre de la base con service role:
+// nada de lo que se manda viene del body.
 //
 // Cada mail sale una sola vez. La tabla `order_emails` tiene clave
 // primaria (order_id, kind) y se inserta ANTES de mandar: si la fila ya
 // existe, no se manda de nuevo. Eso cubre los reintentos de Mercado Pago
 // y los guardados repetidos del panel. Si Resend falla, la fila se borra
 // para que el próximo intento sí salga.
+//
+// El aviso interno (`nuevo-pedido`) no hace falta pedirlo: sale solo
+// después de `transferencia` (entró un pedido a pagar por transferencia)
+// y de `pago-confirmado` (Mercado Pago aprobó un pago). Va a los mails
+// de la tabla `admins` y tiene su propia fila en `order_emails`, así que
+// confirmar a mano una transferencia no lo manda dos veces.
 // ============================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   type BankInfo,
   despachadoEmail,
   type MailOrder,
+  nuevoPedidoEmail,
   pagoConfirmadoEmail,
   type SiteInfo,
   transferenciaEmail,
 } from "./templates.ts";
 
-const KINDS = ["transferencia", "pago-confirmado", "despachado"] as const;
+const KINDS = [
+  "transferencia",
+  "pago-confirmado",
+  "despachado",
+  "nuevo-pedido",
+] as const;
 type Kind = (typeof KINDS)[number];
+
+/** Después de cuáles mails a la clienta sale también el aviso interno. */
+const AVISAN_AL_ADMIN: ReadonlySet<Kind> = new Set([
+  "transferencia",
+  "pago-confirmado",
+]);
+
+type Resultado =
+  | { sent: true; id: string; kind: Kind }
+  | { skipped: true; reason: string }
+  | { error: string; detail?: unknown; status: number };
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -84,12 +108,14 @@ Deno.serve(async (req) => {
     // Cada mail tiene su condición en la base. Así el mail de "pago
     // confirmado" no se puede disparar sobre una orden impaga aunque
     // alguien llame a la función con la anon key.
-    const permitido =
-      (kind === "transferencia" && order.payment_method === "transferencia") ||
-      (kind === "pago-confirmado" && order.status === "paid") ||
-      (kind === "despachado" && order.shipping_status === "despachado");
+    const permitido = (k: Kind): boolean =>
+      (k === "transferencia" && order.payment_method === "transferencia") ||
+      (k === "pago-confirmado" && order.status === "paid") ||
+      (k === "despachado" && order.shipping_status === "despachado") ||
+      (k === "nuevo-pedido" &&
+        (order.payment_method === "transferencia" || order.status === "paid"));
 
-    if (!permitido) {
+    if (!permitido(kind)) {
       return json({ skipped: true, reason: `la orden no está para ${kind}` });
     }
 
@@ -132,11 +158,9 @@ Deno.serve(async (req) => {
     ).find((l) => l.retiro);
 
     const whatsapp = marketing.whatsapp ?? "";
-    const instagram = marketing.instagram ?? "dzestudio_";
     const site: SiteInfo = {
       url: Deno.env.get("SITE_URL") ?? "https://www.dz-estudio.com",
-      instagram,
-      instagramUrl: `https://instagram.com/${instagram}`,
+      instagram: marketing.instagram ?? "dzestudio_",
       whatsapp,
       // wa.me quiere código de país + 9 de celular, sin +, sin 0 y sin 15
       whatsappUrl: `https://wa.me/549${whatsapp.replace(/\D/g, "")}`,
@@ -176,8 +200,14 @@ Deno.serve(async (req) => {
           .join(", ");
 
     const mailOrder: MailOrder = {
+      id: order.id,
       numero: orderNumber(order.id),
       nombre: firstName(order.customer_name),
+      nombreCompleto: order.customer_name,
+      email: order.customer_email,
+      telefono: order.customer_phone ?? null,
+      pago: order.payment_method === "mp" ? "mp" : "transferencia",
+      pagado: order.status === "paid",
       items: (order.items ?? []).map(
         (it: {
           name: string;
@@ -205,54 +235,117 @@ Deno.serve(async (req) => {
       notas: order.customer_notes ?? null,
     };
 
-    const { subject, html, text } =
-      kind === "transferencia"
-        ? transferenciaEmail(mailOrder, site, bank)
-        : kind === "pago-confirmado"
-          ? pagoConfirmadoEmail(mailOrder, site)
-          : despachadoEmail(mailOrder, site);
+    const from =
+      Deno.env.get("RESEND_FROM") ?? "DZ Estudio <pedidos@dz-estudio.com>";
 
-    // --- Reserva del envío: si ya está, este mail ya salió ---
-    const { error: dupe } = await supabase
-      .from("order_emails")
-      .insert({ order_id: order.id, kind });
+    /** Arma, reserva y manda un mail. Idempotente por (orden, kind). */
+    const enviar = async (k: Kind): Promise<Resultado> => {
+      if (!permitido(k)) {
+        return { skipped: true, reason: `la orden no está para ${k}` };
+      }
 
-    if (dupe) {
-      // 23505 = unique_violation: ya se había mandado, no es un error.
-      if (dupe.code === "23505") return json({ skipped: true, reason: "ya se mandó" });
-      return json({ error: "No se pudo registrar el envío", detail: dupe }, 500);
-    }
+      // A quién va. El aviso interno sale a quien esté en `admins`: sumar
+      // una administradora en la tabla la suma también acá, sin secretos
+      // nuevos. Responderlo le escribe a la clienta, no a la tienda.
+      let to: string[];
+      let replyTo: string | undefined;
+      if (k === "nuevo-pedido") {
+        const { data: admins } = await supabase.from("admins").select("email");
+        to = ((admins ?? []) as Array<{ email: string | null }>)
+          .map((a) => a.email ?? "")
+          .filter(Boolean);
+        replyTo = order.customer_email;
+        if (to.length === 0) {
+          return { skipped: true, reason: "no hay admins a quien avisar" };
+        }
+      } else {
+        to = [order.customer_email];
+        replyTo = Deno.env.get("RESEND_REPLY_TO") ?? undefined;
+      }
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: Deno.env.get("RESEND_FROM") ?? "DZ Estudio <pedidos@dz-estudio.com>",
-        to: [order.customer_email],
-        reply_to: Deno.env.get("RESEND_REPLY_TO") ?? undefined,
-        subject,
-        html,
-        // El texto plano viaja junto al HTML. Un mail que va solo en HTML es
-        // una de las señales que más empuja a Gmail a mandarlo a spam.
-        text,
-      }),
-    });
+      const { subject, html, text } =
+        k === "transferencia"
+          ? transferenciaEmail(mailOrder, site, bank)
+          : k === "pago-confirmado"
+            ? pagoConfirmadoEmail(mailOrder, site)
+            : k === "despachado"
+              ? despachadoEmail(mailOrder, site)
+              : nuevoPedidoEmail(mailOrder, site);
 
-    if (!res.ok) {
-      // Liberamos la reserva para que el próximo intento pueda mandarlo.
-      await supabase
+      // --- Reserva del envío: si ya está, este mail ya salió ---
+      const { error: dupe } = await supabase
         .from("order_emails")
-        .delete()
-        .eq("order_id", order.id)
-        .eq("kind", kind);
-      return json({ error: "Resend rechazó el mail", detail: await res.text() }, 502);
+        .insert({ order_id: order.id, kind: k });
+
+      if (dupe) {
+        // 23505 = unique_violation: ya se había mandado, no es un error.
+        if (dupe.code === "23505") {
+          return { skipped: true, reason: "ya se mandó" };
+        }
+        return {
+          error: "No se pudo registrar el envío",
+          detail: dupe,
+          status: 500,
+        };
+      }
+
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to,
+          reply_to: replyTo,
+          subject,
+          html,
+          // El texto plano viaja junto al HTML. Un mail que va solo en HTML es
+          // una de las señales que más empuja a Gmail a mandarlo a spam.
+          text,
+        }),
+      });
+
+      if (!res.ok) {
+        // Liberamos la reserva para que el próximo intento pueda mandarlo.
+        await supabase
+          .from("order_emails")
+          .delete()
+          .eq("order_id", order.id)
+          .eq("kind", k);
+        return {
+          error: "Resend rechazó el mail",
+          detail: await res.text(),
+          status: 502,
+        };
+      }
+
+      const sent = await res.json();
+      return { sent: true, id: sent.id, kind: k };
+    };
+
+    const resultado = await enviar(kind);
+
+    // El aviso interno va aparte y no cambia la respuesta: que Resend
+    // rechace el mail a la administradora no tiene que volver como error al
+    // checkout, que ya guardó la compra. Se intenta aunque el de la clienta
+    // haya salido "ya se mandó": tiene su propia reserva, y si la vez
+    // anterior falló justo este, el reintento lo saca ahora.
+    let aviso: Resultado | undefined;
+    if (AVISAN_AL_ADMIN.has(kind) && !("error" in resultado)) {
+      aviso = await enviar("nuevo-pedido").catch((e) => ({
+        error: String(e),
+        status: 500,
+      }));
+      if ("error" in aviso) console.error("nuevo-pedido:", aviso);
     }
 
-    const sent = await res.json();
-    return json({ sent: true, id: sent.id, kind });
+    if ("error" in resultado) {
+      const { status, ...body } = resultado;
+      return json({ ...body, aviso }, status);
+    }
+    return json({ ...resultado, aviso });
   } catch (e) {
     return json({ error: String(e) }, 500);
   }

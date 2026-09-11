@@ -58,9 +58,16 @@ cargado en **Panel → Métodos de envío** — no rompe nada, solo no cotiza.
 
 ### Resend (los mails del pedido)
 
-La tienda manda tres mails: **falta la transferencia**, **pago confirmado** y
-**despachado / listo para retirar**. Los arma `order-email` leyendo la orden de
-la base, no del navegador.
+La tienda manda tres mails a la clienta: **falta la transferencia**, **pago
+confirmado** y **despachado / listo para retirar**. Los arma `order-email`
+leyendo la orden de la base, no del navegador.
+
+Y un cuarto, interno: el **aviso de pedido nuevo** (`nuevo-pedido`), que va a
+todos los mails de la tabla `admins`. No hay que pedirlo: sale solo detrás de
+"falta la transferencia" (entró un pedido a pagar por transferencia) y de "pago
+confirmado" (Mercado Pago aprobó un pago). Un pedido de MP abandonado o
+rechazado no avisa. Responderlo le escribe a la clienta, porque el `reply_to`
+es su mail. Para que le llegue a alguien más, alcanza con sumarlo a `admins`.
 
 **1. Verificar el dominio.** Resend no deja mandar desde un Hotmail ni desde un
 Gmail: hay que probar que el dominio es tuyo. En Resend → *Domains* → *Add
@@ -97,6 +104,17 @@ para que el reintento sí salga. Para reenviar un mail a mano, borrá su fila:
 ```sql
 delete from order_emails where order_id = '...' and kind = 'pago-confirmado';
 ```
+
+**4. Que Gmail no lo archive en Promociones.** La primera compra real (10/09)
+cayó ahí y la clienta no vio el mail. Lo que decide Gmail no se controla desde
+el código, pero sí las señales que pesan: los mails llevan versión en texto
+plano, no tienen texto oculto tipo "preheader", el único link del pie es el de
+WhatsApp (el de Instagram salió) y el dominio tiene SPF, DKIM y DMARC. Dos cosas
+quedan del lado de la cuenta de Resend: en *Domains → dz-estudio.com* los
+interruptores **Click tracking** y **Open tracking** tienen que estar
+**apagados** (reescriben los links y agregan una imagen invisible, dos señales
+clásicas de publicidad), y mientras el dominio no tenga historial la pantalla de
+gracias avisa que el mail puede estar en Promociones o Spam.
 
 ### Andreani
 

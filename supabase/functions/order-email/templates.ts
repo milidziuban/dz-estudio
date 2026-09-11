@@ -1,5 +1,6 @@
 // ============================================================
-// Los tres mails del pedido, en HTML de email.
+// Los mails del pedido, en HTML de email: tres para la clienta y uno
+// interno, el aviso de pedido nuevo para quien administra la tienda.
 //
 // Nada de Tailwind ni de variables CSS: los clientes de mail (Gmail,
 // Outlook, Mail de iPhone) no leen <style> confiablemente, así que va
@@ -7,6 +8,12 @@
 // cargan por mail: Instrument Serif cae a Georgia y DM Mono a Courier,
 // que son las dos que sí están en todos lados y mantienen el contraste
 // entre serif italic y mono.
+//
+// Gmail archiva en "Promociones" lo que le parece publicidad, y el 10/09
+// lo hizo con el mail de la transferencia: la clienta no lo vio. Lo que
+// sí pesa para ese filtro y acá se cuida: pocos links (no va el de
+// Instagram), nada de texto oculto tipo "preheader" de newsletter, la
+// versión en texto plano y ningún rastreo de aperturas ni de clics.
 // ============================================================
 
 export const COLORS = {
@@ -31,8 +38,17 @@ export type OrderItemRow = {
 };
 
 export type MailOrder = {
+  /** El uuid entero: el aviso interno linkea a la orden en el panel. */
+  id: string;
   numero: string;
+  /** Solo el primer nombre: es como le hablan los mails a la clienta. */
   nombre: string;
+  // Lo que sigue lo usa solo el aviso interno: a quién escribirle y por dónde.
+  nombreCompleto: string;
+  email: string;
+  telefono: string | null;
+  pago: "mp" | "transferencia";
+  pagado: boolean;
   items: OrderItemRow[];
   subtotal: number;
   discount: number;
@@ -51,8 +67,8 @@ export type MailOrder = {
 
 export type SiteInfo = {
   url: string;
+  /** Solo se nombra: el link a Instagram salió del pie por lo de Promociones. */
   instagram: string;
-  instagramUrl: string;
   whatsapp: string;
   whatsappUrl: string;
   /** `horario` es opcional a propósito: si el panel no lo tiene cargado, el
@@ -178,11 +194,22 @@ function orderDetail(order: MailOrder): string {
   );
 }
 
-function shell(site: SiteInfo, preheader: string, inner: string): string {
+/** Link a WhatsApp con el mensaje ya escrito, como los botones de la tienda. */
+function whatsappLink(site: SiteInfo, text: string): string {
+  return `${site.whatsappUrl}?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * El marco común. Sin "preheader" oculto: ese div invisible con el resumen
+ * es un truco de newsletter, y Gmail lo lee como tal. La vista previa del
+ * inbox sale de la primera línea del mail, que ya dice lo que importa.
+ *
+ * `footer` es el pie para la clienta; el aviso interno pasa el suyo.
+ */
+function shell(inner: string, footer: string): string {
   return `<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:${COLORS.cream};">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escape(preheader)}</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLORS.cream};">
     <tr><td align="center" style="padding:32px 16px 48px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
@@ -196,21 +223,25 @@ function shell(site: SiteInfo, preheader: string, inner: string): string {
 
         <tr><td style="padding:12px 4px 0;">
           <div style="height:1px;background:${COLORS.ink};opacity:0.12;margin:0 0 18px;"></div>
-          <p style="margin:0 0 8px;font-family:${SANS};font-size:13px;line-height:1.6;color:${COLORS.ink};opacity:0.7;">
-            Si algo no cierra, respondé este mail o escribinos por
-            <a href="${site.whatsappUrl}" style="color:${COLORS.ink};">WhatsApp al ${escape(site.whatsapp)}</a>.
-          </p>
-          <p style="margin:0;font-family:${MONO};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${COLORS.ink};opacity:0.5;">
-            <a href="${site.url}" style="color:${COLORS.ink};text-decoration:none;">dz-estudio.com</a>
-            &nbsp;&#10022;&nbsp;
-            <a href="${site.instagramUrl}" style="color:${COLORS.ink};text-decoration:none;">@${escape(site.instagram)}</a>
-          </p>
+          ${footer}
         </td></tr>
 
       </table>
     </td></tr>
   </table>
 </body></html>`;
+}
+
+/** Pie de los mails a la clienta: cómo responder, y nada más. Un solo link
+ *  (WhatsApp); el sitio y el Instagram van como texto. */
+function clientFooter(site: SiteInfo): string {
+  return `<p style="margin:0 0 8px;font-family:${SANS};font-size:13px;line-height:1.6;color:${COLORS.ink};opacity:0.7;">
+            Si algo no cierra, respondé este mail o escribinos por
+            <a href="${site.whatsappUrl}" style="color:${COLORS.ink};">WhatsApp al ${escape(site.whatsapp)}</a>.
+          </p>
+          <p style="margin:0;font-family:${MONO};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${COLORS.ink};opacity:0.5;">
+            dz-estudio.com &nbsp;&#10022;&nbsp; @${escape(site.instagram)}
+          </p>`;
 }
 
 // ------------------------------------------------------------
@@ -286,6 +317,13 @@ export function transferenciaEmail(
       <td align="right" style="padding:4px 0 4px 16px;font-family:${MONO};font-size:13px;color:${COLORS.ink};word-break:break-all;">${escape(v)}</td>
     </tr>`;
 
+  // El mismo mensaje que arma el botón de la pantalla de gracias: llega con
+  // el número de pedido puesto, así del otro lado no hay que preguntar cuál es.
+  const comprobanteUrl = whatsappLink(
+    site,
+    `¡Hola DZ Estudio! Soy ${order.nombre}.\nTe mando el comprobante de la transferencia del pedido #${order.numero}.`,
+  );
+
   const inner = `
     ${heading(`Anotado, ${order.nombre}.`, "Falta un paso.")}
     <div style="height:20px;"></div>
@@ -304,7 +342,7 @@ export function transferenciaEmail(
         ${money("Monto exacto", formatPrice(order.total), true)}
       </table>`,
     )}
-    ${paragraph(`Cuando la hagas, mandanos el comprobante por <a href="${site.whatsappUrl}" style="color:${COLORS.ink};font-weight:700;">WhatsApp</a> y lo damos por cerrado.`)}
+    ${paragraph(`Cuando la hagas, mandanos el comprobante por <a href="${comprobanteUrl}" style="color:${COLORS.ink};font-weight:700;">WhatsApp al ${escape(site.whatsapp)}</a> y lo damos por cerrado.`)}
     ${paragraph(`<strong>Te lo reservamos 48 horas.</strong> Después vuelve a la tienda: las ediciones son cortas y hay gente esperando.`)}
     <div style="height:12px;"></div>
     ${orderDetail(order)}
@@ -332,7 +370,7 @@ export function transferenciaEmail(
 
   return {
     subject: `Falta la transferencia — pedido #${order.numero}`,
-    html: shell(site, "Te lo reservamos 48 horas.", inner),
+    html: shell(inner, clientFooter(site)),
     text,
   };
 }
@@ -391,7 +429,7 @@ export function pagoConfirmadoEmail(
 
   return {
     subject: `Pago confirmado — pedido #${order.numero}`,
-    html: shell(site, "El pago entró. Ya lo estamos preparando.", inner),
+    html: shell(inner, clientFooter(site)),
     text,
   };
 }
@@ -478,13 +516,140 @@ export function despachadoEmail(
     subject: order.esRetiro
       ? `Listo para retirar — pedido #${order.numero}`
       : `Tu pedido salió — #${order.numero}`,
-    html: shell(
-      site,
-      order.esRetiro
-        ? "Está armado y te espera en Santa Fe."
-        : "Salió del depósito.",
-      inner + cierre,
+    html: shell(inner + cierre, clientFooter(site)),
+    text,
+  };
+}
+
+// ------------------------------------------------------------
+// 4 · Aviso interno: entró un pedido
+//
+// Va a quien administra la tienda, no a la clienta, así que habla en
+// otro registro: datos, no marca. Lo que hace falta para actuar sin
+// abrir nada —quién, cuánto, cómo paga, a dónde va— y un link al panel.
+// Sale cuando entra una transferencia (todavía sin comprobante) o cuando
+// Mercado Pago aprueba un pago; ver `nuevo-pedido` en index.ts.
+// ------------------------------------------------------------
+export function nuevoPedidoEmail(
+  order: MailOrder,
+  site: SiteInfo,
+): { subject: string; html: string; text: string } {
+  const panelUrl = `${site.url}/admin/ventas?orden=${order.id}`;
+
+  // wa.me quiere código de país + 9, sin +, sin 0 y sin 15: el teléfono se
+  // cargó a mano en el checkout y viene como sea.
+  const digits = (order.telefono ?? "").replace(/\D/g, "");
+  const waCliente =
+    digits.length >= 8
+      ? `https://wa.me/${digits.startsWith("54") ? digits : `549${digits.replace(/^0/, "")}`}`
+      : null;
+
+  const titulo = order.pagado ? "Pagado." : "Falta el comprobante.";
+  const medio = order.pago === "mp" ? "Mercado Pago" : "Transferencia";
+
+  const queSigue = order.pagado
+    ? "Ya le llegó el mail de pago confirmado. Queda prepararlo y despacharlo."
+    : "Cuando mande el comprobante, marcala como pagada en el panel: ahí le sale el mail de pago confirmado. La reserva es de 48 horas.";
+
+  const entrega = order.esRetiro
+    ? "Retira por el depósito"
+    : `${order.envioLabel}${order.envioACoordinar ? " · cobrar aparte" : ""}${
+        order.direccion ? ` → ${order.direccion}` : ""
+      }`;
+
+  const fila = (k: string, v: string) =>
+    `<tr>
+      <td style="padding:4px 12px 4px 0;font-family:${MONO};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${COLORS.ink};opacity:0.6;white-space:nowrap;vertical-align:top;">${escape(k)}</td>
+      <td style="padding:4px 0;font-family:${SANS};font-size:14px;line-height:1.5;color:${COLORS.ink};">${v}</td>
+    </tr>`;
+
+  const items = order.items
+    .map(
+      (item) =>
+        `<tr>
+          <td style="padding:6px 0;font-family:${SANS};font-size:14px;color:${COLORS.ink};">${item.qty} × ${escape(item.name)}${item.variant ? ` <span style="opacity:0.6;">· ${escape(item.variant)}</span>` : ""}</td>
+          <td align="right" style="padding:6px 0;font-family:${MONO};font-size:13px;color:${COLORS.ink};white-space:nowrap;">${escape(formatPrice(item.price * item.qty))}</td>
+        </tr>`,
+    )
+    .join("");
+
+  const inner = `
+    ${heading(`Pedido #${order.numero}.`, titulo)}
+    <div style="height:20px;"></div>
+    ${block(
+      order.pagado ? COLORS.verde : COLORS.amarillo,
+      `${label(medio)}
+       <p style="margin:0;font-family:${MONO};font-size:24px;font-weight:700;color:${COLORS.ink};">${escape(formatPrice(order.total))}</p>
+       <p style="margin:10px 0 0;font-family:${SANS};font-size:14px;line-height:1.5;color:${COLORS.ink};">${escape(queSigue)}</p>`,
+    )}
+    ${block(
+      COLORS.white,
+      `${label("Quién")}
+       <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+         ${fila("Nombre", escape(order.nombreCompleto))}
+         ${fila("Email", `<a href="mailto:${escape(order.email)}" style="color:${COLORS.ink};">${escape(order.email)}</a>`)}
+         ${fila(
+           "Teléfono",
+           order.telefono
+             ? waCliente
+               ? `<a href="${waCliente}" style="color:${COLORS.ink};font-weight:700;">${escape(order.telefono)}</a> <span style="opacity:0.6;">· abre WhatsApp</span>`
+               : escape(order.telefono)
+             : `<span style="opacity:0.6;">no cargó</span>`,
+         )}
+         ${fila("Entrega", escape(entrega))}
+         ${order.notas ? fila("Nota", escape(order.notas)) : ""}
+       </table>
+       <div style="height:1px;background:${COLORS.ink};opacity:0.12;margin:18px 0;"></div>
+       ${label("Qué")}
+       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+         ${items}
+         ${order.discount > 0 ? money(order.discountLabel ?? "Descuento", `- ${formatPrice(order.discount)}`) : ""}
+         ${money("Total", formatPrice(order.total), true)}
+       </table>`,
+    )}
+    <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:separate;">
+      <tr><td style="border-radius:999px;background:${COLORS.ink};">
+        <a href="${panelUrl}" style="display:inline-block;padding:14px 28px;font-family:${MONO};font-size:12px;letter-spacing:2px;text-transform:uppercase;color:${COLORS.cream};text-decoration:none;">Abrir en el panel &#10022;</a>
+      </td></tr>
+    </table>
+  `;
+
+  const footer = `<p style="margin:0;font-family:${MONO};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${COLORS.ink};opacity:0.5;">
+            Aviso automático de la tienda &nbsp;&#10022;&nbsp; respondé y le escribís a la clienta
+          </p>`;
+
+  const text = [
+    `Pedido #${order.numero}. ${titulo}`,
+    "",
+    `${medio} — ${formatPrice(order.total)}`,
+    queSigue,
+    "",
+    `Nombre: ${order.nombreCompleto}`,
+    `Email: ${order.email}`,
+    `Teléfono: ${order.telefono ?? "no cargó"}${waCliente ? ` (${waCliente})` : ""}`,
+    `Entrega: ${entrega}`,
+    ...(order.notas ? [`Nota: ${order.notas}`] : []),
+    "",
+    ...order.items.map(
+      (item) =>
+        `  ${item.qty} x ${item.name}${item.variant ? ` (${item.variant})` : ""} — ${formatPrice(item.price * item.qty)}`,
     ),
+    ...(order.discount > 0
+      ? [`  ${order.discountLabel ?? "Descuento"}: - ${formatPrice(order.discount)}`]
+      : []),
+    `  TOTAL: ${formatPrice(order.total)}`,
+    "",
+    `Abrir en el panel: ${panelUrl}`,
+    "",
+    "—",
+    "Aviso automático de la tienda. Respondé este mail y le escribís a la clienta.",
+  ].join("\n");
+
+  return {
+    subject: `Nuevo pedido #${order.numero} — ${order.nombreCompleto}, ${formatPrice(order.total)} ${
+      order.pagado ? "pagado" : "por transferencia"
+    }`,
+    html: shell(inner, footer),
     text,
   };
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
@@ -303,6 +303,22 @@ export default function AdminVentas() {
       adminNotes: order.adminNotes ?? "",
     });
   };
+
+  // `?orden=<id>` abre esa orden apenas cargan: es el link de la campanita
+  // y del mail de aviso. El parámetro se saca de la URL al abrirla para que
+  // cerrar el drawer no la vuelva a abrir, ni recargar la página tampoco.
+  const ordenPedida = searchParams.get("orden");
+  useEffect(() => {
+    if (!ordenPedida || !orders.data) return;
+    const order = orders.data.find((o) => o.id === ordenPedida);
+    if (order) abrir(order);
+    const next = new URLSearchParams(searchParams);
+    next.delete("orden");
+    setSearchParams(next, { replace: true });
+    // `abrir` y `searchParams` cambian en cada render; lo que importa es que
+    // corra una vez por orden pedida, cuando hay datos.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ordenPedida, orders.data]);
 
   const guardar = async () => {
     if (!abierta || !patch) return;

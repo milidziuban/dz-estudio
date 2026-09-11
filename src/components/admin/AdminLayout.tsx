@@ -21,7 +21,7 @@ export default function AdminLayout() {
   const { email, nombre, signOut } = useAdminAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const { alerts, unseenCount, markAllSeen, toasts, dismissToast } =
+  const { alerts, esNuevo, unseenCount, markAllSeen, toasts, dismissToast } =
     useOrderAlerts();
 
   // Al navegar, el menú mobile se cierra solo
@@ -139,6 +139,7 @@ export default function AdminLayout() {
           <div className="flex flex-1 items-center justify-end gap-4">
             <NotificationBell
               alerts={alerts}
+              esNuevo={esNuevo}
               unseenCount={unseenCount}
               onOpen={markAllSeen}
             />

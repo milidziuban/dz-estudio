@@ -28,6 +28,8 @@ supabase/migrations/20260908150000_aviso_de_stock.sql
 supabase/migrations/20260909120000_costo_fuera_de_la_tienda.sql
 supabase/migrations/20260909130000_margen_fuera_de_la_tienda.sql
 supabase/migrations/20260909221453_cupones_fuera_de_la_tienda.sql
+supabase/migrations/20260910203819_embudo_en_la_base.sql
+supabase/migrations/20260911142100_aviso_de_pedido_nuevo.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -47,7 +49,8 @@ avisa que falta la migración.
 
 Las de septiembre son arreglos sobre lo anterior —envío a coordinar, stock de
 los combos, el costo y el margen fuera de la tienda, los cupones fuera de la
-tienda— y cada una explica arriba de todo qué cambia y por qué.
+tienda, el embudo medido en la base, el aviso de pedido nuevo— y cada una
+explica arriba de todo qué cambia y por qué.
 
 Todas se pueden correr dos veces sin romper nada, **menos la primera**:
 `catalogo_2026_07` vacía `products` y la vuelve a cargar. Sirve para levantar
@@ -183,16 +186,31 @@ Lo que todavía **no** está conectado, y hay que tenerlo presente:
 
 ## Notificaciones de ventas nuevas
 
-La campanita del header (`NotificationBell` + `OrderToastStack`, enganchadas
-en `AdminLayout` vía el hook `useOrderAlerts`) escucha los `insert` en
-`orders` por Supabase Realtime y avisa apenas entra un pedido — antes de que
-se confirme el pago, porque el checkout inserta la orden en `pending` desde
-el paso 1 (ver `src/pages/Checkout.tsx`). El aviso muestra nombre, monto y
-medio de pago; un click lleva a Ventas.
+Un pedido nuevo avisa por dos lados:
 
-Requiere la migración `20260819170000_notificaciones_ventas.sql` (suma
-`orders` a la publicación `supabase_realtime`) y que el proyecto tenga
-Realtime habilitado — viene prendido por default, pero si algún proyecto lo
+- **Por mail**, a todos los mails de la tabla `admins`. Lo manda la Edge
+  Function `order-email` (kind `nuevo-pedido`) cuando entra un pedido a pagar
+  por transferencia y cuando Mercado Pago aprueba un pago — un pedido de MP
+  que quedó en `pending` (abandonado, rechazado) no avisa. Trae quién compró,
+  qué, cuánto, cómo paga y a dónde va, con el teléfono como link a WhatsApp y
+  un botón que abre la orden en Ventas. Responder ese mail le escribe a la
+  clienta. Sale una sola vez por pedido (fila `nuevo-pedido` en
+  `order_emails`), así que confirmar a mano una transferencia no lo repite.
+  Para sumar a alguien a los avisos alcanza con sumarlo a `admins`.
+- **En el panel**, con la campanita del header (`NotificationBell` +
+  `OrderToastStack`, enganchadas en `AdminLayout` vía `useOrderAlerts`). La
+  lista sale de la base —los mismos pedidos que ve Ventas—, así que muestra
+  lo que entró con el panel cerrado; el contador marca los que entraron
+  después de la última vez que se abrió la campanita en ese navegador
+  (`localStorage`). Cada aviso dice quién, cuánto y en qué está el pago
+  ("falta el comprobante", "pagada"…), y un click abre esa orden en Ventas
+  (`/admin/ventas?orden=<id>`, el mismo link que usa el mail). Supabase
+  Realtime sigue para lo inmediato: el aviso flotante cuando un pedido entra
+  con el panel abierto, y refrescar Ventas en cuanto cambia una orden.
+
+Realtime requiere la migración `20260819170000_notificaciones_ventas.sql`
+(suma `orders` a la publicación `supabase_realtime`) y que el proyecto lo
+tenga habilitado — viene prendido por default, pero si algún proyecto lo
 desactivó a mano hay que prenderlo en **Database → Replication**.
 
 ## Estructura

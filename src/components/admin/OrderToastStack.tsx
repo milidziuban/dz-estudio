@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { formatPrice } from "../../lib/format";
-import type { OrderAlert } from "../../hooks/useOrderAlerts";
+import type { Toast } from "../../hooks/useOrderAlerts";
 
 type OrderToastStackProps = {
-  toasts: OrderAlert[];
+  toasts: Toast[];
   onDismiss: (id: string) => void;
 };
 
@@ -40,7 +40,7 @@ export default function OrderToastStack({
             </button>
           </div>
           <Link
-            to="/admin/ventas"
+            to={`/admin/ventas?orden=${toast.id}`}
             onClick={() => onDismiss(toast.id)}
             className="mt-2 inline-block font-mono text-[11px] uppercase tracking-widest text-cream/70 transition-colors hover:text-cream"
           >
