@@ -40,38 +40,70 @@ export const TRANSFER_PROMO = {
  * `sinInteres` son las que absorbe la tienda: se activan en la cuenta de MP
  * (Tu negocio → Costos y cuotas) y acá solo se anuncian. Hoy están en cero —
  * la tienda no las está ofreciendo — así que ningún texto promete "sin
- * interés". Para volver a darlas: activarlas en la cuenta y poner acá cuántas
- * son; los textos se rearman solos.
+ * interés". Para volver a darlas: activarlas en la cuenta y poner cuántas son
+ * en /admin/pagos; los textos se rearman solos.
  * `max` sí es real: es el tope que viaja en la preferencia de pago. Esas
  * cuotas entran por Cuotas Simples, con el costo financiero a cargo del
  * cliente.
  * `minAmount` es el piso que pone Mercado Pago para las cuotas sin interés:
  * por debajo de ese monto, sea el producto o el carrito, no se ofrecen. Solo
  * pesa mientras `sinInteres` sea mayor que cero.
+ *
+ * Los dos primeros viven en `store_settings.pagos.mercadopago` (`installments`
+ * y `maxInstallments`) y los edita el panel; la tienda los lee con
+ * `useInstallments`. Los de acá son el respaldo mientras la fila carga o si
+ * la lectura falla, y tienen que coincidir con los de la base para que el
+ * texto no salte al llegar la respuesta. El piso no está en la base: si
+ * Mercado Pago lo cambia, se cambia acá.
  */
-// Anotado como `number` a propósito: si fuera el literal 0, TypeScript daría
-// por muerta la rama de "sin interés" y habría que reescribir los textos para
-// volver a activarla.
+// Anotado como `number` a propósito: `INSTALLMENTS` va `as const`, y con el
+// literal 0 TypeScript daría por muerta la rama de "sin interés" en cualquier
+// texto que se arme a partir de él, y habría que reescribirlo para volver a
+// activarla.
 const INSTALLMENTS_SIN_INTERES: number = 0;
 const INSTALLMENTS_MAX = 6;
 const INSTALLMENTS_MIN_AMOUNT = 45000;
 
-const SIN_INTERES_DESDE = `${INSTALLMENTS_SIN_INTERES} cuotas sin interés desde ${formatPrice(
-  INSTALLMENTS_MIN_AMOUNT,
-)}`;
+export type InstallmentsTexts = {
+  /** Titular corto: marquesina, badges, grilla de producto */
+  label: string;
+  /** Frase completa: carrito, checkout, medios de pago */
+  detail: string;
+};
 
+/** Cómo anuncia la tienda las cuotas, a partir de cuántas van sin interés y
+ *  del tope del checkout. Con `sinInteres` en 0 las frases hablan solo del
+ *  tope y de las Cuotas Simples. Es pura a propósito: la tienda la llama con
+ *  lo que hay en la base y el panel con el borrador, para mostrar qué va a
+ *  decir la tienda antes de guardar. */
+export function installmentsTexts({
+  sinInteres,
+  max,
+}: {
+  sinInteres: number;
+  max: number;
+}): InstallmentsTexts {
+  const sinInteresDesde = `${sinInteres} cuotas sin interés desde ${formatPrice(
+    INSTALLMENTS_MIN_AMOUNT,
+  )}`;
+  return {
+    label: sinInteres ? sinInteresDesde : `Hasta ${max} cuotas con tarjeta`,
+    detail: sinInteres
+      ? `${sinInteresDesde}, o hasta ${max} con Cuotas Simples`
+      : `Hasta ${max} cuotas con tarjeta de crédito, por Cuotas Simples`,
+  };
+}
+
+/** Los valores del código, con sus textos: el respaldo de `useInstallments` y
+ *  la fila `pagos` de `SETTINGS_DEFAULTS`. */
 export const INSTALLMENTS = {
   sinInteres: INSTALLMENTS_SIN_INTERES,
   max: INSTALLMENTS_MAX,
   minAmount: INSTALLMENTS_MIN_AMOUNT,
-  /** Titular corto: marquesina, badges, grilla de producto */
-  label: INSTALLMENTS_SIN_INTERES
-    ? SIN_INTERES_DESDE
-    : `Hasta ${INSTALLMENTS_MAX} cuotas con tarjeta`,
-  /** Frase completa: carrito, checkout, medios de pago */
-  detail: INSTALLMENTS_SIN_INTERES
-    ? `${SIN_INTERES_DESDE}, o hasta ${INSTALLMENTS_MAX} con Cuotas Simples`
-    : `Hasta ${INSTALLMENTS_MAX} cuotas con tarjeta de crédito, por Cuotas Simples`,
+  ...installmentsTexts({
+    sinInteres: INSTALLMENTS_SIN_INTERES,
+    max: INSTALLMENTS_MAX,
+  }),
 } as const;
 
 /** Configuración editable de las dos promos automáticas. Los porcentajes van

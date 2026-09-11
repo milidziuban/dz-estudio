@@ -1,14 +1,22 @@
+import { Link } from "react-router-dom";
 import PageHeading from "../../components/admin/PageHeading";
 import SaveBar from "../../components/admin/SaveBar";
 import SettingsSection from "../../components/admin/SettingsSection";
 import Toggle from "../../components/admin/Toggle";
 import TextField from "../../components/TextField";
 import { useSettingsDraft } from "../../hooks/useStoreSettings";
-import { INSTALLMENTS } from "../../lib/promos";
+import { formatPrice } from "../../lib/format";
+import { INSTALLMENTS, installmentsTexts } from "../../lib/promos";
 
 export default function AdminMetodosPago() {
   const pagos = useSettingsDraft("pagos");
   const { mercadopago, transferencia } = pagos.value;
+  // Con el borrador y no con lo guardado: así se ve qué va a decir la tienda
+  // antes de apretar Guardar. Es la misma función que usa la tienda.
+  const cuotas = installmentsTexts({
+    sinInteres: mercadopago.installments,
+    max: mercadopago.maxInstallments,
+  });
 
   const saveBar = (
     <SaveBar
@@ -59,15 +67,16 @@ export default function AdminMetodosPago() {
               <p className="mt-2">
                 Las <strong>sin interés</strong> las absorbés vos y se activan
                 en tu cuenta de Mercado Pago (Tu negocio → Costos y cuotas);
-                este campo solo dice cuántas anuncia la tienda. El{" "}
+                este campo dice cuántas anuncia la tienda y cuántas deja
+                preseleccionadas Mercado Pago al pagar. El{" "}
                 <strong>tope</strong> sí es real: viaja en la preferencia de
                 pago y de ahí para arriba el cliente no ve más opciones. Entre
                 una y otra quedan las Cuotas Simples, con el interés a cargo del
                 cliente. Mercado Pago no las ofrece por debajo de{" "}
-                <strong>$45.000</strong>: ese piso está escrito en el texto que
-                anuncia la tienda (
-                <code className="font-mono">lib/promos.ts</code>), no en un
-                campo de acá — si Mercado Pago lo cambia, se actualiza ahí.
+                <strong>{formatPrice(INSTALLMENTS.minAmount)}</strong>: ese
+                piso no es un campo, está escrito en el código (
+                <code className="font-mono">lib/promos.ts</code>) — si Mercado
+                Pago lo cambia, se actualiza ahí.
               </p>
               <p className="mt-2">
                 En <strong>0</strong> la tienda deja de anunciarlas: los textos
@@ -113,21 +122,28 @@ export default function AdminMetodosPago() {
               {/* Antes acá había un campo "Cómo se anuncia" que no leía
                   ninguna pantalla de la tienda: se escribía, se guardaba y no
                   cambiaba nada. En su lugar va lo que la tienda dice de
-                  verdad, que se arma solo con los dos números de arriba. */}
+                  verdad, armado con los dos números de arriba tal como están
+                  en el borrador. */}
               <div className="mt-4 rounded-xl bg-white p-4">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
-                  Cómo se anuncia hoy en la tienda
+                  {pagos.dirty
+                    ? "Cómo lo va a anunciar la tienda al guardar"
+                    : "Cómo se anuncia hoy en la tienda"}
                 </p>
-                <p className="mt-2 text-sm text-ink">{INSTALLMENTS.detail}</p>
+                <p className="mt-2 text-sm text-ink">{cuotas.detail}</p>
                 <p className="mt-1 text-[11px] text-ink/65">
-                  En la marquesina y en las fichas, más corto:{" "}
-                  <span className="text-ink">{INSTALLMENTS.label}</span>
+                  En la portada y en las fichas, más corto:{" "}
+                  <span className="text-ink">{cuotas.label}</span>
                 </p>
                 <p className="mt-2 text-[11px] leading-relaxed">
-                  No es un campo: la frase se arma sola en{" "}
-                  <code className="font-mono">lib/promos.ts</code> a partir de
-                  las cuotas sin interés y del tope. Si acá dice algo distinto
-                  de lo que querés ofrecer, se cambia ahí y no en el panel.
+                  No es un campo: la frase se arma sola con las cuotas sin
+                  interés y el tope de arriba, y la tienda la lee de acá. La
+                  marquesina va aparte: sus líneas se escriben a mano en{" "}
+                  <Link to="/admin/marketing" className="underline">
+                    Marketing
+                  </Link>
+                  , así que si cambiás las cuotas, cambiá también la línea de
+                  ahí.
                 </p>
               </div>
             </div>

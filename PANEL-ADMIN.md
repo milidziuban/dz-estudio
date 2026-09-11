@@ -153,6 +153,10 @@ Estos cambios se ven en el sitio sin deploy:
   MiCorreo); Andreani todavía es costo fijo porque su API pide credenciales
   que da el comercial de cuenta, no autoservicio.
 - **Métodos de pago**: banco, titular, CUIT, CBU y alias de la transferencia.
+  Las cuotas sin interés y el tope de cuotas viajan en la preferencia de
+  Mercado Pago y arman los textos de cuotas de la tienda (portada, fichas,
+  carrito, checkout y medios de pago). La línea de cuotas de la marquesina
+  no: es texto guardado y se edita en Marketing.
 - **Descuentos → promociones automáticas**: los porcentajes y el mínimo de las
   dos promos que se aplican solas en el carrito.
 - **Marketing → marquesina**: las frases de la franja negra.

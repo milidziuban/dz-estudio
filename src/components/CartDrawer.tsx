@@ -1,15 +1,11 @@
 import { useEffect } from "react";
 import { useCart } from "../hooks/useCart";
+import { useInstallments } from "../hooks/useInstallments";
 import { useProducts } from "../hooks/useProducts";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
-import {
-  bestDiscount,
-  comboFaltan,
-  DEFAULT_PROMOS,
-  INSTALLMENTS,
-} from "../lib/promos";
+import { bestDiscount, comboFaltan, DEFAULT_PROMOS } from "../lib/promos";
 import {
   SETTINGS_DEFAULTS,
   useStoreSettings,
@@ -26,6 +22,7 @@ export default function CartDrawer() {
   const { data: products = [], isLoading } = useProducts();
   const { data: settings } = useStoreSettings();
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
+  const cuotas = useInstallments();
 
   const resolved = resolveCartItems(items, products);
   const subtotal = cartSubtotal(resolved);
@@ -164,7 +161,7 @@ export default function CartDrawer() {
               </dl>
 
               <p className="mt-2 text-xs text-ink/65">
-                {INSTALLMENTS.detail}. Pagando por transferencia,{" "}
+                {cuotas.detail}. Pagando por transferencia,{" "}
                 {promos.transferencia.percent}% off.
               </p>
 

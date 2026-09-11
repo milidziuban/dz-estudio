@@ -8,13 +8,14 @@ import Seo from "../components/Seo";
 import Tag from "../components/Tag";
 import { CATEGORY_LABEL } from "../data/products";
 import { useCart } from "../hooks/useCart";
+import { useInstallments } from "../hooks/useInstallments";
 import { useProducts } from "../hooks/useProducts";
 import { useStoreSettings } from "../hooks/useStoreSettings";
 import { trackAddToCart, trackViewItem } from "../lib/analytics";
 import { cn } from "../lib/cn";
 import { COLOR_HEX } from "../lib/colors";
 import { formatPrice } from "../lib/format";
-import { comboBanner, DEFAULT_PROMOS, INSTALLMENTS } from "../lib/promos";
+import { comboBanner, DEFAULT_PROMOS } from "../lib/promos";
 import {
   avisoDeUnidades,
   topeDeCantidad,
@@ -39,6 +40,7 @@ export default function Producto() {
   // Porcentaje y mínimo del combo salen del panel, no del código
   const { data: settings } = useStoreSettings();
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
+  const cuotas = useInstallments();
 
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
@@ -226,7 +228,7 @@ export default function Producto() {
               {formatPrice(product.price)}
             </p>
             <p className="mt-1.5 font-mono text-xs uppercase tracking-widest text-ink/65">
-              {INSTALLMENTS.label} ✦ 10% off por transferencia
+              {cuotas.label} ✦ 10% off por transferencia
             </p>
 
             {avisoCombo && (

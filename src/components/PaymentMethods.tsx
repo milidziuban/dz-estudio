@@ -1,5 +1,5 @@
+import { useInstallments } from "../hooks/useInstallments";
 import { cn } from "../lib/cn";
-import { INSTALLMENTS } from "../lib/promos";
 
 // Medios habilitados en la tienda (Pago Nube + Mercado Pago).
 const GROUPS = [
@@ -22,6 +22,8 @@ export default function PaymentMethods({
   className,
   tone = "light",
 }: PaymentMethodsProps) {
+  const cuotas = useInstallments();
+
   return (
     <div className={className}>
       <p
@@ -38,7 +40,7 @@ export default function PaymentMethods({
           tone === "dark" ? "text-cream" : "text-petroleo",
         )}
       >
-        {INSTALLMENTS.detail}
+        {cuotas.detail}
       </p>
       <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {GROUPS.map((group) => (

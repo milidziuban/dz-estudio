@@ -1,19 +1,23 @@
-import { INSTALLMENTS } from "../lib/promos";
-
-const values = [
-  {
-    symbol: "✦",
-    title: "Envíos a todo el país",
-    text: "El costo lo coordinamos por WhatsApp antes de despachar.",
-  },
-  {
-    symbol: "✧",
-    title: "Cuotas con tarjeta",
-    text: `${INSTALLMENTS.detail}. O 10% off pagando por transferencia.`,
-  },
-];
+import { useInstallments } from "../hooks/useInstallments";
 
 export default function Values() {
+  const cuotas = useInstallments();
+
+  // Adentro del componente y no como constante del módulo: el texto de cuotas
+  // sale de la base y puede llegar después del primer render.
+  const values = [
+    {
+      symbol: "✦",
+      title: "Envíos a todo el país",
+      text: "El costo lo coordinamos por WhatsApp antes de despachar.",
+    },
+    {
+      symbol: "✧",
+      title: "Cuotas con tarjeta",
+      text: `${cuotas.detail}. O 10% off pagando por transferencia.`,
+    },
+  ];
+
   return (
     <section>
       <div className="bg-amarillo px-5 py-14 sm:px-8 md:py-20 lg:px-12">

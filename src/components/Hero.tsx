@@ -1,14 +1,16 @@
-import { INSTALLMENTS } from "../lib/promos";
+import { useInstallments } from "../hooks/useInstallments";
 import Button from "./Button";
 import Tag from "./Tag";
 
 export default function Hero() {
+  const cuotas = useInstallments();
+
   return (
     <section className="px-5 pb-12 pt-10 sm:px-8 md:pb-16 md:pt-14 lg:px-12">
       <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-14">
         <div>
           <Tag color="amarillo" className="mb-6">
-            ✦ {INSTALLMENTS.label}
+            ✦ {cuotas.label}
           </Tag>
 
           <h1 className="text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">

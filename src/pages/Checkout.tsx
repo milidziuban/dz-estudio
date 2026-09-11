@@ -9,6 +9,7 @@ import SelectField from "../components/SelectField";
 import TextareaField from "../components/TextareaField";
 import TextField from "../components/TextField";
 import { useCart } from "../hooks/useCart";
+import { useInstallments } from "../hooks/useInstallments";
 import { useProducts } from "../hooks/useProducts";
 import { useShippingQuote } from "../hooks/useShippingQuote";
 import { stashPurchase, trackBeginCheckout } from "../lib/analytics";
@@ -24,7 +25,7 @@ import {
 } from "../lib/checkout";
 import { cn } from "../lib/cn";
 import { formatPrice } from "../lib/format";
-import { bestDiscount, DEFAULT_PROMOS, INSTALLMENTS } from "../lib/promos";
+import { bestDiscount, DEFAULT_PROMOS } from "../lib/promos";
 import {
   SETTINGS_DEFAULTS,
   useStoreSettings,
@@ -121,6 +122,7 @@ export default function Checkout() {
   const envios = settings?.envios ?? SETTINGS_DEFAULTS.envios;
   const banco = (settings?.pagos ?? SETTINGS_DEFAULTS.pagos).transferencia;
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
+  const cuotas = useInstallments();
   const shippingOptions = envios.options.filter((option) => option.enabled);
   const distribucion = settings?.distribucion ?? SETTINGS_DEFAULTS.distribucion;
   const puntoRetiro = distribucion.locations.find((location) => location.retiro);
@@ -856,7 +858,7 @@ export default function Checkout() {
 
               {pagoSel !== "transferencia" && (
                 <p className="mt-4 text-xs leading-relaxed text-ink/65">
-                  {INSTALLMENTS.detail}. Pagando por transferencia se te
+                  {cuotas.detail}. Pagando por transferencia se te
                   aplica 10% off.
                 </p>
               )}
