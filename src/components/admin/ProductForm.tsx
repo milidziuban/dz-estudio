@@ -378,7 +378,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                       draft.images.filter((_, i) => i !== index),
                     )
                   }
-                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-orange transition-opacity hover:opacity-70"
+                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Quitar
                 </button>
@@ -415,7 +415,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
         </div>
 
         {uploadError && (
-          <p role="alert" className="mt-3 text-xs font-semibold text-orange">
+          <p role="alert" className="mt-3 text-xs font-semibold text-orange-ink">
             ✕ {uploadError}
           </p>
         )}
@@ -492,7 +492,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                     draft.variants.filter((_, i) => i !== index),
                   )
                 }
-                className="font-mono text-[10px] uppercase tracking-widest text-orange transition-opacity hover:opacity-70"
+                className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
               >
                 Quitar
               </button>

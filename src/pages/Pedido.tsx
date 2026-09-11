@@ -111,7 +111,7 @@ export default function Pedido() {
           </form>
 
           {tracking.isError && (
-            <p className="mt-6 text-sm font-semibold text-orange">
+            <p className="mt-6 text-sm font-semibold text-orange-ink">
               ✕ {errorMessage(tracking.error, "No pudimos buscar el pedido.")}
             </p>
           )}

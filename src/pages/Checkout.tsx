@@ -383,7 +383,7 @@ export default function Checkout() {
         </p>
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           Ya casi es{" "}
-          <em className="font-serif font-normal italic text-pink">tuyo</em>
+          <em className="font-serif font-normal italic text-pink-ink">tuyo</em>
         </h1>
 
         {/* Indicador de pasos */}
@@ -538,7 +538,7 @@ export default function Checkout() {
                   </p>
                 )}
                 {errors.envio && (
-                  <p className="mt-2 text-xs font-semibold text-orange">
+                  <p className="mt-2 text-xs font-semibold text-orange-ink">
                     ✕ {errors.envio.message}
                   </p>
                 )}
@@ -824,7 +824,7 @@ export default function Checkout() {
                   <dd>{formatPrice(subtotal)}</dd>
                 </div>
                 {discount && (
-                  <div className="flex justify-between gap-3 text-verde">
+                  <div className="flex justify-between gap-3 text-verde-ink">
                     <dt className="text-xs uppercase">{discount.label}</dt>
                     <dd className="whitespace-nowrap">
                       −{formatPrice(discount.amount)}

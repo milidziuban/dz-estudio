@@ -22,7 +22,7 @@ export default function Contacto() {
           </p>
           <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
             Escribinos{" "}
-            <em className="font-serif font-normal italic text-pink">
+            <em className="font-serif font-normal italic text-pink-ink">
               sin vueltas
             </em>
           </h1>
@@ -43,7 +43,7 @@ export default function Contacto() {
                     href={SITE.whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-lg font-bold hover:text-verde hover:underline"
+                    className="text-lg font-bold hover:text-verde-ink hover:underline"
                   >
                     WhatsApp {SITE.whatsapp}
                   </a>
@@ -54,7 +54,7 @@ export default function Contacto() {
                 <li>
                   <a
                     href={`mailto:${SITE.email}`}
-                    className="text-lg font-bold hover:text-pink hover:underline"
+                    className="text-lg font-bold hover:text-pink-ink hover:underline"
                   >
                     {SITE.email}
                   </a>
@@ -65,7 +65,7 @@ export default function Contacto() {
                     href={SITE.instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-lg font-bold hover:text-orange hover:underline"
+                    className="text-lg font-bold hover:text-orange-ink hover:underline"
                   >
                     @{SITE.instagram}
                   </a>

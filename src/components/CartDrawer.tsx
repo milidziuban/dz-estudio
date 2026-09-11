@@ -141,7 +141,7 @@ export default function CartDrawer() {
                   <dd>{formatPrice(subtotal)}</dd>
                 </div>
                 {discount && (
-                  <div className="flex justify-between gap-3 text-verde">
+                  <div className="flex justify-between gap-3 text-verde-ink">
                     <dt className="text-xs uppercase">{discount.label}</dt>
                     <dd className="whitespace-nowrap">
                       −{formatPrice(discount.amount)}

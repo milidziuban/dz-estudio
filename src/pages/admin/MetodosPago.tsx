@@ -35,7 +35,7 @@ export default function AdminMetodosPago() {
         title={
           <>
             Métodos de{" "}
-            <em className="font-serif font-normal italic text-verde">pago</em>
+            <em className="font-serif font-normal italic text-verde-ink">pago</em>
           </>
         }
         description="Qué puede elegir el cliente en el último paso del checkout, y con qué datos transfiere."

@@ -173,7 +173,7 @@ export default function Producto() {
       <div className="mx-auto max-w-6xl">
         <Link
           to="/tienda"
-          className="font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink"
+          className="font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink-ink"
         >
           ← Volver a la tienda
         </Link>
@@ -294,7 +294,7 @@ export default function Producto() {
                   type="button"
                   aria-label="Restar una unidad"
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="px-4 py-3 text-lg font-bold hover:text-pink"
+                  className="px-4 py-3 text-lg font-bold hover:text-pink-ink"
                 >
                   −
                 </button>
@@ -309,7 +309,7 @@ export default function Producto() {
                   aria-label="Sumar una unidad"
                   disabled={qtyEnRango >= tope}
                   onClick={() => setQty((q) => Math.min(q + 1, tope))}
-                  className="px-4 py-3 text-lg font-bold hover:text-pink disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:text-ink/30"
+                  className="px-4 py-3 text-lg font-bold hover:text-pink-ink disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:text-ink/30"
                 >
                   +
                 </button>
@@ -376,7 +376,7 @@ export default function Producto() {
         <section className="mt-20">
           <h2 className="mb-8 text-3xl font-bold tracking-tight sm:text-4xl">
             Va perfecto{" "}
-            <em className="font-serif font-normal italic text-pink">con</em>
+            <em className="font-serif font-normal italic text-pink-ink">con</em>
           </h2>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {related.map((p) => (

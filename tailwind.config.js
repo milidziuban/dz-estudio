@@ -13,6 +13,12 @@ export default {
         lila: "#B8A4E3",
         petroleo: "#2F5D62",
         amarillo: "#F4C542",
+        // Solo para texto sobre cream/blanco: ver la regla en globals.css
+        "pink-ink": "#A94C6F",
+        "orange-ink": "#AB4622",
+        "verde-ink": "#517640",
+        "lila-ink": "#755AAF",
+        "celeste-ink": "#337099",
       },
       fontFamily: {
         sans: ["Lato", "system-ui", "sans-serif"],

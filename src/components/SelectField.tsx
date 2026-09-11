@@ -23,14 +23,14 @@ const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
         className={cn(
           "w-full rounded-lg border bg-transparent px-4 py-3 font-mono text-sm",
           "transition-colors focus:border-ink focus:outline-none",
-          error ? "border-orange" : "border-ink/25",
+          error ? "border-orange-ink" : "border-ink/25",
         )}
         {...props}
       >
         {children}
       </select>
       {error && (
-        <p id={`${id}-error`} className="mt-1.5 text-xs font-semibold text-orange">
+        <p id={`${id}-error`} className="mt-1.5 text-xs font-semibold text-orange-ink">
           ✕ {error}
         </p>
       )}

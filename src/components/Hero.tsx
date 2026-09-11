@@ -15,7 +15,7 @@ export default function Hero() {
 
           <h1 className="text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
             Animate a ponerle{" "}
-            <em className="font-serif font-normal italic text-pink">onda</em>{" "}
+            <em className="font-serif font-normal italic text-pink-ink">onda</em>{" "}
             a tu hogar.
           </h1>
 

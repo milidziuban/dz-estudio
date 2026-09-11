@@ -42,14 +42,14 @@ export default function SaveBar({
       {saved && !dirty && (
         <p
           role="status"
-          className="font-mono text-[10px] uppercase tracking-widest text-verde"
+          className="font-mono text-[10px] uppercase tracking-widest text-verde-ink"
         >
           ✦ Guardado
         </p>
       )}
 
       {error != null && (
-        <p role="alert" className="text-xs font-semibold text-orange">
+        <p role="alert" className="text-xs font-semibold text-orange-ink">
           ✕{" "}
           {errorMessage(error, "No se pudo guardar. Reintentá.")}
         </p>

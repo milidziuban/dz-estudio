@@ -216,7 +216,7 @@ export default function AdminEstadisticas() {
         title={
           <>
             Estadísticas de{" "}
-            <em className="font-serif font-normal italic text-lila">tráfico</em>
+            <em className="font-serif font-normal italic text-lila-ink">tráfico</em>
           </>
         }
         description="Visitas propias del sitio, de dónde llegan y cómo se convierten en ventas. Google Analytics sigue midiendo aparte, con más detalle."

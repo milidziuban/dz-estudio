@@ -12,6 +12,13 @@
   --lila: #b8a4e3;
   --petroleo: #2f5d62;
   --amarillo: #f4c542;
+
+  /* Variantes de texto (ver la regla de contraste de acá abajo) */
+  --pink-ink: #a94c6f;
+  --orange-ink: #ab4622;
+  --verde-ink: #517640;
+  --lila-ink: #755aaf;
+  --celeste-ink: #337099;
 }
 
 /* Contraste mínimo del texto gris (WCAG AA)
@@ -26,6 +33,25 @@
  * usa como mínimo text-ink/65, y sobre fondo ink, text-cream/60 (6.18:1).
  * Por debajo de eso solo pueden quedar los íconos y los controles
  * deshabilitados, que la norma exime: ahí el piso es 3:1 → ink/55 (3.73:1).
+ *
+ * Los colores de marca tampoco llegan cuando hacen de texto sobre cream o
+ * blanco: pink 2.45:1, orange 2.75:1, verde 2.11:1, lila 1.93:1, celeste
+ * 1.61:1 (ni el 3:1 de texto grande). Solo petróleo pasa (6.38:1). Para eso
+ * están las variantes *-ink: el mismo tono, más oscuro, medido contra los dos
+ * fondos y contra la caja bg-orange/10 de los errores del panel:
+ *
+ *   pink-ink    #A94C6F → 4.63 cream · 5.32 blanco
+ *   orange-ink  #AB4622 → 5.03 cream · 5.78 blanco · 4.55 sobre orange/10
+ *   verde-ink   #517640 → 4.55 cream · 5.23 blanco
+ *   lila-ink    #755AAF → 4.76 cream · 5.47 blanco
+ *   celeste-ink #337099 → 4.66 cream · 5.36 blanco
+ *
+ * La regla: color de marca como TEXTO sobre cream o blanco (el `em` de los
+ * titulares, errores, links, etiquetas chicas, el borde de un campo con
+ * error) → siempre la variante -ink. El color pleno queda para bloques,
+ * fondos, badges y pills, y para texto sobre fondo ink (pink 6.18:1,
+ * amarillo 10.7:1). Sobre un bloque de color no hay variante que llegue
+ * —orange-ink da 2.82:1 sobre celeste—: ahí el texto va en ink.
  */
 
 @layer base {

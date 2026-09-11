@@ -27,7 +27,7 @@ export default function AdminLogin() {
       <div className="flex min-h-screen items-center justify-center bg-cream px-5">
         <Seo title="Panel" noindex />
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-orange">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-orange-ink">
             Sin permisos
           </p>
           <h1 className="mt-3 text-2xl font-bold tracking-tight">
@@ -69,7 +69,7 @@ export default function AdminLogin() {
         <div className="mt-8 rounded-2xl bg-white p-8">
           <h1 className="text-2xl font-bold tracking-tight">
             Panel de{" "}
-            <em className="font-serif font-normal italic text-pink">gestión</em>
+            <em className="font-serif font-normal italic text-pink-ink">gestión</em>
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-ink/65">
             Ventas, productos y números de la tienda. Solo para vos.
@@ -98,7 +98,7 @@ export default function AdminLogin() {
             {error && (
               <p
                 role="alert"
-                className="rounded-lg bg-orange/10 px-4 py-3 text-xs font-semibold text-orange"
+                className="rounded-lg bg-orange/10 px-4 py-3 text-xs font-semibold text-orange-ink"
               >
                 ✕ {error}
               </p>

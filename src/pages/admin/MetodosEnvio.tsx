@@ -34,7 +34,7 @@ export default function AdminMetodosEnvio() {
         title={
           <>
             Métodos de{" "}
-            <em className="font-serif font-normal italic text-celeste">envío</em>
+            <em className="font-serif font-normal italic text-celeste-ink">envío</em>
           </>
         }
         description="Lo que el cliente elige en el paso 2 del checkout. Los costos que pongas acá son los que se cobran."

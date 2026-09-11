@@ -47,6 +47,15 @@
 
 Reglas: cada sección/colección usa una **dupla bicolor** (rosa+naranja, celeste+verde, lila+petróleo, amarillo+tinta). Nunca más de 2 colores vibrantes en la misma pieza. Base siempre cream + ink.
 
+**Color como texto:** los colores plenos no llegan al contraste AA sobre cream
+ni blanco (rosa 2.45:1, naranja 2.75:1). Cuando un color de marca hace de
+texto —el `em` de un titular, un error, un link, una etiqueta chica— va la
+variante oscura `text-pink-ink`, `text-orange-ink`, `text-verde-ink`,
+`text-lila-ink` o `text-celeste-ink` (`#A94C6F`, `#AB4622`, `#517640`,
+`#755AAF`, `#337099`, definidas en `globals.css` con sus ratios). El color
+pleno queda para fondos, bloques, badges y pills, y para texto sobre ink.
+Sobre un bloque de color (la card celeste del newsletter) el texto va en ink.
+
 ### Tipografía (Google Fonts)
 
 - **Lato** (400, 700, 900) — sans-serif para todo el contenido

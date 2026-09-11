@@ -592,7 +592,7 @@ export default function AdminVentas() {
           </p>
 
           {kanbanError && (
-            <p className="rounded-xl bg-orange/10 px-4 py-3 text-xs text-orange">
+            <p className="rounded-xl bg-orange/10 px-4 py-3 text-xs text-orange-ink">
               {kanbanError}
             </p>
           )}
@@ -890,7 +890,7 @@ export default function AdminVentas() {
                       href={whatsappLink(abierta)!}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-[10px] uppercase tracking-widest text-verde hover:underline"
+                      className="font-mono text-[10px] uppercase tracking-widest text-verde-ink hover:underline"
                     >
                       Escribir por WhatsApp ↗
                     </a>
@@ -934,7 +934,7 @@ export default function AdminVentas() {
                   <dd>{formatPrice(abierta.subtotal)}</dd>
                 </div>
                 {abierta.discount > 0 && (
-                  <div className="flex justify-between gap-3 text-verde">
+                  <div className="flex justify-between gap-3 text-verde-ink">
                     <dt>{abierta.discountLabel ?? "Descuento"}</dt>
                     <dd>−{formatPrice(abierta.discount)}</dd>
                   </div>

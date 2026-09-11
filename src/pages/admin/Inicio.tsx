@@ -153,7 +153,7 @@ export default function AdminInicio() {
         title={
           <>
             Cómo va{" "}
-            <em className="font-serif font-normal italic text-lila">
+            <em className="font-serif font-normal italic text-lila-ink">
               la tienda
             </em>
           </>

@@ -12,7 +12,7 @@ export default function NotFound() {
         </p>
         <h1 className="mt-4 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl">
           Esta página se fue{" "}
-          <em className="font-serif font-normal italic text-pink">
+          <em className="font-serif font-normal italic text-pink-ink">
             de compras
           </em>
           .

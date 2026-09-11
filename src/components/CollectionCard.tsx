@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { COLOR_HEX } from "../lib/colors";
+import { COLOR_TEXT_HEX } from "../lib/colors";
 import type { ColorToken } from "../types/product";
 import Card from "./Card";
 import Tag, { type TagColor } from "./Tag";
@@ -57,7 +57,7 @@ export default function CollectionCard({
         <h3 className="text-2xl font-bold">
           <em
             className="font-serif font-normal italic"
-            style={{ color: COLOR_HEX[colorB] }}
+            style={{ color: COLOR_TEXT_HEX[colorB] }}
           >
             {title}
           </em>
@@ -65,7 +65,7 @@ export default function CollectionCard({
         <p className="text-sm leading-relaxed">{description}</p>
         <Link
           to={to}
-          className="mt-auto font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink"
+          className="mt-auto font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink-ink"
         >
           Ver {title.toLowerCase()} ✦
         </Link>

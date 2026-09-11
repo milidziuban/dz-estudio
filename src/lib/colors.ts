@@ -12,6 +12,21 @@ export const COLOR_HEX: Record<ColorToken, string> = {
   cream: "#F3EFE4",
 };
 
+/** El mismo color, pero legible como texto sobre cream o blanco (la regla y
+ *  los ratios están en globals.css). Amarillo y cream no tienen versión de
+ *  texto: van en ink. */
+export const COLOR_TEXT_HEX: Record<ColorToken, string> = {
+  pink: "#A94C6F",
+  orange: "#AB4622",
+  celeste: "#337099",
+  verde: "#517640",
+  lila: "#755AAF",
+  petroleo: "#2F5D62",
+  amarillo: "#1A1A1A",
+  ink: "#1A1A1A",
+  cream: "#1A1A1A",
+};
+
 /** Orden en el que se ofrecen los colores en el panel. */
 export const COLOR_TOKENS: ColorToken[] = [
   "pink",

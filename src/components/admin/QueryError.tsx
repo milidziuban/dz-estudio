@@ -21,7 +21,7 @@ export default function QueryError({ error, what, migration }: QueryErrorProps) 
       role="alert"
       className="rounded-2xl bg-white p-6 text-sm leading-relaxed"
     >
-      <p className="font-mono text-[11px] uppercase tracking-widest text-orange">
+      <p className="font-mono text-[11px] uppercase tracking-widest text-orange-ink">
         No se pudo cargar {what}
       </p>
       <p className="mt-3 text-ink/70">

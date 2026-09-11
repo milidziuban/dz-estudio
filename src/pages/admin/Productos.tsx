@@ -248,7 +248,7 @@ export default function AdminProductos() {
         title={
           <>
             Productos{" "}
-            <em className="font-serif font-normal italic text-pink">
+            <em className="font-serif font-normal italic text-pink-ink">
               del catálogo
             </em>
           </>
@@ -387,7 +387,7 @@ export default function AdminProductos() {
                       setFormError(null);
                       setDraft(draftFromProduct(product));
                     }}
-                    className="block max-w-[16rem] truncate text-left text-sm font-semibold hover:text-pink"
+                    className="block max-w-[16rem] truncate text-left text-sm font-semibold hover:text-pink-ink"
                   >
                     {product.name}
                   </button>
@@ -413,7 +413,7 @@ export default function AdminProductos() {
                 <span
                   title="Poco stock"
                   className={cn(
-                    "w-9 font-mono text-[10px] uppercase tracking-widest text-orange",
+                    "w-9 font-mono text-[10px] uppercase tracking-widest text-orange-ink",
                     !isLowStock(product, lowStock) && "invisible",
                   )}
                 >
@@ -458,7 +458,7 @@ export default function AdminProductos() {
               <button
                 type="button"
                 onClick={() => setProductToDelete(product)}
-                className="ml-3 font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
+                className="ml-3 font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
               >
                 Borrar
               </button>
@@ -480,7 +480,7 @@ export default function AdminProductos() {
         footer={
           <div className="space-y-3">
             {formError && (
-              <p role="alert" className="text-xs font-semibold text-orange">
+              <p role="alert" className="text-xs font-semibold text-orange-ink">
                 ✕ {formError}
               </p>
             )}

@@ -117,7 +117,7 @@ function PriceCell({
           type="button"
           onClick={usarSugerido}
           title="Costo + margen (y el combo, si el producto ya viene en pack) sugieren este precio."
-          className="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-orange transition-colors hover:text-ink"
+          className="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
         >
           Sugerido {formatPrice(listPrice)} — usar ✦
         </button>
@@ -168,7 +168,7 @@ export default function AdminPrecios() {
         title={
           <>
             Precios y{" "}
-            <em className="font-serif font-normal italic text-orange">
+            <em className="font-serif font-normal italic text-orange-ink">
               márgenes
             </em>
           </>
@@ -410,7 +410,7 @@ export default function AdminPrecios() {
                 {transferPrice === null ? "—" : formatPrice(transferPrice)}
               </td>
 
-              <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-xs text-verde sm:table-cell">
+              <td className="hidden whitespace-nowrap px-4 py-3 text-right font-mono text-xs text-verde-ink sm:table-cell">
                 {profit === null ? "—" : formatPrice(profit)}
               </td>
             </tr>

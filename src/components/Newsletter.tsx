@@ -76,7 +76,7 @@ export default function Newsletter() {
         )}
 
         {estado === "error" && (
-          <p role="alert" className="mt-4 text-xs font-semibold text-orange">
+          <p role="alert" className="mt-4 text-xs font-semibold text-ink">
             ✕ No pudimos guardarlo. Probá de nuevo en un rato.
           </p>
         )}

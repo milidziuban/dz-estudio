@@ -34,7 +34,7 @@ export default function Accordion({ items, idPrefix }: AccordionProps) {
                   aria-hidden="true"
                   className={cn(
                     "shrink-0 text-xl font-normal transition-transform duration-200",
-                    isOpen && "rotate-45 text-pink",
+                    isOpen && "rotate-45 text-pink-ink",
                   )}
                 >
                   +

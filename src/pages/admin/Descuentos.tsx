@@ -84,7 +84,7 @@ export default function AdminDescuentos() {
         title={
           <>
             Descuentos y{" "}
-            <em className="font-serif font-normal italic text-orange">
+            <em className="font-serif font-normal italic text-orange-ink">
               promociones
             </em>
           </>
@@ -181,7 +181,7 @@ export default function AdminDescuentos() {
                   "Siempre"
                 )}
                 {!vigente(discount) && (
-                  <span className="block text-orange">No vigente</span>
+                  <span className="block text-orange-ink">No vigente</span>
                 )}
               </td>
               <td className="px-4 py-3 text-center">
@@ -215,7 +215,7 @@ export default function AdminDescuentos() {
                       deleteDiscount.mutate(discount.id);
                     }
                   }}
-                  className="ml-3 font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
+                  className="ml-3 font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Borrar
                 </button>
@@ -232,7 +232,7 @@ export default function AdminDescuentos() {
         footer={
           <div className="space-y-3">
             {formError && (
-              <p role="alert" className="text-xs font-semibold text-orange">
+              <p role="alert" className="text-xs font-semibold text-orange-ink">
                 ✕ {formError}
               </p>
             )}

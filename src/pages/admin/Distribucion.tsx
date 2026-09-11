@@ -167,7 +167,7 @@ export default function AdminDistribucion() {
                           locations: locations.filter((_, i) => i !== index),
                         })
                       }
-                      className="font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
+                      className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                     >
                       Quitar
                     </button>
@@ -356,7 +356,7 @@ export default function AdminDistribucion() {
                     "px-4 py-3 text-right font-mono text-xs",
                     disponible !== null &&
                       disponible <= lowStockThreshold &&
-                      "text-orange",
+                      "text-orange-ink",
                   )}
                 >
                   {disponible === null ? "—" : disponible}

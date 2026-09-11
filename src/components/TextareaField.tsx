@@ -24,12 +24,12 @@ const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
         className={cn(
           "w-full resize-y rounded-lg border bg-transparent px-4 py-3 text-sm leading-relaxed placeholder:text-ink/65",
           "transition-colors focus:border-ink focus:outline-none",
-          error ? "border-orange" : "border-ink/25",
+          error ? "border-orange-ink" : "border-ink/25",
         )}
         {...props}
       />
       {error && (
-        <p id={`${id}-error`} className="mt-1.5 text-xs font-semibold text-orange">
+        <p id={`${id}-error`} className="mt-1.5 text-xs font-semibold text-orange-ink">
           ✕ {error}
         </p>
       )}

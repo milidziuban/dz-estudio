@@ -152,7 +152,7 @@ export default function AdminContenido() {
         title={
           <>
             Contenido y{" "}
-            <em className="font-serif font-normal italic text-pink">redes</em>
+            <em className="font-serif font-normal italic text-pink-ink">redes</em>
           </>
         }
         description="Qué se publica, qué día y a qué hora. Cada pieza guarda la foto, el guion y el texto listo para copiar y pegar."
@@ -290,7 +290,7 @@ export default function AdminContenido() {
         footer={
           <div className="space-y-3">
             {formError && (
-              <p role="alert" className="text-xs font-semibold text-orange">
+              <p role="alert" className="text-xs font-semibold text-orange-ink">
                 ✕ {formError}
               </p>
             )}
@@ -431,7 +431,7 @@ export default function AdminContenido() {
                   <button
                     type="button"
                     onClick={() => setDraft({ ...draft, mediaUrl: "" })}
-                    className="font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
+                    className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                   >
                     Quitar
                   </button>
@@ -531,7 +531,7 @@ export default function AdminContenido() {
                       setDraft(null);
                     }
                   }}
-                  className="font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
+                  className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Borrar la pieza
                 </button>

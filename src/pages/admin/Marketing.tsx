@@ -35,7 +35,7 @@ export default function AdminMarketing() {
         title={
           <>
             Marketing y{" "}
-            <em className="font-serif font-normal italic text-pink">difusión</em>
+            <em className="font-serif font-normal italic text-pink-ink">difusión</em>
           </>
         }
         description="La marquesina de la tienda, los suscriptores de la newsletter y por dónde te encuentran."
@@ -105,7 +105,7 @@ export default function AdminMarketing() {
               <li key={index} className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className="font-mono text-xs text-pink"
+                  className="font-mono text-xs text-pink-ink"
                 >
                   ✦
                 </span>
@@ -125,7 +125,7 @@ export default function AdminMarketing() {
                   onClick={() =>
                     setMarquee(marquee.filter((_, i) => i !== index))
                   }
-                  className="font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
+                  className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Quitar
                 </button>
@@ -243,7 +243,7 @@ export default function AdminMarketing() {
                       deleteSubscriber.mutate(subscriber.id);
                     }
                   }}
-                  className="font-mono text-[10px] uppercase tracking-widest text-orange/70 transition-colors hover:text-orange"
+                  className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Borrar
                 </button>

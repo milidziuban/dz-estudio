@@ -39,7 +39,7 @@ export default function StatCard({
           <span
             className={cn(
               "font-mono text-[11px] font-medium",
-              flat ? "text-ink/65" : positive ? "text-verde" : "text-orange",
+              flat ? "text-ink/65" : positive ? "text-verde-ink" : "text-orange-ink",
             )}
           >
             {flat ? "=" : variation! > 0 ? "↑" : "↓"}{" "}

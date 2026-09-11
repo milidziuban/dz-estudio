@@ -49,7 +49,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
             type="button"
             aria-label={`Eliminar ${label} del carrito`}
             onClick={() => remove(key)}
-            className="text-lg leading-none hover:text-orange"
+            className="text-lg leading-none hover:text-orange-ink"
           >
             ✕
           </button>
@@ -77,7 +77,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
               type="button"
               aria-label={`Restar una unidad de ${label}`}
               onClick={() => setQty(key, qty - 1, max)}
-              className="px-3 py-1 font-bold hover:text-pink"
+              className="px-3 py-1 font-bold hover:text-pink-ink"
             >
               −
             </button>
@@ -89,7 +89,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
               aria-label={`Sumar una unidad de ${label}`}
               disabled={qty >= max}
               onClick={() => setQty(key, qty + 1, max)}
-              className="px-3 py-1 font-bold hover:text-pink disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:text-ink/30"
+              className="px-3 py-1 font-bold hover:text-pink-ink disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:text-ink/30"
             >
               +
             </button>

@@ -112,7 +112,7 @@ export default function AdminClientes() {
         title={
           <>
             Quién{" "}
-            <em className="font-serif font-normal italic text-pink">compra</em>
+            <em className="font-serif font-normal italic text-pink-ink">compra</em>
           </>
         }
         description="La lista sale de las órdenes: cada email es un cliente, con lo que gastó y hace cuánto que no compra."
