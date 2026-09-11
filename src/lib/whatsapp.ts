@@ -93,15 +93,15 @@ export function checkoutWhatsappUrl(
     ...(discount
       ? [`Descuento (${discount.label}): -${formatPrice(discount.amount)}`]
       : []),
+    // Con el envío a coordinar la etiqueta ya es el dato: "Envío (Envío a
+    // coordinar): a coordinar" lo decía tres veces.
     ...(envio && shippingCost !== undefined
       ? [
-          `Envío (${envio.label}): ${
-            shippingCost === null
-              ? "a coordinar"
-              : shippingCost === 0
-                ? "gratis"
-                : formatPrice(shippingCost)
-          }`,
+          shippingCost === null
+            ? "Envío: a coordinar"
+            : `Envío (${envio.label}): ${
+                shippingCost === 0 ? "gratis" : formatPrice(shippingCost)
+              }`,
         ]
       : []),
     shippingCost === null

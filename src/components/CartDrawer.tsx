@@ -151,7 +151,7 @@ export default function CartDrawer() {
                 <div className="flex justify-between gap-3">
                   <dt className="uppercase text-xs">Envío</dt>
                   <dd className="text-xs">
-                    {cotizaEnLaTienda ? "Se calcula al final" : "Se coordina aparte"}
+                    {cotizaEnLaTienda ? "Se calcula al final" : "A coordinar"}
                   </dd>
                 </div>
                 <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">

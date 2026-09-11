@@ -213,7 +213,7 @@ function OrderSummary({ order }: { order: OrderTracking }) {
           pelado, parece que el envío ya está cubierto. */}
       {envioACoordinarPorId(order.shippingMethod) && (
         <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-ink/65">
-          Es el total de los productos · el envío se cobra aparte
+          El total es de los productos · el envío se cobra aparte
         </p>
       )}
 

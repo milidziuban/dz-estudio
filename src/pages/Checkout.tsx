@@ -630,11 +630,11 @@ export default function Checkout() {
                         </label>
                       ))}
                     </div>
+                    {/* La opción de arriba ya dice cómo sigue (WhatsApp, antes
+                        de despachar): acá va solo lo que cambia en el pago. */}
                     {envioACoordinar && (
                       <p className="mt-3 rounded-xl bg-amarillo/30 px-4 py-3 text-xs leading-relaxed">
-                        ✦ Ahora pagás solo los productos. Te escribimos por
-                        WhatsApp con el costo del envío y lo cobramos antes de
-                        despachar.
+                        ✦ Ahora pagás solo los productos. El envío se cobra aparte.
                       </p>
                     )}
                     {errors.envio && (
@@ -913,11 +913,11 @@ export default function Checkout() {
                     </dd>
                   </div>
                 )}
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-3">
                   <dt className="text-xs uppercase">Envío</dt>
-                  <dd>
+                  <dd className="text-right">
                     {shippingCost === undefined
-                      ? "A definir"
+                      ? "Lo elegís en el paso 2"
                       : shippingCost === null
                         ? "A coordinar"
                         : shippingCost === 0
@@ -933,8 +933,7 @@ export default function Checkout() {
 
               {envioACoordinar && (
                 <p className="mt-3 text-xs leading-relaxed text-ink/65">
-                  El total es de los productos. El envío se cobra aparte,
-                  cuando sepamos cuánto sale.
+                  El total es de los productos. El envío se cobra aparte.
                 </p>
               )}
 

@@ -18,7 +18,7 @@ const CATEGORIES: { id: string; symbol: string; title: string; items: QA[] }[] =
         },
         {
           q: "¿Cuánto cuesta el envío?",
-          a: "Depende de a dónde va y de cuánto pesa el paquete, así que no lo cobramos en el checkout: ahí pagás los productos y nada más. Después te escribimos por WhatsApp con el costo del envío y lo cobramos antes de despachar. El retiro por el depósito es siempre gratis.",
+          a: "Depende de a dónde va y de cuánto pesa el paquete, así que en el checkout figura «A coordinar» y pagás solo los productos. El envío se cobra aparte: te escribimos por WhatsApp con el costo antes de despachar. El retiro por el depósito es siempre gratis.",
         },
         {
           q: "¿Puedo seguir mi pedido?",
