@@ -1,19 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import Filters, {
-  DEFAULT_FILTERS,
-  PRICE_RANGES,
-  type FiltersState,
-} from "../components/Filters";
+import { useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import Seo from "../components/Seo";
 import { CATEGORY_LABEL } from "../data/products";
 import { useProducts } from "../hooks/useProducts";
+import { cn } from "../lib/cn";
 import { productListJsonLd } from "../lib/structured-data";
-import type { ColorToken } from "../types/product";
+import type { Category } from "../types/product";
 
-const categoriaFromParam = (param: string | null) =>
-  param && param in CATEGORY_LABEL ? param : "all";
+type CategoriaActiva = Category | "all";
+
+const CATEGORIAS = Object.keys(CATEGORY_LABEL) as Category[];
+
+/** Cualquier valor que no sea una categoría real (o ninguno) muestra todo. */
+const categoriaFromParam = (param: string | null): CategoriaActiva =>
+  CATEGORIAS.find((c) => c === param) ?? "all";
+
+/** Las mismas tres entradas que la navbar. La categoría vive en la URL
+ *  (`?categoria=`) y no en un estado local: un link compartido abre la tienda
+ *  ya filtrada y el botón "atrás" deshace el filtro. */
+const CATEGORY_LINKS: { id: CategoriaActiva; label: string; to: string }[] = [
+  { id: "all", label: "Todo", to: "/tienda" },
+  ...CATEGORIAS.map((id) => ({
+    id,
+    label: CATEGORY_LABEL[id],
+    to: `/tienda?categoria=${id}`,
+  })),
+];
 
 type SortId = "novedades" | "precio-asc" | "precio-desc";
 
@@ -26,43 +39,14 @@ const SORT_OPTIONS: { id: SortId; label: string }[] = [
 export default function Tienda() {
   const { data: products = [], isLoading, isError, refetch } = useProducts();
   const [searchParams] = useSearchParams();
-
-  const [filters, setFilters] = useState<FiltersState>({
-    ...DEFAULT_FILTERS,
-    categoria: categoriaFromParam(searchParams.get("categoria")),
-  });
+  const categoria = categoriaFromParam(searchParams.get("categoria"));
   const [sort, setSort] = useState<SortId>("novedades");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Los links de la navbar cambian la URL estando ya en /tienda:
-  // sincronizamos los params con los filtros.
-  useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      categoria: categoriaFromParam(searchParams.get("categoria")),
-    }));
-  }, [searchParams]);
-
-  const updateFilters = (patch: Partial<FiltersState>) =>
-    setFilters((prev) => ({ ...prev, ...patch }));
-
-  const colorOptions = useMemo(() => {
-    const seen = new Set<ColorToken>();
-    products.forEach((p) => p.colors.forEach((c) => seen.add(c)));
-    return [...seen];
-  }, [products]);
 
   const visible = useMemo(() => {
-    const range = PRICE_RANGES.find((r) => r.id === filters.precio)!;
-
-    const filtered = products.filter(
-      (p) =>
-        (filters.categoria === "all" || p.category === filters.categoria) &&
-        (filters.color === "all" ||
-          p.colors.includes(filters.color as ColorToken)) &&
-        p.price >= range.min &&
-        p.price < range.max,
-    );
+    const filtered =
+      categoria === "all"
+        ? products
+        : products.filter((p) => p.category === categoria);
 
     const sorted = [...filtered];
     switch (sort) {
@@ -78,7 +62,7 @@ export default function Tienda() {
         break;
     }
     return sorted;
-  }, [filters, sort, products]);
+  }, [categoria, sort, products]);
 
   return (
     <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
@@ -98,142 +82,112 @@ export default function Tienda() {
           </em>
         </h1>
 
-        <div className="md:grid md:grid-cols-[260px_1fr] md:gap-10 lg:gap-14">
-          {/* Sidebar desktop */}
-          <aside className="hidden md:block" aria-label="Filtros">
-            <Filters
-              value={filters}
-              onChange={updateFilters}
-              colorOptions={colorOptions}
-            />
-          </aside>
+        {/* Barra superior: categoría + contador + orden */}
+        <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-6">
+          <nav
+            aria-label="Filtrar por categoría"
+            className="flex flex-wrap gap-2"
+          >
+            {CATEGORY_LINKS.map((link) => {
+              const selected = categoria === link.id;
+              return (
+                <Link
+                  key={link.id}
+                  to={link.to}
+                  aria-current={selected ? "page" : undefined}
+                  className={cn(
+                    "rounded-full border px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
+                    selected
+                      ? "border-ink bg-ink text-cream"
+                      : "border-ink/25 bg-transparent text-ink hover:border-ink",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-          <div>
-            {/* Barra superior: filtrar (mobile) + orden + contador */}
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-              <button
-                type="button"
-                onClick={() => setDrawerOpen(true)}
-                className="rounded-full border border-ink px-5 py-2 font-mono text-xs font-medium uppercase tracking-widest transition-colors hover:bg-ink hover:text-cream md:hidden"
+          <div className="flex flex-wrap items-center justify-between gap-4 md:justify-end md:gap-6">
+            <p className="font-mono text-xs uppercase tracking-widest">
+              {visible.length}{" "}
+              {visible.length === 1 ? "producto" : "productos"}
+            </p>
+
+            <div className="flex items-center gap-2">
+              {/* En mobile el select ya dice "Novedades": la etiqueta queda
+                  solo para lectores de pantalla y la fila entra en 375px */}
+              <label
+                htmlFor="sort"
+                className="sr-only font-mono text-xs font-medium uppercase tracking-widest md:not-sr-only"
               >
-                Filtrar ✦
-              </button>
-
-              <p className="font-mono text-xs uppercase tracking-widest">
-                {visible.length}{" "}
-                {visible.length === 1 ? "producto" : "productos"}
-              </p>
-
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="sort"
-                  className="font-mono text-xs font-medium uppercase tracking-widest"
-                >
-                  Ordenar:
-                </label>
-                <select
-                  id="sort"
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value as SortId)}
-                  className="rounded-lg border border-ink/25 bg-transparent px-3 py-2 font-mono text-xs uppercase tracking-wider transition-colors focus:border-ink focus:outline-none"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {isLoading ? (
-              <p
-                className="animate-pulse py-20 text-center font-mono text-sm uppercase tracking-widest"
-                role="status"
+                Ordenar:
+              </label>
+              <select
+                id="sort"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortId)}
+                className="rounded-lg border border-ink/25 bg-transparent px-3 py-2 font-mono text-xs uppercase tracking-wider transition-colors focus:border-ink focus:outline-none"
               >
-                ✦ Cargando la tienda…
-              </p>
-            ) : isError ? (
-              <div className="rounded-2xl bg-orange p-10 text-center text-cream">
-                <p className="font-serif text-2xl italic">
-                  Se nos corrió un punto ✧
-                </p>
-                <p className="mt-2 text-sm">
-                  No pudimos cargar los productos. Revisá tu conexión (o que la
-                  base de datos exista).
-                </p>
-                <button
-                  type="button"
-                  onClick={() => refetch()}
-                  className="mt-6 rounded-full bg-cream px-6 py-2.5 font-mono text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-white"
-                >
-                  Reintentar ✦
-                </button>
-              </div>
-            ) : visible.length > 0 ? (
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-                {visible.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
                 ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl bg-lila p-10 text-center">
-                <p className="font-serif text-2xl italic">
-                  Nada por acá ✧
-                </p>
-                <p className="mt-2 text-sm">
-                  Probá con menos filtros. O con menos exigencias.
-                </p>
-              </div>
-            )}
+              </select>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Drawer de filtros mobile */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            type="button"
-            aria-label="Cerrar filtros"
-            onClick={() => setDrawerOpen(false)}
-            className="absolute inset-0 bg-ink/50"
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Filtros"
-            className="absolute inset-y-0 left-0 w-80 max-w-[85vw] overflow-y-auto bg-cream p-6 shadow-2xl shadow-ink/20"
+        {isLoading ? (
+          <p
+            className="animate-pulse py-20 text-center font-mono text-sm uppercase tracking-widest"
+            role="status"
           >
-            <div className="mb-8 flex items-center justify-between">
-              <p className="font-mono text-sm font-medium uppercase tracking-widest">
-                ✦ Filtros
-              </p>
-              <button
-                type="button"
-                aria-label="Cerrar filtros"
-                onClick={() => setDrawerOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-lg transition-colors hover:bg-ink/5"
-              >
-                ✕
-              </button>
-            </div>
-            <Filters
-              value={filters}
-              onChange={updateFilters}
-              colorOptions={colorOptions}
-            />
+            ✦ Cargando la tienda…
+          </p>
+        ) : isError ? (
+          <div className="rounded-2xl bg-orange p-10 text-center text-cream">
+            <p className="font-serif text-2xl italic">
+              Se nos corrió un punto ✧
+            </p>
+            <p className="mt-2 text-sm">
+              No pudimos cargar los productos. Revisá tu conexión (o que la
+              base de datos exista).
+            </p>
             <button
               type="button"
-              onClick={() => setDrawerOpen(false)}
-              className="mt-10 w-full rounded-full bg-ink px-8 py-3.5 font-mono text-xs font-medium uppercase tracking-widest text-cream transition-colors hover:bg-ink/80"
+              onClick={() => refetch()}
+              className="mt-6 rounded-full bg-cream px-6 py-2.5 font-mono text-xs font-medium uppercase tracking-widest text-ink transition-colors hover:bg-white"
             >
-              Ver {visible.length}{" "}
-              {visible.length === 1 ? "producto" : "productos"}
+              Reintentar ✦
             </button>
           </div>
-        </div>
-      )}
+        ) : visible.length > 0 ? (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+            {visible.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl bg-lila p-10 text-center">
+            <p className="font-serif text-2xl italic">Nada por acá ✧</p>
+            <p className="mt-2 text-sm">
+              {categoria === "all"
+                ? "No hay nada publicado por ahora. Volvé en unos días."
+                : `Todavía no hay ${CATEGORY_LABEL[categoria].toLowerCase()} publicados. El resto de la tienda, sí.`}
+            </p>
+            {categoria !== "all" && (
+              <Link
+                to="/tienda"
+                className="mt-6 inline-block rounded-full bg-ink px-6 py-2.5 font-mono text-xs font-medium uppercase tracking-widest text-cream transition-colors hover:bg-ink/80"
+              >
+                Ver todo ✦
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
