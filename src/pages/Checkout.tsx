@@ -40,9 +40,11 @@ const STEPS = [
   { number: 3, label: "Pago" },
 ];
 
+// En el orden en que están en pantalla: al validar, el foco va al primero
+// que falla, y en el paso 2 el código postal va antes que todo lo demás.
 const STEP_FIELDS: Record<number, (keyof CheckoutData)[]> = {
   1: ["email", "telefono", "nombre", "apellido"],
-  2: ["envio", "direccion", "ciudad", "provincia", "cp"],
+  2: ["cp", "envio", "direccion", "ciudad", "provincia"],
 };
 
 /** Qué se le muestra a la clienta cuando el pedido no se puede guardar. */
@@ -109,6 +111,7 @@ export default function Checkout() {
     trigger,
     watch,
     setValue,
+    resetField,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutData>({
     resolver: zodResolver(checkoutSchema),
@@ -124,6 +127,12 @@ export default function Checkout() {
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
   const cuotas = useInstallments();
   const shippingOptions = envios.options.filter((option) => option.enabled);
+  // El retiro no es una opción más de la lista: es el atajo de arriba, el que
+  // saltea código postal, transportistas y dirección de un solo clic.
+  const opcionRetiro = shippingOptions.find((option) => option.id === "retiro");
+  const opcionesDeEnvio = shippingOptions.filter(
+    (option) => option.id !== "retiro",
+  );
   const distribucion = settings?.distribucion ?? SETTINGS_DEFAULTS.distribucion;
   const puntoRetiro = distribucion.locations.find((location) => location.retiro);
 
@@ -135,6 +144,33 @@ export default function Checkout() {
   const esRetiro = envioSel === "retiro";
   const pagoSel = watch("pago");
   const cpWatched = watch("cp") ?? "";
+  const cpCompleto = cpWatched.trim().length >= 4;
+
+  /** Lo que había elegido antes de tocar "Lo retiro": si se arrepiente y
+   *  vuelve al envío, encuentra la transportista donde la dejó. El código
+   *  postal no hace falta guardarlo: el campo se desmonta pero el formulario
+   *  se lo acuerda igual. */
+  const envioAntesDeRetiro = useRef<CheckoutData["envio"] | null>(null);
+  const elegirRetiro = () => {
+    envioAntesDeRetiro.current = esRetiro ? null : (envioSel ?? null);
+    setValue("envio", "retiro", { shouldValidate: true, shouldDirty: true });
+  };
+  const volverAlEnvio = () => {
+    const previo = envioAntesDeRetiro.current;
+    if (previo) setValue("envio", previo, { shouldValidate: true });
+    else resetField("envio");
+  };
+
+  // Con una sola forma de envío —hoy, "a coordinar", con las transportistas
+  // apagadas— no hay nada que elegir: queda marcada y la clienta no se come
+  // un "Elegí cómo lo recibís" por una lista de una.
+  const unicaFormaDeEnvio =
+    opcionesDeEnvio.length === 1 ? opcionesDeEnvio[0].id : null;
+  useEffect(() => {
+    if (step === 2 && !envioSel && unicaFormaDeEnvio) {
+      setValue("envio", unicaFormaDeEnvio as CheckoutData["envio"]);
+    }
+  }, [step, envioSel, unicaFormaDeEnvio, setValue]);
 
   // Peso real del carrito, para cotizar con la transportista.
   const cartWeightGrams = resolved.reduce(
@@ -159,9 +195,7 @@ export default function Checkout() {
   };
 
   const isQuoting = (option: (typeof shippingOptions)[number]) =>
-    option.mode === "vivo" &&
-    cpWatched.trim().length >= 4 &&
-    (quote.isLoading || quote.isFetching);
+    option.mode === "vivo" && cpCompleto && (quote.isLoading || quote.isFetching);
 
   // Envío gratis a partir del monto configurado (null = sin envío gratis)
   const envioGratis =
@@ -177,8 +211,13 @@ export default function Checkout() {
         : (liveCostFor(option) ?? option.cost);
 
   /** Lo que va a la derecha de cada opción. Nunca "$0" ni "Gratis" para el
-   *  envío a coordinar: eso se lee como envío gratis y no lo es. */
+   *  envío a coordinar: eso se lee como envío gratis y no lo es. Las que
+   *  cotizan en vivo no muestran número hasta tener el código postal: el de
+   *  respaldo del panel se usa solo si la cotización falla. */
   const priceLabel = (option: (typeof shippingOptions)[number]): string => {
+    if (option.mode === "vivo" && !cpCompleto && !envioGratis) {
+      return "Según tu CP";
+    }
     if (isQuoting(option)) return "Calculando…";
     const costo = costFor(option);
     if (costo === null) return "A coordinar";
@@ -245,7 +284,7 @@ export default function Checkout() {
       return;
     }
     const fields = STEP_FIELDS[step];
-    const valid = fields ? await trigger(fields) : true;
+    const valid = fields ? await trigger(fields, { shouldFocus: true }) : true;
     if (valid) setStep(target);
   };
 
@@ -483,68 +522,15 @@ export default function Checkout() {
                   </span>
                   Envío
                 </p>
+                {/* Primero el código postal: es lo único que hace falta para
+                    cotizar, así el precio de cada envío aparece antes de
+                    pedir calle, ciudad y provincia. */}
                 <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
-                  ✧ ¿Cómo lo recibís?
+                  ✧ ¿A dónde va?
                 </p>
-                {envioGratis && (
-                  <p className="mb-3 rounded-xl bg-verde/20 px-4 py-3 text-xs leading-relaxed">
-                    ✦ Tu compra tiene <strong>envío gratis</strong>.
-                  </p>
-                )}
-                <div className="space-y-3">
-                  {shippingOptions.map((option) => (
-                    <label
-                      key={option.id}
-                      className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-ink/20 p-4 transition-colors hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-amarillo/40"
-                    >
-                      <span className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          value={option.id}
-                          className="h-4 w-4 accent-ink"
-                          {...register("envio")}
-                        />
-                        <span>
-                          <span className="block text-sm font-bold">
-                            {option.label}
-                          </span>
-                          <span className="block text-xs text-ink/70">
-                            {option.detail}
-                          </span>
-                        </span>
-                      </span>
-                      <span
-                        className={cn(
-                          "whitespace-nowrap font-mono text-sm font-medium tracking-wider",
-                          costFor(option) === null && "text-ink/65",
-                        )}
-                      >
-                        {priceLabel(option)}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                {envioACoordinar && (
-                  <p className="mt-3 rounded-xl bg-amarillo/30 px-4 py-3 text-xs leading-relaxed">
-                    ✦ Ahora pagás solo los productos. Te escribimos por
-                    WhatsApp con el costo del envío y lo cobramos antes de
-                    despachar.
-                  </p>
-                )}
-                {hasLiveOptions && !esRetiro && cpWatched.trim().length < 4 && (
-                  <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
-                    Correo Argentino cotiza con tu código postal: el precio se
-                    ajusta cuando lo cargues acá abajo.
-                  </p>
-                )}
-                {errors.envio && (
-                  <p className="mt-2 text-xs font-semibold text-orange-ink">
-                    ✕ {errors.envio.message}
-                  </p>
-                )}
 
                 {esRetiro ? (
-                  <div className="mt-8 rounded-xl bg-verde/20 p-5">
+                  <div className="rounded-xl bg-verde/20 p-5">
                     <p className="font-mono text-xs font-medium uppercase tracking-widest">
                       ✦ Lo retirás vos
                     </p>
@@ -557,43 +543,139 @@ export default function Checkout() {
                       No hace falta que cargues una dirección: te avisamos apenas
                       esté listo para retirar.
                     </p>
+                    <button
+                      type="button"
+                      onClick={volverAlEnvio}
+                      className="mt-4 font-mono text-xs font-medium uppercase tracking-widest underline underline-offset-4 transition-colors hover:text-ink/70"
+                    >
+                      Prefiero que me lo envíen →
+                    </button>
                   </div>
                 ) : (
-                  <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                    <TextField
-                      label="Dirección"
-                      id="direccion"
-                      placeholder="Calle y número, piso, depto"
-                      error={errors.direccion?.message}
-                      className="sm:col-span-2"
-                      {...register("direccion")}
-                    />
-                    <TextField
-                      label="Ciudad"
-                      id="ciudad"
-                      error={errors.ciudad?.message}
-                      {...register("ciudad")}
-                    />
-                    <SelectField
-                      label="Provincia"
-                      id="provincia"
-                      error={errors.provincia?.message}
-                      {...register("provincia")}
-                    >
-                      <option value="">Elegí una provincia…</option>
-                      {PROVINCIAS.map((provincia) => (
-                        <option key={provincia} value={provincia}>
-                          {provincia}
-                        </option>
+                  <>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                      <TextField
+                        label="Código postal"
+                        id="cp"
+                        inputMode="numeric"
+                        autoComplete="postal-code"
+                        placeholder="Ej. 3000"
+                        error={errors.cp?.message}
+                        className="sm:w-44"
+                        {...register("cp")}
+                      />
+                      {opcionRetiro && (
+                        <div className="flex items-center gap-4 sm:mt-[22px]">
+                          <span className="hidden font-serif text-lg italic text-ink/70 sm:inline">
+                            o
+                          </span>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={elegirRetiro}
+                            className="w-full px-6 sm:w-auto"
+                          >
+                            Lo retiro en el depósito
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {hasLiveOptions && !cpCompleto && (
+                      <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
+                        Con el código postal cotizamos el envío antes de
+                        pedirte el resto de la dirección.
+                      </p>
+                    )}
+
+                    <p className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-widest">
+                      ✧ ¿Cómo lo recibís?
+                    </p>
+                    {envioGratis && (
+                      <p className="mb-3 rounded-xl bg-verde/20 px-4 py-3 text-xs leading-relaxed">
+                        ✦ Tu compra tiene <strong>envío gratis</strong>.
+                      </p>
+                    )}
+                    <div className="space-y-3">
+                      {opcionesDeEnvio.map((option) => (
+                        <label
+                          key={option.id}
+                          className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-ink/20 p-4 transition-colors hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-amarillo/40"
+                        >
+                          <span className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              value={option.id}
+                              className="h-4 w-4 accent-ink"
+                              {...register("envio")}
+                            />
+                            <span>
+                              <span className="block text-sm font-bold">
+                                {option.label}
+                              </span>
+                              <span className="block text-xs text-ink/70">
+                                {option.detail}
+                              </span>
+                            </span>
+                          </span>
+                          <span
+                            className={cn(
+                              "whitespace-nowrap font-mono text-sm font-medium tracking-wider",
+                              (costFor(option) === null ||
+                                (option.mode === "vivo" && !cpCompleto)) &&
+                                "text-ink/65",
+                            )}
+                          >
+                            {priceLabel(option)}
+                          </span>
+                        </label>
                       ))}
-                    </SelectField>
-                    <TextField
-                      label="Código postal"
-                      id="cp"
-                      error={errors.cp?.message}
-                      {...register("cp")}
-                    />
-                  </div>
+                    </div>
+                    {envioACoordinar && (
+                      <p className="mt-3 rounded-xl bg-amarillo/30 px-4 py-3 text-xs leading-relaxed">
+                        ✦ Ahora pagás solo los productos. Te escribimos por
+                        WhatsApp con el costo del envío y lo cobramos antes de
+                        despachar.
+                      </p>
+                    )}
+                    {errors.envio && (
+                      <p className="mt-2 text-xs font-semibold text-orange-ink">
+                        ✕ {errors.envio.message}
+                      </p>
+                    )}
+
+                    <p className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-widest">
+                      ✧ ¿A qué dirección?
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <TextField
+                        label="Dirección"
+                        id="direccion"
+                        placeholder="Calle y número, piso, depto"
+                        error={errors.direccion?.message}
+                        className="sm:col-span-2"
+                        {...register("direccion")}
+                      />
+                      <TextField
+                        label="Ciudad"
+                        id="ciudad"
+                        error={errors.ciudad?.message}
+                        {...register("ciudad")}
+                      />
+                      <SelectField
+                        label="Provincia"
+                        id="provincia"
+                        error={errors.provincia?.message}
+                        {...register("provincia")}
+                      >
+                        <option value="">Elegí una provincia…</option>
+                        {PROVINCIAS.map((provincia) => (
+                          <option key={provincia} value={provincia}>
+                            {provincia}
+                          </option>
+                        ))}
+                      </SelectField>
+                    </div>
+                  </>
                 )}
 
                 <div className="mt-8 flex gap-4">

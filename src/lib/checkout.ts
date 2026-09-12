@@ -180,6 +180,8 @@ type CampoDireccion = (typeof CAMPOS_DIRECCION)[number];
  * refinamiento: quien retira en el depósito no tiene por qué cargar calle,
  * ciudad, provincia ni código postal. El envío a coordinar sí los pide todos:
  * el paquete viaja igual y sin dirección no hay con qué cotizarlo después.
+ * En pantalla el código postal va primero —es con lo que se cotiza—, pero
+ * para el esquema es un campo más de la dirección.
  */
 export const checkoutSchema = z
   .object({
@@ -234,7 +236,14 @@ export const checkoutSchema = z
       (PROVINCIAS as readonly string[]).includes(valor("provincia")),
       "Elegí tu provincia",
     );
-    exigir("cp", valor("cp").length >= 4, "Código postal inválido");
+    // El código postal es lo primero que se pide en el paso 2 —con él se
+    // cotiza el envío—, así que el mensaje tiene que servir con el campo
+    // todavía vacío.
+    exigir(
+      "cp",
+      valor("cp").length >= 4,
+      valor("cp") ? "Código postal inválido" : "Ingresá tu código postal",
+    );
   });
 
 export type CheckoutData = z.infer<typeof checkoutSchema>;
