@@ -31,7 +31,7 @@ supabase/migrations/20260909221453_cupones_fuera_de_la_tienda.sql
 supabase/migrations/20260910203819_embudo_en_la_base.sql
 supabase/migrations/20260911142100_aviso_de_pedido_nuevo.sql
 supabase/migrations/20260911220000_registro_de_produccion.sql
-supabase/migrations/20260911190000_cupon_en_el_checkout.sql
+supabase/migrations/20260912201842_cupon_en_el_checkout.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -55,11 +55,13 @@ tienda, el embudo medido en la base, el aviso de pedido nuevo, el cupón
 canjeado en el checkout— y cada una explica arriba de todo qué cambia y por
 qué.
 
-`registro_de_produccion` es la última y cambia cómo se carga el stock: crea
+`registro_de_produccion` cambia cómo se carga el stock: crea
 `stock_movimientos` y la función `registrar_movimiento_stock`, que es la
 única puerta para mover unidades (ver "Stock" más abajo). Deja el stock que
 había ese día como primer movimiento ("saldo inicial"), así el historial cierra
-desde el principio.
+desde el principio. `cupon_en_el_checkout` es la última: el trigger de las
+órdenes aprende a validar y aplicar el cupón, y `get_order_tracking` devuelve
+si el envío va sin cargo.
 
 Todas se pueden correr dos veces sin romper nada, **menos la primera**:
 `catalogo_2026_07` vacía `products` y la vuelve a cargar. Sirve para levantar

@@ -72,7 +72,7 @@ function errorDePedido(error: {
 }): ErrorDePedido {
   // El cupón se validó al aplicarlo, pero la base vuelve a mirarlo al guardar:
   // pudo vencerse o agotarse mientras la clienta cargaba los datos
-  // (migración 20260911190000).
+  // (migración 20260912201842).
   if (error.hint === "cupon-invalido") {
     return {
       titulo: "El cupón ya no está vigente",

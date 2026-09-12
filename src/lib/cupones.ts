@@ -10,7 +10,7 @@ import type { DiscountKind } from "../types/admin";
  * función `cupon_vigente` (migración 20260909221453), que devuelve el cupón
  * solo si existe y está vigente. Lo que se calcula acá es la estimación que
  * ve la clienta en el resumen; el precio real lo fija el trigger
- * `recalculate_order_totals` con la misma regla (migración 20260911190000),
+ * `recalculate_order_totals` con la misma regla (migración 20260912201842),
  * y si el cupón dejó de valer entre que lo aplicó y que confirmó, el insert
  * lo rechaza con `hint` y el checkout lo dice.
  */
