@@ -1,22 +1,27 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import AdminTable from "../../components/admin/AdminTable";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
 import SaveBar from "../../components/admin/SaveBar";
 import SettingsSection from "../../components/admin/SettingsSection";
 import StatCard from "../../components/admin/StatCard";
-import StockCell from "../../components/admin/StockCell";
+import StockDrawer, {
+  DeltaText,
+  type StockModo,
+} from "../../components/admin/StockDrawer";
 import Toggle from "../../components/admin/Toggle";
 import TextField from "../../components/TextField";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
-import {
-  useAdminProducts,
-  useQuickUpdateProduct,
-  useQuickUpdateVariantStock,
-} from "../../hooks/useAdminProducts";
+import { useAdminProducts } from "../../hooks/useAdminProducts";
+import { useStockMovimientos } from "../../hooks/useStockMovimientos";
 import { useSettingsDraft } from "../../hooks/useStoreSettings";
 import { isPaid } from "../../lib/admin";
-import { stockLineKey, stockLines } from "../../lib/admin-stats";
+import {
+  produccionDelMes,
+  stockLineKey,
+  stockLines,
+  type StockLine,
+} from "../../lib/admin-stats";
 import { cn } from "../../lib/cn";
 import type { DistributionLocation } from "../../types/admin";
 
@@ -24,8 +29,11 @@ export default function AdminDistribucion() {
   const distribucion = useSettingsDraft("distribucion");
   const products = useAdminProducts();
   const orders = useAdminOrders();
-  const quickUpdate = useQuickUpdateProduct();
-  const quickUpdateVariant = useQuickUpdateVariantStock();
+  const movimientos = useStockMovimientos();
+
+  /** Línea abierta en el drawer y con qué formulario se abrió. */
+  const [abierta, setAbierta] = useState<StockLine | null>(null);
+  const [modo, setModo] = useState<StockModo>("produccion");
 
   const { locations, lowStockThreshold } = distribucion.value;
 
@@ -60,6 +68,29 @@ export default function AdminDistribucion() {
     0,
   );
 
+  const producidas = useMemo(
+    () => produccionDelMes(movimientos.data ?? []),
+    [movimientos.data],
+  );
+  const producidasTotal = [...producidas.values()].reduce(
+    (total, qty) => total + qty,
+    0,
+  );
+  const mesActual = new Intl.DateTimeFormat("es-AR", { month: "long" }).format(
+    new Date(),
+  );
+
+  // La línea del drawer se lee del catálogo fresco: así el stock del título
+  // y el del formulario se actualizan después de cada movimiento.
+  const lineaAbierta = abierta
+    ? (lineas.find((line) => line.key === abierta.key) ?? abierta)
+    : null;
+
+  const abrir = (line: StockLine, siguiente: StockModo) => {
+    setModo(siguiente);
+    setAbierta(line);
+  };
+
   const setLocation = (
     index: number,
     patch: Partial<DistributionLocation>,
@@ -91,7 +122,7 @@ export default function AdminDistribucion() {
             </em>
           </>
         }
-        description="Desde dónde sale cada pedido, qué hay en stock y qué unidades ya están comprometidas."
+        description="Desde dónde sale cada pedido, qué hay en stock, qué se cosió este mes y qué unidades ya están comprometidas."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -256,6 +287,53 @@ export default function AdminDistribucion() {
       </div>
 
       <h2 className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-[0.15em]">
+        Producción de {mesActual}
+      </h2>
+
+      <div className="rounded-2xl bg-white p-5">
+        {movimientos.error ? (
+          <p className="text-sm text-ink/65">
+            No se pudo leer el registro de producción.
+          </p>
+        ) : producidasTotal === 0 ? (
+          <p className="text-sm text-ink/65">
+            Todavía no se registró producción este mes. Se anota desde
+            "+ Producción", en la tabla de abajo.
+          </p>
+        ) : (
+          <>
+            <p className="font-mono text-2xl font-medium tracking-tight">
+              {producidasTotal.toLocaleString("es-AR")}{" "}
+              <span className="text-sm font-normal text-ink/65">
+                unidades cosidas
+              </span>
+            </p>
+            <ul className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+              {lineas
+                .filter((line) => (producidas.get(line.key) ?? 0) > 0)
+                .map((line) => (
+                  <li
+                    key={line.key}
+                    className="flex items-baseline justify-between gap-3 border-b border-ink/[0.06] pb-2 text-sm last:border-0"
+                  >
+                    <span className="truncate">
+                      {line.productName}
+                      {line.variantLabel && (
+                        <span className="text-ink/65"> · {line.variantLabel}</span>
+                      )}
+                    </span>
+                    <DeltaText
+                      delta={producidas.get(line.key) ?? 0}
+                      className="text-xs"
+                    />
+                  </li>
+                ))}
+            </ul>
+          </>
+        )}
+      </div>
+
+      <h2 className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-[0.15em]">
         Stock por producto
       </h2>
 
@@ -269,6 +347,7 @@ export default function AdminDistribucion() {
             { label: "En stock", align: "right" },
             { label: "Comprometido", align: "right" },
             { label: "Disponible", align: "right" },
+            { label: "Movimientos", align: "right", hideOnMobile: true },
           ]}
           isLoading={products.isLoading}
           isEmpty={lineas.length === 0}
@@ -280,25 +359,31 @@ export default function AdminDistribucion() {
               line.stock === null ? null : line.stock - reservado;
             const mismoProductoQueAnterior =
               lineas[index - 1]?.productId === line.productId;
-            const pendiente =
-              (line.variantId
-                ? quickUpdateVariant.isPending
-                : quickUpdate.isPending) || false;
+            const nombre = line.variantLabel ?? line.productName;
 
-            const commitStock = (next: number) => {
-              if (line.variantId) {
-                quickUpdateVariant.mutate({
-                  productId: line.productId,
-                  variantId: line.variantId,
-                  stock: next,
-                });
-              } else {
-                quickUpdate.mutate({
-                  id: line.productId,
-                  patch: { stock: next },
-                });
-              }
-            };
+            // Las dos puertas al stock. En pantallas chicas van debajo del
+            // nombre, que es lo que queda a la vista sin scrollear la tabla.
+            const acciones = (className: string) =>
+              line.stock === null ? null : (
+                <div className={cn("flex items-center gap-4", className)}>
+                  <button
+                    type="button"
+                    onClick={() => abrir(line, "produccion")}
+                    aria-label={`Registrar producción de ${nombre}`}
+                    className="font-mono text-[10px] uppercase tracking-widest text-verde transition-opacity hover:opacity-70"
+                  >
+                    + Producción
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => abrir(line, "ajuste")}
+                    aria-label={`Ajustar el stock de ${nombre}`}
+                    className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+                  >
+                    Ajustar a…
+                  </button>
+                </div>
+              );
 
             return (
               <tr
@@ -330,6 +415,7 @@ export default function AdminDistribucion() {
                       </span>
                     </>
                   )}
+                  {acciones("mt-2 sm:hidden")}
                 </td>
                 <td className="hidden px-4 py-3 font-mono text-[11px] text-ink/65 sm:table-cell">
                   {line.sku ?? "—"}
@@ -340,12 +426,16 @@ export default function AdminDistribucion() {
                       Sin control
                     </span>
                   ) : (
-                    <StockCell
-                      value={line.stock}
-                      pending={pendiente}
-                      ariaLabel={`Stock de ${line.variantLabel ?? line.productName}`}
-                      onCommit={commitStock}
-                    />
+                    // El número ya no se edita acá: se mueve con las acciones
+                    // de la derecha y queda anotado. Tocarlo abre el historial.
+                    <button
+                      type="button"
+                      onClick={() => abrir(line, "produccion")}
+                      aria-label={`Historial de stock de ${nombre}`}
+                      className="font-mono text-sm tabular-nums underline decoration-ink/25 decoration-dotted underline-offset-4 transition-colors hover:decoration-ink"
+                    >
+                      {line.stock}
+                    </button>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-xs text-ink/65">
@@ -361,11 +451,28 @@ export default function AdminDistribucion() {
                 >
                   {disponible === null ? "—" : disponible}
                 </td>
+                <td className="hidden whitespace-nowrap px-4 py-3 text-right sm:table-cell">
+                  {acciones("justify-end") ?? (
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                      —
+                    </span>
+                  )}
+                </td>
               </tr>
             );
           })}
         </AdminTable>
       )}
+
+      <StockDrawer
+        line={lineaAbierta}
+        modo={modo}
+        onModoChange={setModo}
+        onClose={() => setAbierta(null)}
+        movimientos={movimientos.data ?? []}
+        isLoading={movimientos.isLoading}
+        error={movimientos.error}
+      />
     </>
   );
 }

@@ -283,6 +283,32 @@ export type ProductDraft = {
   variants: AdminProductVariant[];
 };
 
+// ── Movimientos de stock ──────────────────────────────────────
+
+/** Por qué se movió el stock. `venta` lo anota el despacho; el resto, el
+ *  panel desde Distribución. */
+export type StockMotivo = "produccion" | "ajuste" | "venta" | "devolucion";
+
+/** Una fila de `stock_movimientos`: lo único que mueve el stock, en las dos
+ *  direcciones, y por eso la suma de `delta` por línea da el stock actual. */
+export type StockMovimiento = {
+  id: number;
+  createdAt: string;
+  /** null si el producto se borró después del movimiento */
+  productId: number | null;
+  slug: string;
+  variantId: string | null;
+  /** Con signo, y el que se aplicó de verdad (nunca deja el stock bajo 0). */
+  delta: number;
+  /** Lo que quedó después del movimiento. */
+  saldo: number;
+  motivo: StockMotivo;
+  orderId: string | null;
+  nota: string | null;
+  /** Nombre del admin que lo registró. null = la migración o un proceso. */
+  autor: string | null;
+};
+
 // ── Calendario de contenido ───────────────────────────────────
 
 /** La mezcla semanal que recomienda el vault: 2 de producto, 1 de proceso,

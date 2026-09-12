@@ -6,11 +6,14 @@
 --
 -- Correr completo en Supabase → SQL Editor → Run.
 -- Es IRREVERSIBLE: no hay vuelta atrás una vez ejecutado.
--- No toca `admins`, `products` (catálogo), `discounts` ni
--- `store_settings`.
+-- No toca `admins`, `products` (catálogo), `discounts`,
+-- `store_settings` ni `stock_movimientos` (la devolución queda anotada).
 -- ============================================================
 
--- 1) Devolver el stock descontado por órdenes de prueba ya despachadas
+-- 1) Devolver el stock descontado por órdenes de prueba ya despachadas.
+--    Pasa por fn_stock_mover (la única puerta al stock) como `devolucion`,
+--    así el historial de stock_movimientos sigue cerrando: el despacho de
+--    prueba queda anotado y su devolución también.
 do $$
 declare
   ord record;
@@ -29,28 +32,10 @@ begin
         continue;
       end if;
 
-      if v_variant_id is not null then
-        update public.products
-        set variants = (
-          select coalesce(jsonb_agg(
-            case
-              when elem->>'id' = v_variant_id and elem->>'stock' is not null
-                then jsonb_set(
-                  elem,
-                  '{stock}',
-                  to_jsonb((elem->>'stock')::integer + v_qty)
-                )
-              else elem
-            end
-          ), '[]'::jsonb)
-          from jsonb_array_elements(variants) as elem
-        )
-        where slug = v_slug;
-      else
-        update public.products
-        set stock = stock + v_qty
-        where slug = v_slug and stock is not null;
-      end if;
+      perform public.fn_stock_mover(
+        v_slug, v_variant_id, v_qty, 'devolucion',
+        'Reset de datos de prueba', ord.id
+      );
     end loop;
   end loop;
 end $$;

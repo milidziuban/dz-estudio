@@ -30,6 +30,7 @@ supabase/migrations/20260909130000_margen_fuera_de_la_tienda.sql
 supabase/migrations/20260909221453_cupones_fuera_de_la_tienda.sql
 supabase/migrations/20260910203819_embudo_en_la_base.sql
 supabase/migrations/20260911142100_aviso_de_pedido_nuevo.sql
+supabase/migrations/20260911220000_registro_de_produccion.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -51,6 +52,12 @@ Las de septiembre son arreglos sobre lo anterior —envío a coordinar, stock de
 los combos, el costo y el margen fuera de la tienda, los cupones fuera de la
 tienda, el embudo medido en la base, el aviso de pedido nuevo— y cada una
 explica arriba de todo qué cambia y por qué.
+
+`registro_de_produccion` es la última y cambia cómo se carga el stock: crea
+`stock_movimientos` y la función `registrar_movimiento_stock`, que es la
+única puerta para mover unidades (ver "Stock" más abajo). Deja el stock que
+había ese día como primer movimiento ("saldo inicial"), así el historial cierra
+desde el principio.
 
 Todas se pueden correr dos veces sin romper nada, **menos la primera**:
 `catalogo_2026_07` vacía `products` y la vuelve a cargar. Sirve para levantar
@@ -135,6 +142,7 @@ Qué queda público a propósito:
 | `page_views` | insert | lectura |
 | `newsletter_subscribers` | insert | todo |
 | `content_posts` | nada | todo |
+| `stock_movimientos` | nada | lectura (se escribe solo por función) |
 | Storage `productos` | lectura | subir / borrar |
 
 Los `insert` públicos son necesarios (el visitante no está logueado) y por eso
@@ -145,7 +153,9 @@ inflarlos.
 
 Estos cambios se ven en el sitio sin deploy:
 
-- **Productos**: precio, stock, fichas, fotos, variantes, prender y apagar.
+- **Productos**: precio, fichas, fotos, variantes, prender y apagar, y si
+  una línea controla stock o no. El número de unidades no: eso se mueve en
+  Distribución.
 - **Métodos de envío**: nombre, aclaración, costo, cuáles se ofrecen y desde qué
   monto el envío es gratis. El checkout los lee de `store_settings`. Correo
   Argentino cotiza en vivo por código postal (edge function `shipping-quote`,
@@ -164,7 +174,9 @@ Estos cambios se ven en el sitio sin deploy:
   la agenda de Instagram y Facebook —día, hora, foto, guion, texto y hashtags—
   con el registro de lo que ya salió.
 - **Centro de distribución**: dirección y horario del punto de retiro, umbral de
-  poco stock.
+  poco stock, y el stock en sí: "+ Producción" (cuántas se cosieron) y
+  "Ajustar a…" (inventario) por cada línea, con el historial en un drawer y
+  las unidades producidas en el mes arriba de la tabla.
 
 Lo que todavía **no** está conectado, y hay que tenerlo presente:
 
@@ -172,13 +184,25 @@ Lo que todavía **no** está conectado, y hay que tenerlo presente:
   no tiene el campo para canjearlos. Por ahora sirven para tenerlos definidos.
 - **Instagram / WhatsApp / email del footer**: se guardan en el panel, pero el
   footer y la página de contacto los siguen tomando de `src/lib/site.ts`.
-- **Stock**: se ve y se edita a mano, y ahora también baja solo — pero recién al
-  **despachar**, no al cobrar. Un trigger en Postgres
-  (`supabase/migrations/20260819150000_stock_al_despachar.sql`) resta las
-  unidades del pedido cuando `shipping_status` pasa a `despachado` por primera
-  vez (columna `stock_descontado` evita descontar dos veces). Antes de eso, un
-  pedido pagado y sin despachar solo cuenta como "comprometido" en
-  Distribución — el número de `stock` no se mueve hasta que sale del depósito.
+- **Stock**: ya no se pisa a mano. Todo lo que mueve unidades pasa por la
+  función `registrar_movimiento_stock` (o por `fn_stock_mover`, la interna
+  que usa el despacho) y deja una fila en `stock_movimientos` con fecha,
+  delta con signo, saldo, motivo (`produccion`, `ajuste`, `venta`,
+  `devolucion`), nota y quién. La suma de los deltas de una línea es su stock.
+  Sube desde Distribución ("+ Producción" o "Ajustar a…"), y baja solo al
+  **despachar**, no al cobrar: el trigger
+  (`supabase/migrations/20260911220000_registro_de_produccion.sql`, antes
+  `20260819150000_stock_al_despachar.sql`) resta las unidades del pedido
+  cuando `shipping_status` pasa a `despachado` por primera vez y anota la
+  `venta` con el id del pedido (`stock_descontado` evita descontar dos
+  veces). Un pedido pagado y sin despachar solo cuenta como "comprometido" en
+  Distribución. La regla es la misma en las dos direcciones: no baja de 0, la
+  ficha se apaga en 0 y se prende cuando vuelve a haber. La ficha del producto
+  y el listado muestran el número pero no lo editan: solo prenden o apagan el
+  control de stock (`null` = sin control) y linkean a Distribución; al
+  guardar la ficha se conserva el número que tenga la base, por si un despacho
+  lo movió con la ficha abierta. Los tiempos de producción (cuánto tarda cada
+  pieza) no están en la base: viven en el vault.
 - **Visitas**: se cuentan desde que se corre la migración. GA4 sigue midiendo
   aparte y con más detalle.
 - **Conversión por producto** (Estadísticas → "Qué se mira y qué se vende"):
@@ -225,11 +249,13 @@ src/pages/admin/          Inicio, Estadisticas, Productos, Ventas, Clientes,
                           MetodosEnvio, Distribucion, Login
 src/components/admin/     Layout, sidebar, tablas, drawers, gráfico, guard
 src/hooks/                useAdminAuth, useAdminOrders, useAdminProducts,
-                          useDiscounts, useSubscribers, useStoreSettings,
-                          useVisits, useContentPosts, useProductFunnel
+                          useStockMovimientos, useDiscounts, useSubscribers,
+                          useStoreSettings, useVisits, useContentPosts,
+                          useProductFunnel
 src/lib/admin.ts          Formato, rangos de fecha, export CSV
-src/lib/admin-stats.ts    KPIs, series del gráfico, clientes, tráfico y el
-                          cruce de vistas contra ventas por producto
+src/lib/admin-stats.ts    KPIs, series del gráfico, clientes, tráfico, el
+                          cruce de vistas contra ventas por producto y las
+                          líneas de stock con la producción del mes
 src/lib/contenido.ts      Etiquetas, grilla del mes y fechas del calendario
 src/lib/visits.ts         Registro de visitas propio
 ```

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -6,7 +7,6 @@ import PageHeading from "../../components/admin/PageHeading";
 import PriceCell from "../../components/admin/PriceCell";
 import ProductForm from "../../components/admin/ProductForm";
 import QueryError from "../../components/admin/QueryError";
-import StockCell from "../../components/admin/StockCell";
 import { ToggleSwitch } from "../../components/admin/Toggle";
 import Button from "../../components/Button";
 import {
@@ -50,13 +50,10 @@ function stockSortValue(product: AdminProduct): number | null {
   return product.stock;
 }
 
-/** Celda de stock editable en el listado: el caso más frecuente es corregir
- *  un número, no abrir la ficha completa. Con variantes no se edita acá —
- *  cada una tiene su propio número y eso se hace en la ficha o en
- *  Distribución — así que solo se muestra un resumen. */
+/** Stock del listado, de solo lectura: el número se mueve desde
+ *  Distribución —producción o ajuste, y queda anotado—, no se pisa acá. La
+ *  celda linkea para allá. Con variantes se muestra el total. */
 function ProductStockCell({ product }: { product: AdminProduct }) {
-  const quickUpdate = useQuickUpdateProduct();
-
   if (product.variants?.length) {
     const controlado = product.variants.every(
       (variant) => variant.stock !== null,
@@ -80,14 +77,14 @@ function ProductStockCell({ product }: { product: AdminProduct }) {
   }
 
   return (
-    <StockCell
-      value={product.stock}
-      ariaLabel={`Stock de ${product.name}`}
-      pending={quickUpdate.isPending}
-      onCommit={(stock) =>
-        quickUpdate.mutate({ id: product.id, patch: { stock } })
-      }
-    />
+    <Link
+      to="/admin/distribucion"
+      title="Se mueve desde Centro de distribución"
+      aria-label={`Stock de ${product.name}: ${product.stock}. Se mueve desde Centro de distribución`}
+      className="font-mono text-xs tabular-nums underline decoration-ink/25 decoration-dotted underline-offset-4 transition-colors hover:decoration-ink"
+    >
+      {product.stock}
+    </Link>
   );
 }
 

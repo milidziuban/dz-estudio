@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { COLOR_HEX, COLOR_LABEL, COLOR_TOKENS } from "../../lib/colors";
 import { cn } from "../../lib/cn";
 import { errorMessage, slugify } from "../../lib/admin";
@@ -8,12 +9,41 @@ import type { ColorToken } from "../../types/product";
 import SelectField from "../SelectField";
 import TextField from "../TextField";
 import TextareaField from "../TextareaField";
-import Toggle from "./Toggle";
+import Toggle, { ToggleSwitch } from "./Toggle";
 
 type ProductFormProps = {
   draft: ProductDraft;
   onChange: (draft: ProductDraft) => void;
 };
+
+/** El número de unidades no se edita en la ficha: se mueve desde
+ *  Distribución (producción o ajuste) y queda anotado con fecha y motivo. La
+ *  ficha solo decide si la línea controla stock. */
+function StockActual({ stock, nuevo }: { stock: number; nuevo: boolean }) {
+  return (
+    <div className="rounded-xl bg-cream p-4">
+      <p className="font-mono text-xs font-medium uppercase tracking-widest">
+        Unidades en stock
+      </p>
+      <p className="mt-2 font-mono text-2xl font-medium tabular-nums tracking-tight">
+        {stock}
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-ink/65">
+        {nuevo
+          ? "Guardá el producto y cargá la primera tanda desde Centro de distribución."
+          : "Se mueve desde Centro de distribución, con fecha y motivo. "}
+        {!nuevo && (
+          <Link
+            to="/admin/distribucion"
+            className="font-mono text-[10px] uppercase tracking-widest text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink"
+          >
+            Ir a Distribución →
+          </Link>
+        )}
+      </p>
+    </div>
+  );
+}
 
 /** Título de bloque dentro del formulario. */
 function Bloque({
@@ -153,16 +183,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
               />
 
               {draft.stock !== null && (
-                <TextField
-                  id="p-stock"
-                  label="Unidades disponibles"
-                  type="number"
-                  min={0}
-                  value={draft.stock}
-                  onChange={(event) =>
-                    set("stock", Number(event.target.value) || 0)
-                  }
-                />
+                <StockActual stock={draft.stock} nuevo={draft.id === null} />
               )}
             </>
           )}
@@ -465,25 +486,23 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   </option>
                 ))}
               </select>
-              <input
-                aria-label={`Stock de la variante ${index + 1}`}
-                type="number"
-                min={0}
-                value={variant.stock ?? ""}
-                onChange={(event) => {
-                  const variants = [...draft.variants];
-                  variants[index] = {
-                    ...variant,
-                    stock:
-                      event.target.value === ""
-                        ? null
-                        : Math.max(0, Number(event.target.value) || 0),
-                  };
-                  set("variants", variants);
-                }}
-                placeholder="Sin control"
-                className="w-28 rounded-lg border border-ink/20 bg-transparent px-3 py-2 text-right font-mono text-xs placeholder:text-ink/65 focus:border-ink focus:outline-none"
-              />
+              {/* Solo prende o apaga el control: el número se mueve en Distribución */}
+              <span className="flex w-28 items-center justify-end gap-2">
+                <ToggleSwitch
+                  compact
+                  label={`Controlar stock de la variante ${index + 1}`}
+                  title="Controlar stock"
+                  checked={variant.stock !== null}
+                  onChange={(checked) => {
+                    const variants = [...draft.variants];
+                    variants[index] = { ...variant, stock: checked ? 0 : null };
+                    set("variants", variants);
+                  }}
+                />
+                <span className="w-8 text-right font-mono text-xs tabular-nums text-ink/65">
+                  {variant.stock ?? "—"}
+                </span>
+              </span>
               <button
                 type="button"
                 onClick={() =>
@@ -501,7 +520,8 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
         </ul>
         {draft.variants.length > 0 && (
           <p className="mt-2 text-[11px] leading-relaxed text-ink/65">
-            Stock vacío = sin control, se vende sin límite de unidades.
+            Con el control apagado la variante se vende sin límite de unidades.
+            Las unidades se cargan desde Centro de distribución.
           </p>
         )}
 

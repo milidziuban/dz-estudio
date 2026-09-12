@@ -159,15 +159,47 @@ function rowFromDraft(draft: ProductDraft) {
   };
 }
 
+type StockActual = {
+  stock: number | null;
+  variants: AdminProductVariantRow[] | null;
+};
+
+/** La ficha no mueve unidades: eso se hace desde Distribución y queda
+ *  anotado en `stock_movimientos`. Lo único que la ficha decide es si una
+ *  línea controla stock o no (null ↔ número). Así que al guardar, donde la
+ *  base ya tiene un número se conserva el de la base —que pudo cambiar por un
+ *  despacho o una producción mientras la ficha estaba abierta— y el número
+ *  del borrador solo vale para la línea que recién prende el control. */
+function conservarStock(draft: ProductDraft, actual: StockActual): ProductDraft {
+  const stock =
+    draft.stock === null ? null : (actual.stock ?? draft.stock);
+  const variants = draft.variants.map((variant) => {
+    if (variant.stock === null) return variant;
+    const enBase = actual.variants?.find((v) => v.id === variant.id);
+    return enBase?.stock == null ? variant : { ...variant, stock: enBase.stock };
+  });
+  return { ...draft, stock, variants };
+}
+
 /** Alta y edición: un upsert por id cubre los dos casos. */
 export function useSaveProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (draft: ProductDraft) => {
+      let row = draft;
+      if (draft.id !== null) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("stock, variants")
+          .eq("id", draft.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) row = conservarStock(draft, data as StockActual);
+      }
       const { error } = await supabase
         .from("products")
-        .upsert(rowFromDraft(draft), { onConflict: "id" });
+        .upsert(rowFromDraft(row), { onConflict: "id" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -193,7 +225,8 @@ export function useDeleteProduct() {
   });
 }
 
-/** Cambios rápidos desde el listado o el centro de distribución. */
+/** Cambios rápidos desde el listado o precios. El stock no está: se mueve
+ *  desde Distribución, por `useRegistrarMovimiento`, para que quede anotado. */
 export function useQuickUpdateProduct() {
   const queryClient = useQueryClient();
 
@@ -205,7 +238,6 @@ export function useQuickUpdateProduct() {
       id: number;
       patch: {
         price?: number;
-        stock?: number | null;
         inStock?: boolean;
         cost?: number | null;
         isBundle?: boolean;
@@ -214,51 +246,12 @@ export function useQuickUpdateProduct() {
     }) => {
       const row: Record<string, unknown> = {};
       if (patch.price !== undefined) row.price = patch.price;
-      if (patch.stock !== undefined) row.stock = patch.stock;
       if (patch.inStock !== undefined) row.in_stock = patch.inStock;
       if (patch.cost !== undefined) row.cost = patch.cost;
       if (patch.isBundle !== undefined) row.is_bundle = patch.isBundle;
       if (patch.category !== undefined) row.category = patch.category;
 
       const { error } = await supabase.from("products").update(row).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
-      void queryClient.invalidateQueries({ queryKey: ["products"] });
-    },
-  });
-}
-
-/** Ajusta el stock de una sola variante, desde el listado o distribución.
- *  Como `variants` es una columna jsonb, hay que reescribir el array
- *  entero: se parte del que ya está en cache, no hace falta pedirlo. */
-export function useQuickUpdateVariantStock() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      productId,
-      variantId,
-      stock,
-    }: {
-      productId: number;
-      variantId: string;
-      stock: number;
-    }) => {
-      const products =
-        queryClient.getQueryData<AdminProduct[]>(["admin", "products"]) ?? [];
-      const product = products.find((p) => p.id === productId);
-      if (!product?.variants) {
-        throw new Error("Ese producto no tiene variantes cargadas.");
-      }
-      const variants = product.variants.map((variant) =>
-        variant.id === variantId ? { ...variant, stock } : variant,
-      );
-      const { error } = await supabase
-        .from("products")
-        .update({ variants })
-        .eq("id", productId);
       if (error) throw error;
     },
     onSuccess: () => {

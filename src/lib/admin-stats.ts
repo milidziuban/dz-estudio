@@ -14,6 +14,7 @@ import type {
   Customer,
   Order,
   PageView,
+  StockMovimiento,
   StoreEvent,
 } from "../types/admin";
 
@@ -562,6 +563,26 @@ export function stockLines(products: AdminProduct[]): StockLine[] {
     }
   }
   return lines;
+}
+
+/** Unidades producidas en el mes calendario de `now`, por línea de stock
+ *  (misma clave que `stockLines`). Solo cuenta `produccion`: un ajuste de
+ *  inventario para arriba no es algo que se cosió. */
+export function produccionDelMes(
+  movimientos: StockMovimiento[],
+  now: Date = new Date(),
+): Map<string, number> {
+  const map = new Map<string, number>();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  for (const mov of movimientos) {
+    if (mov.motivo !== "produccion") continue;
+    const fecha = new Date(mov.createdAt);
+    if (fecha.getFullYear() !== year || fecha.getMonth() !== month) continue;
+    const key = stockLineKey(mov.slug, mov.variantId);
+    map.set(key, (map.get(key) ?? 0) + mov.delta);
+  }
+  return map;
 }
 
 // ── Tráfico ───────────────────────────────────────────────────

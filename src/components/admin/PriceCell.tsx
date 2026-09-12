@@ -9,7 +9,7 @@ type PriceCellProps = {
 };
 
 /** Precio editable en línea: se escribe el número directamente, se confirma
- *  al salir del campo o con Enter. Mismo patrón que StockCell. */
+ *  al salir del campo o con Enter. */
 export default function PriceCell({
   value,
   onCommit,
