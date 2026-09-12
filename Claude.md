@@ -164,7 +164,9 @@ secar al sol.
 pagando por transferencia, y 10% llevando 2 almohadones o 2 packs de
 individuales —se cuentan por categoría y por separado, uno de cada uno no
 alcanza—. Hasta 6 cuotas con tarjeta por Cuotas Simples, **con** interés: hoy
-no hay cuotas sin interés y ningún texto puede prometerlas.
+no hay cuotas sin interés y ningún texto puede prometerlas. Los cupones con
+código (`/admin/descuentos`) se canjean en el resumen del checkout y no se
+suman a las promos: se aplica el descuento mayor.
 
 ## Info de contacto
 

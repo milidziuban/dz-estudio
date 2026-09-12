@@ -31,6 +31,7 @@ supabase/migrations/20260909221453_cupones_fuera_de_la_tienda.sql
 supabase/migrations/20260910203819_embudo_en_la_base.sql
 supabase/migrations/20260911142100_aviso_de_pedido_nuevo.sql
 supabase/migrations/20260911220000_registro_de_produccion.sql
+supabase/migrations/20260911190000_cupon_en_el_checkout.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -50,8 +51,9 @@ avisa que falta la migración.
 
 Las de septiembre son arreglos sobre lo anterior —envío a coordinar, stock de
 los combos, el costo y el margen fuera de la tienda, los cupones fuera de la
-tienda, el embudo medido en la base, el aviso de pedido nuevo— y cada una
-explica arriba de todo qué cambia y por qué.
+tienda, el embudo medido en la base, el aviso de pedido nuevo, el cupón
+canjeado en el checkout— y cada una explica arriba de todo qué cambia y por
+qué.
 
 `registro_de_produccion` es la última y cambia cómo se carga el stock: crea
 `stock_movimientos` y la función `registrar_movimiento_stock`, que es la
@@ -138,7 +140,7 @@ Qué queda público a propósito:
 | `products` | lectura | lectura + escritura |
 | `orders` | insert (el checkout) | lectura + edición |
 | `store_settings` | lectura (costos de envío, datos bancarios) | escritura |
-| `discounts` | lectura solo de los vigentes | todo |
+| `discounts` | nada directo: la tienda pregunta por un código a `cupon_vigente` | todo |
 | `page_views` | insert | lectura |
 | `newsletter_subscribers` | insert | todo |
 | `content_posts` | nada | todo |
@@ -169,6 +171,16 @@ Estos cambios se ven en el sitio sin deploy:
   no: es texto guardado y se edita en Marketing.
 - **Descuentos → promociones automáticas**: los porcentajes y el mínimo de las
   dos promos que se aplican solas en el carrito.
+- **Descuentos → cupones**: se canjean en el checkout ("¿Tenés un cupón?" en
+  el resumen). La tienda valida el código con `cupon_vigente` y el trigger
+  `recalculate_order_totals` lo vuelve a validar y calcula el descuento al
+  guardar la orden (`orders.coupon_code` / `coupon_kind`). No se suma a las
+  promos automáticas: se aplica el descuento mayor. El uso se cuenta cuando
+  la orden pasa a pagada (`fn_orders_contar_cupon`), así un pedido de
+  Mercado Pago abandonado no lo gasta. Un cupón de envío gratis no descuenta
+  plata —el envío no se cobra en la tienda— pero deja la orden marcada:
+  Ventas, la ficha y el remito dicen "envío sin cargo" en vez de "falta
+  cobrar envío".
 - **Marketing → marquesina**: las frases de la franja negra.
 - **Contenido y redes**: el calendario de publicaciones. No toca la tienda: es
   la agenda de Instagram y Facebook —día, hora, foto, guion, texto y hashtags—
@@ -180,8 +192,6 @@ Estos cambios se ven en el sitio sin deploy:
 
 Lo que todavía **no** está conectado, y hay que tenerlo presente:
 
-- **Cupones con código**: se crean y administran en el panel, pero el checkout
-  no tiene el campo para canjearlos. Por ahora sirven para tenerlos definidos.
 - **Instagram / WhatsApp / email del footer**: se guardan en el panel, pero el
   footer y la página de contacto los siguen tomando de `src/lib/site.ts`.
 - **Stock**: ya no se pisa a mano. Todo lo que mueve unidades pasa por la

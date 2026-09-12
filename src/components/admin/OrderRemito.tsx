@@ -9,10 +9,11 @@ import {
   PAYMENT_LABEL,
   SHIPPING_METHOD_LABEL,
   SHIPPING_STATUS_LABEL,
+  cuponLabel,
+  envioPorCobrar,
   formatDateTime,
   orderRevenue,
 } from "../../lib/admin";
-import { envioACoordinarPorId } from "../../lib/checkout";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import { SITE } from "../../lib/site";
@@ -67,7 +68,10 @@ export default function OrderRemito({ order, onClose }: OrderRemitoProps) {
   const retira = order.shippingMethod === "retiro";
   // El envío a coordinar no se cobró en la tienda. En la hoja con la que se
   // despacha, "Sin cargo" sería exactamente el error que hace despachar gratis.
-  const envioSinCobrar = envioACoordinarPorId(order.shippingMethod);
+  // Salvo que la clienta haya usado un cupón de envío gratis: ahí sí va sin
+  // cargo, y la hoja lo dice con el código para que no se cobre por error.
+  const envioSinCobrar = envioPorCobrar(order);
+  const envioGratisPorCupon = order.couponKind === "free-shipping";
   const direccion = order.shippingAddress;
   const hayDireccion = Boolean(direccion?.direccion);
 
@@ -236,6 +240,12 @@ export default function OrderRemito({ order, onClose }: OrderRemitoProps) {
                 <dd>−{formatPrice(order.discount)}</dd>
               </div>
             )}
+            {envioGratisPorCupon && (
+              <div className="flex justify-between gap-3">
+                <dt className="text-ink/65">{cuponLabel(order)}</dt>
+                <dd>✦</dd>
+              </div>
+            )}
             {/* El envío va aparte de punta a punta: es plata que pasa de largo
                 hacia la transportista y nunca cuenta como facturación. La
                 línea de lo facturado solo aparece cuando hay envío que
@@ -253,7 +263,9 @@ export default function OrderRemito({ order, onClose }: OrderRemitoProps) {
                   ? "A cobrar"
                   : order.shippingCost
                     ? formatPrice(order.shippingCost)
-                    : "Sin cargo"}
+                    : envioGratisPorCupon
+                      ? "Sin cargo · cupón"
+                      : "Sin cargo"}
               </dd>
             </div>
             <div className="flex justify-between border-t border-ink/20 pt-1.5 text-sm font-medium">
@@ -264,6 +276,12 @@ export default function OrderRemito({ order, onClose }: OrderRemitoProps) {
           {envioSinCobrar && (
             <p className="mt-2 border border-ink px-2 py-1.5 text-[11px] font-medium">
               ✦ Falta cobrar el envío. Este total es solo de los productos.
+            </p>
+          )}
+          {envioGratisPorCupon && (
+            <p className="mt-2 border border-ink px-2 py-1.5 text-[11px] font-medium">
+              ✦ Envío sin cargo por el cupón {order.couponCode}. No se cobra
+              aparte.
             </p>
           )}
         </section>

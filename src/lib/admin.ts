@@ -4,6 +4,7 @@ import type {
   PaymentMethod,
   ShippingStatus,
 } from "../types/admin";
+import { envioACoordinarPorId } from "./checkout";
 
 // ── Etiquetas ─────────────────────────────────────────────────
 
@@ -50,6 +51,24 @@ export function isPaid(order: Order): boolean {
  *  diferencia es de más del 30%. */
 export function orderRevenue(order: Order): number {
   return order.total - order.shippingCost;
+}
+
+/** El envío de esta orden se cobra aparte, por WhatsApp: fue "a coordinar" y
+ *  no entró en el total. Con un cupón de envío gratis no: la tienda prometió
+ *  que no se cobra, y el panel tiene que decir eso y no "falta cobrar". */
+export function envioPorCobrar(order: Order): boolean {
+  return (
+    envioACoordinarPorId(order.shippingMethod) &&
+    order.couponKind !== "free-shipping"
+  );
+}
+
+/** Lo que dice el panel sobre el cupón de una orden, o null si no hubo. */
+export function cuponLabel(order: Order): string | null {
+  if (!order.couponCode) return null;
+  return order.couponKind === "free-shipping"
+    ? `Cupón ${order.couponCode} · envío gratis`
+    : `Cupón ${order.couponCode}`;
 }
 
 // ── Pendientes: qué está esperando cada orden sin pagar ───────

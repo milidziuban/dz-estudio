@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import type { ShippingId } from "../lib/checkout";
 import type {
+  DiscountKind,
   Order,
   OrderItem,
   OrderStatus,
@@ -31,6 +32,8 @@ type OrderRow = {
   admin_notes: string | null;
   customer_notes: string | null;
   mp_payment_id: string | null;
+  coupon_code: string | null;
+  coupon_kind: DiscountKind | null;
 };
 
 function mapOrder(row: OrderRow): Order {
@@ -56,6 +59,8 @@ function mapOrder(row: OrderRow): Order {
     adminNotes: row.admin_notes,
     customerNotes: row.customer_notes,
     mpPaymentId: row.mp_payment_id,
+    couponCode: row.coupon_code ?? null,
+    couponKind: row.coupon_kind ?? null,
   };
 }
 

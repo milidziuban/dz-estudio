@@ -17,6 +17,8 @@ export type OrderTracking = {
   trackingCode: string | null;
   total: number;
   items: TrackingItem[];
+  /** Usó un cupón de envío gratis: el envío no se cobra aparte. */
+  envioGratis: boolean;
 };
 
 type TrackingRow = {
@@ -28,6 +30,7 @@ type TrackingRow = {
   tracking_code: string | null;
   total: number;
   items: TrackingItem[] | null;
+  envio_gratis: boolean | null;
 };
 
 function mapTracking(row: TrackingRow): OrderTracking {
@@ -40,6 +43,7 @@ function mapTracking(row: TrackingRow): OrderTracking {
     trackingCode: row.tracking_code,
     total: row.total,
     items: row.items ?? [],
+    envioGratis: row.envio_gratis ?? false,
   };
 }
 

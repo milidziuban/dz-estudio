@@ -24,6 +24,12 @@ import {
   type CheckoutData,
 } from "../lib/checkout";
 import { cn } from "../lib/cn";
+import {
+  cuponDiscount,
+  mejorDescuento,
+  validarCupon,
+  type Cupon,
+} from "../lib/cupones";
 import { formatPrice } from "../lib/format";
 import { bestDiscount, DEFAULT_PROMOS } from "../lib/promos";
 import {
@@ -64,6 +70,29 @@ function errorDePedido(error: {
   hint?: string | null;
   details?: string | null;
 }): ErrorDePedido {
+  // El cupón se validó al aplicarlo, pero la base vuelve a mirarlo al guardar:
+  // pudo vencerse o agotarse mientras la clienta cargaba los datos
+  // (migración 20260911190000).
+  if (error.hint === "cupon-invalido") {
+    return {
+      titulo: "El cupón ya no está vigente",
+      ayuda:
+        "Quitalo del resumen y confirmá de nuevo — el resto del pedido sigue igual. Si creés que tendría que andar, escribinos.",
+    };
+  }
+
+  if (error.hint === "cupon-minimo") {
+    try {
+      const { minimo } = JSON.parse(error.details ?? "") as { minimo: number };
+      return {
+        titulo: "El cupón no llega al mínimo",
+        ayuda: `Vale para compras desde ${formatPrice(minimo)}. Quitalo del resumen para seguir, o sumá algo más al carrito.`,
+      };
+    } catch {
+      return ERROR_GENERICO;
+    }
+  }
+
   if (error.hint === "fuera-de-venta") {
     return {
       titulo: "Uno de los productos del carrito ya no está a la venta",
@@ -104,6 +133,15 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [submitError, setSubmitError] = useState<ErrorDePedido | null>(null);
+
+  // Cupón: el campo arranca plegado —la mayoría no tiene uno— y lo que se
+  // aplicó queda acá hasta que la clienta lo saque. El monto se recalcula
+  // con el resto del resumen; la base lo vuelve a validar al guardar.
+  const [cuponAbierto, setCuponAbierto] = useState(false);
+  const [codigoCupon, setCodigoCupon] = useState("");
+  const [cupon, setCupon] = useState<Cupon | null>(null);
+  const [cuponError, setCuponError] = useState<string | null>(null);
+  const [validandoCupon, setValidandoCupon] = useState(false);
 
   const {
     register,
@@ -200,15 +238,20 @@ export default function Checkout() {
   // Envío gratis a partir del monto configurado (null = sin envío gratis)
   const envioGratis =
     envios.freeShippingFrom !== null && subtotal >= envios.freeShippingFrom;
+  // El cupón de envío gratis va sobre la línea de envío, no sobre los
+  // productos: con él, hasta el envío a coordinar es sin cargo.
+  const envioGratisPorCupon = cupon?.kind === "free-shipping";
 
   /** Cuánto sale el envío. `null` = a coordinar: todavía no lo sabemos, no
    *  se muestra ningún número y no entra en el total. */
   const costFor = (option: (typeof shippingOptions)[number]): number | null =>
-    esACoordinar(option)
-      ? null
-      : envioGratis
-        ? 0
-        : (liveCostFor(option) ?? option.cost);
+    envioGratisPorCupon
+      ? 0
+      : esACoordinar(option)
+        ? null
+        : envioGratis
+          ? 0
+          : (liveCostFor(option) ?? option.cost);
 
   /** Lo que va a la derecha de cada opción. Nunca "$0" ni "Gratis" para el
    *  envío a coordinar: eso se lee como envío gratis y no lo es. Las que
@@ -229,14 +272,38 @@ export default function Checkout() {
   const shippingCost = selectedOption ? costFor(selectedOption) : undefined;
   const envioACoordinar = shippingCost === null;
 
-  // Las promos de Tienda Nube no se combinan: se aplica la más conveniente
-  const discount = bestDiscount(
+  // Las promos de Tienda Nube no se combinan: se aplica la más conveniente.
+  // El cupón entra en la misma comparación: tampoco se suma, gana el mayor.
+  const promo = bestDiscount(
     resolved,
     subtotal,
     pagoSel === "transferencia",
     promos,
   );
+  const { discount, cuponPerdio } = mejorDescuento(
+    promo,
+    cupon ? cuponDiscount(cupon, subtotal) : null,
+  );
   const total = subtotal - (discount?.amount ?? 0) + (shippingCost ?? 0);
+
+  const aplicarCupon = async () => {
+    setValidandoCupon(true);
+    setCuponError(null);
+    const resultado = await validarCupon(codigoCupon, subtotal);
+    setValidandoCupon(false);
+    if (resultado.ok) {
+      setCupon(resultado.cupon);
+      setCodigoCupon("");
+    } else {
+      setCuponError(resultado.error);
+    }
+  };
+
+  const quitarCupon = () => {
+    setCupon(null);
+    setCuponError(null);
+    setSubmitError(null);
+  };
 
   // `begin_checkout`, una sola vez por visita. Espera a que el carrito esté
   // resuelto: los productos llegan por query y en el primer render no están.
@@ -310,7 +377,13 @@ export default function Checkout() {
     // solo insert. Si entre un intento y otro cambió algo —el formulario, el
     // carrito, el costo del envío— la huella deja de coincidir y entra un
     // pedido nuevo; el anterior nunca se pagó.
-    const huella = JSON.stringify([data, orderItems, total, shippingCost]);
+    const huella = JSON.stringify([
+      data,
+      orderItems,
+      total,
+      shippingCost,
+      cupon?.code ?? null,
+    ]);
     const guardada = ordenGuardada.current;
     const orderId =
       guardada?.huella === huella ? guardada.id : crypto.randomUUID();
@@ -342,6 +415,9 @@ export default function Checkout() {
         total,
         payment_method: data.pago,
         status: "pending",
+        // Viaja el código, no el descuento: la base lo valida de nuevo y
+        // calcula lo que corresponde (o rechaza el pedido con `hint`).
+        coupon_code: cupon?.code ?? null,
       });
 
       if (error) {
@@ -900,7 +976,107 @@ export default function Checkout() {
                   </li>
                 ))}
               </ul>
-              <dl className="mt-5 space-y-1.5 border-t border-ink/15 pt-4 font-mono text-sm tracking-wider">
+
+              {/* Cupón: plegado hasta que haga falta. El aside está fuera del
+                  <form>, así que Enter acá no confirma el pedido. */}
+              <div className="mt-5 border-t border-ink/15 pt-4">
+                {cupon ? (
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-mono text-xs uppercase tracking-widest">
+                        ✦ Cupón{" "}
+                        <span className="font-medium">{cupon.code}</span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={quitarCupon}
+                        className="font-mono text-[11px] uppercase tracking-widest text-ink/65 underline-offset-4 transition-colors hover:text-ink hover:underline"
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                    {cuponPerdio && discount && (
+                      <p className="mt-2 text-xs leading-relaxed text-ink/65">
+                        La promo &ldquo;{discount.label}&rdquo; te descuenta
+                        más que el cupón, así que se aplica esa. El cupón queda
+                        sin usar.
+                      </p>
+                    )}
+                    {envioGratisPorCupon && (
+                      <p className="mt-2 text-xs leading-relaxed text-ink/65">
+                        El envío va sin cargo, sea retiro o envío. No te
+                        cobramos nada aparte.
+                      </p>
+                    )}
+                  </div>
+                ) : !cuponAbierto ? (
+                  <button
+                    type="button"
+                    onClick={() => setCuponAbierto(true)}
+                    aria-expanded={false}
+                    aria-controls="cupon-campo"
+                    className="font-mono text-xs uppercase tracking-widest underline-offset-4 transition-colors hover:underline"
+                  >
+                    ¿Tenés un cupón? +
+                  </button>
+                ) : (
+                  <div id="cupon-campo">
+                    <label
+                      htmlFor="cupon"
+                      className="mb-1.5 block font-mono text-xs font-medium uppercase tracking-widest"
+                    >
+                      Cupón
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="cupon"
+                        type="text"
+                        value={codigoCupon}
+                        onChange={(event) => {
+                          setCodigoCupon(event.target.value);
+                          setCuponError(null);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            void aplicarCupon();
+                          }
+                        }}
+                        placeholder="Código"
+                        autoCapitalize="characters"
+                        autoComplete="off"
+                        spellCheck={false}
+                        aria-invalid={cuponError ? true : undefined}
+                        aria-describedby={cuponError ? "cupon-error" : undefined}
+                        className={cn(
+                          "min-w-0 flex-1 rounded-lg border bg-transparent px-4 py-3 font-mono text-sm uppercase tracking-wider placeholder:normal-case placeholder:tracking-normal placeholder:text-ink/65",
+                          "transition-colors focus:border-ink focus:outline-none",
+                          cuponError ? "border-orange" : "border-ink/25",
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void aplicarCupon()}
+                        disabled={validandoCupon || !codigoCupon.trim()}
+                        className="shrink-0 rounded-full bg-ink px-5 py-3 font-mono text-xs font-medium uppercase tracking-widest text-cream transition-colors hover:bg-ink/80 disabled:cursor-default disabled:opacity-60"
+                      >
+                        {validandoCupon ? "…" : "Aplicar"}
+                      </button>
+                    </div>
+                    {cuponError && (
+                      <p
+                        id="cupon-error"
+                        role="alert"
+                        className="mt-1.5 text-xs font-semibold text-orange"
+                      >
+                        ✕ {cuponError}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <dl className="mt-4 space-y-1.5 border-t border-ink/15 pt-4 font-mono text-sm tracking-wider">
                 <div className="flex justify-between">
                   <dt className="text-xs uppercase">Subtotal</dt>
                   <dd>{formatPrice(subtotal)}</dd>
@@ -921,7 +1097,9 @@ export default function Checkout() {
                       : shippingCost === null
                         ? "A coordinar"
                         : shippingCost === 0
-                          ? "Gratis"
+                          ? envioGratisPorCupon
+                            ? "Gratis · cupón"
+                            : "Gratis"
                           : formatPrice(shippingCost)}
                   </dd>
                 </div>

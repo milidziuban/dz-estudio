@@ -19,7 +19,9 @@ import {
   RESERVA_HORAS,
   SHIPPING_METHOD_LABEL,
   SHIPPING_STATUS_LABEL,
+  cuponLabel,
   downloadCsv,
+  envioPorCobrar,
   errorMessage,
   formatCompactPrice,
   formatDate,
@@ -32,7 +34,6 @@ import {
   timeUntil,
   type PendingStage,
 } from "../../lib/admin";
-import { envioACoordinarPorId } from "../../lib/checkout";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import { SITE } from "../../lib/site";
@@ -377,6 +378,7 @@ export default function AdminVentas() {
                 Pago: PAYMENT_LABEL[order.paymentMethod],
                 Subtotal: order.subtotal,
                 Descuento: order.discount,
+                Cupon: order.couponCode ?? "",
                 Envio_costo: order.shippingCost,
                 Total: order.total,
                 Facturado_sin_envio: orderRevenue(order),
@@ -758,9 +760,14 @@ export default function AdminVentas() {
                   ? "Retira en el depósito"
                   : order.shippingAddress?.provincia}
               </span>
-              {envioACoordinarPorId(order.shippingMethod) && (
+              {envioPorCobrar(order) && (
                 <span className="mt-1 inline-block rounded-full bg-amarillo px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-ink">
                   Falta cobrar envío
+                </span>
+              )}
+              {order.couponKind === "free-shipping" && (
+                <span className="mt-1 inline-block rounded-full bg-verde px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-cream">
+                  Envío sin cargo · cupón
                 </span>
               )}
             </td>
@@ -770,6 +777,11 @@ export default function AdminVentas() {
               <span className="block text-[10px] text-ink/65">
                 {PAYMENT_LABEL[order.paymentMethod]}
               </span>
+              {order.couponCode && (
+                <span className="block text-[10px] uppercase tracking-widest text-ink/65">
+                  Cupón {order.couponCode}
+                </span>
+              )}
             </td>
 
             <td className="px-4 py-3">
@@ -877,10 +889,16 @@ export default function AdminVentas() {
                   {SHIPPING_METHOD_LABEL[abierta.shippingMethod] ??
                     abierta.shippingMethod}
                 </p>
-                {envioACoordinarPorId(abierta.shippingMethod) && (
+                {envioPorCobrar(abierta) && (
                   <p className="mt-2 rounded-xl bg-amarillo/30 px-3 py-2 text-[11px] leading-relaxed">
                     ✦ El envío de esta orden no se cobró en la tienda. Pasale el
                     costo por WhatsApp y cobralo antes de despachar.
+                  </p>
+                )}
+                {abierta.couponKind === "free-shipping" && (
+                  <p className="mt-2 rounded-xl bg-verde/20 px-3 py-2 text-[11px] leading-relaxed">
+                    ✦ Envío sin cargo: usó el cupón {abierta.couponCode}. No le
+                    cobres el envío.
                   </p>
                 )}
 
@@ -939,12 +957,22 @@ export default function AdminVentas() {
                     <dd>−{formatPrice(abierta.discount)}</dd>
                   </div>
                 )}
+                {/* El cupón de envío gratis no descuenta plata: se nombra
+                    aparte para que se vea que hubo cupón. */}
+                {abierta.couponKind === "free-shipping" && (
+                  <div className="flex justify-between gap-3 text-verde">
+                    <dt>{cuponLabel(abierta)}</dt>
+                    <dd>✦</dd>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <dt className="text-ink/65">Envío</dt>
                   <dd>
                     {abierta.shippingCost
                       ? formatPrice(abierta.shippingCost)
-                      : "Sin cargo"}
+                      : envioPorCobrar(abierta)
+                        ? "A cobrar"
+                        : "Sin cargo"}
                   </dd>
                 </div>
                 <div className="flex justify-between border-t border-ink/10 pt-2 text-sm font-medium">

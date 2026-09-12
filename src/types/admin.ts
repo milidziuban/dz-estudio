@@ -82,6 +82,10 @@ export type Order = {
   adminNotes: string | null;
   customerNotes: string | null;
   mpPaymentId: string | null;
+  /** Cupón que se aplicó de verdad (null si no hubo o si la promo dio más).
+   *  `free-shipping` marca que el envío no se cobra, ni por WhatsApp. */
+  couponCode: string | null;
+  couponKind: DiscountKind | null;
 };
 
 /** Cliente: no hay tabla, se agrupa por email desde las órdenes pagadas. */

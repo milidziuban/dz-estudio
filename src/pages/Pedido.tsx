@@ -211,9 +211,14 @@ function OrderSummary({ order }: { order: OrderTracking }) {
 
       {/* El envío a coordinar no entró en lo que se pagó: si el total figura
           pelado, parece que el envío ya está cubierto. */}
-      {envioACoordinarPorId(order.shippingMethod) && (
+      {envioACoordinarPorId(order.shippingMethod) && !order.envioGratis && (
         <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-ink/65">
           El total es de los productos · el envío se cobra aparte
+        </p>
+      )}
+      {order.envioGratis && (
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+          Envío sin cargo · cupón aplicado
         </p>
       )}
 

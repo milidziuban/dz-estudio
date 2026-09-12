@@ -186,8 +186,11 @@ Deno.serve(async (req) => {
     };
     const esRetiro = order.shipping_method === "retiro";
     // El modo lo define el código, no store_settings: ahí se cambian textos y
-    // costos, no de qué tipo es cada opción.
-    const envioACoordinar = order.shipping_method === "envio-a-coordinar";
+    // costos, no de qué tipo es cada opción. Con un cupón de envío gratis no
+    // hay nada que coordinar ni cobrar: el mail lo muestra como gratis.
+    const envioACoordinar =
+      order.shipping_method === "envio-a-coordinar" &&
+      order.coupon_kind !== "free-shipping";
     const direccion = esRetiro
       ? null
       : [
