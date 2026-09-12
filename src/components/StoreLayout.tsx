@@ -20,8 +20,8 @@ export default function StoreLayout() {
   return (
     <>
       <Marquee items={marquee} />
-      {/* offset por la marquesina fija */}
-      <div className="pt-9">
+      {/* offset por la marquesina fija (solo desktop: en mobile scrollea) */}
+      <div className="md:pt-9">
         <Header />
         <main>
           <Suspense fallback={<PageLoader />}>

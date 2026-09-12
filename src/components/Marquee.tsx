@@ -24,7 +24,10 @@ export default function Marquee({ items }: MarqueeProps) {
   );
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 flex overflow-hidden bg-ink py-2.5">
+    // En mobile va en el flujo (scrollea con la página) y más angosta; en
+    // desktop queda fija arriba de todo. Si cambia la altura, cambiar el
+    // offset en StoreLayout (pt) y en Header (top).
+    <div className="relative z-50 flex overflow-hidden bg-ink py-1.5 md:fixed md:inset-x-0 md:top-0 md:py-2.5">
       {strip(false)}
       {strip(true)}
     </div>
