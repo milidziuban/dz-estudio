@@ -17,7 +17,11 @@ import {
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
 import { COMBO_CATEGORIES } from "../../lib/promos";
-import { computeListPrice, computeTransferPrice } from "../../lib/pricing";
+import {
+  computeListPrice,
+  computeProfit,
+  computeTransferPrice,
+} from "../../lib/pricing";
 import type { AdminProduct } from "../../types/admin";
 
 /** Costo unitario editable en el listado: es el dato que más se ajusta,
@@ -134,6 +138,7 @@ export default function AdminPrecios() {
 
   const promos = marketing.value.promos ?? SETTINGS_DEFAULTS.marketing.promos;
   const marginPercent = precios.value.marginPercent;
+  const envioEnPrecioPercent = precios.value.envioEnPrecioPercent;
   const metaGananciaMensual = precios.value.metaGananciaMensual;
   const comboPercent = promos.combo.percent;
   const transferPercent = promos.transferencia.percent;
@@ -154,13 +159,19 @@ export default function AdminPrecios() {
               marginPercent,
               comboEnElPrecio,
               comboPercent,
+              envioEnPrecioPercent,
             );
       const transferPrice =
         listPrice === null ? null : computeTransferPrice(listPrice, transferPercent);
-      const profit = listPrice === null || cost === null ? null : listPrice - cost;
+      // La parte del precio que paga el envío no es ganancia: se aparta
+      // antes, igual que en la planilla.
+      const profit =
+        listPrice === null || cost === null
+          ? null
+          : computeProfit(listPrice, cost, envioEnPrecioPercent);
       return { product, cost, listPrice, transferPrice, profit, comboAplica };
     });
-  }, [products.data, marginPercent, comboPercent, transferPercent]);
+  }, [products.data, marginPercent, envioEnPrecioPercent, comboPercent, transferPercent]);
 
   return (
     <>
@@ -191,7 +202,7 @@ export default function AdminPrecios() {
             />
           }
         >
-          <div className="grid max-w-xl gap-4 sm:grid-cols-2">
+          <div className="grid max-w-3xl gap-4 sm:grid-cols-3">
             <div>
               <TextField
                 id="precios-margin"
@@ -208,6 +219,30 @@ export default function AdminPrecios() {
               />
               <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
                 100% = el precio de lista duplica el costo.
+              </p>
+            </div>
+
+            <div>
+              <TextField
+                id="precios-envio"
+                label="Envío dentro del precio %"
+                type="number"
+                min={0}
+                max={90}
+                value={envioEnPrecioPercent}
+                onChange={(event) =>
+                  precios.update({
+                    ...precios.value,
+                    envioEnPrecioPercent: Math.min(
+                      90,
+                      Number(event.target.value) || 0,
+                    ),
+                  })
+                }
+              />
+              <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
+                La parte del precio que paga el envío gratis. Con 44%, el
+                precio es costo + margen ÷ 0,56. No se cuenta como ganancia.
               </p>
             </div>
 

@@ -247,6 +247,9 @@ export type MarketingSettings = {
 export type PreciosSettings = {
   /** Margen de ganancia sobre el costo, en % (100 = duplicar el costo). */
   marginPercent: number;
+  /** Parte del precio que paga el envío gratis, en % del precio final
+   *  (44 = precio con margen ÷ 0,56). Es la de la planilla. */
+  envioEnPrecioPercent: number;
   /** Meta de ganancia por mes en ARS. La usa la tarjeta de Inicio para medir
    *  el avance del mes en curso. 0 = no mostrar meta. */
   metaGananciaMensual: number;

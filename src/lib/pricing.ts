@@ -19,10 +19,23 @@ export function computeListPrice(
   marginPercent: number,
   isBundle: boolean,
   comboPercent: number,
+  envioEnPrecioPercent: number,
 ): number {
   const withMargin = cost * (1 + marginPercent / 100);
   const withCombo = isBundle ? withMargin * (1 - comboPercent / 100) : withMargin;
-  return roundUpToHundred(withCombo);
+  // El envío gratis va repartido en el precio: con 44%, de cada peso que se
+  // cobra, 44 centavos son para el envío y el resto es costo + margen.
+  return roundUpToHundred(withCombo / (1 - envioEnPrecioPercent / 100));
+}
+
+/** Lo que queda de un precio después de apartar la parte que paga el envío
+ *  y el costo de los materiales. Es la "ganancia por venta" de la planilla. */
+export function computeProfit(
+  listPrice: number,
+  cost: number,
+  envioEnPrecioPercent: number,
+): number {
+  return Math.round(listPrice * (1 - envioEnPrecioPercent / 100)) - cost;
 }
 
 /** Precio con el descuento por transferencia ya aplicado, sin redondear más:

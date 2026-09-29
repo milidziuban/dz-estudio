@@ -148,11 +148,12 @@ envío.
 Seis productos, dos categorías. **La fuente de verdad es la tabla `products`
 de Supabase**, que es la que edita el panel; `src/data/products.ts` es un
 espejo que todavía usa la home (ver T1 en el backlog). Los precios de acá son
-los del 28/09/2026 —ya con el envío gratis repartido: precio anterior ÷ 0,56,
-redondeado hacia arriba a $100— y cambian sin avisar: si importan,
-consultarlos.
+los del 28/09/2026 —costo de materiales × 1,8 (margen 80%) ÷ 0,56 (el 44%
+que paga el envío gratis), redondeado hacia arriba a $100— y cambian sin
+avisar: si importan, consultarlos. Margen y porcentaje de envío se editan en
+/admin/precios.
 
-Almohadones — 40 × 40 cm, pana estampada, 350 g, $32.600:
+Almohadones — 40 × 40 cm, pana estampada, 350 g, $29.300:
 
 1. Almohadón Rombo Rosa — `almohadones-rombo-rosa` — rosa/naranja
 2. Almohadón Rombo Celeste — `almohadones-rombo-celeste` — celeste
@@ -160,9 +161,9 @@ Almohadones — 40 × 40 cm, pana estampada, 350 g, $32.600:
 
 Individuales — pack x2, 30 × 42 cm cada uno, gabardina acrílica impermeable, 400 g:
 
-4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $12.900
-5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $12.900
-6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $9.700
+4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $11.600
+5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $11.600
+6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $8.700
 
 Cuidados, iguales en todos: lavar con agua fría, a ciclo suave o a mano, no
 secar al sol.

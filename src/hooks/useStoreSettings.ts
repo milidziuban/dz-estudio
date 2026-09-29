@@ -92,7 +92,8 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
     promos: DEFAULT_PROMOS,
   },
   precios: {
-    marginPercent: 100,
+    marginPercent: 80,
+    envioEnPrecioPercent: 44,
     metaGananciaMensual: 500000,
   },
 };
