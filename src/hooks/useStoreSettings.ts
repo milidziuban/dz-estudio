@@ -3,6 +3,7 @@ import { useState } from "react";
 import { GA_ID } from "../lib/analytics";
 import {
   BANK_INFO,
+  ENVIO_COSTO_REAL,
   ENVIO_GRATIS_DESDE,
   ORIGEN_CP_DEFAULT,
   PAQUETE_DEFAULT_CM,
@@ -59,6 +60,7 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
     // "sin envío gratis" que se guarde desde el panel nunca podría ganar. El
     // 50.000 lo carga la migración `envio_nacional_y_precios`.
     freeShippingFrom: null,
+    costoRealEnvio: ENVIO_COSTO_REAL,
     origenCp: ORIGEN_CP_DEFAULT,
     paquete: PAQUETE_DEFAULT_CM,
   },

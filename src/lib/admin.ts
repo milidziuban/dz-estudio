@@ -64,6 +64,20 @@ export function envioPorCobrar(order: Order): boolean {
   );
 }
 
+/** Lo que pone la tienda de su bolsillo para despachar esta orden: el costo
+ *  real del envío menos lo que se le cobró a la clienta. Con retiro es cero.
+ *  "A coordinar" también, porque se cobraba aparte al costo de la
+ *  transportista —salvo con un cupón de envío gratis, que lo paga entero la
+ *  tienda—. El costo real es uno solo para todo el país: es un promedio, no
+ *  la cotización de cada paquete. */
+export function envioQuePoneLaTienda(order: Order, costoReal: number): number {
+  if (order.shippingMethod === "retiro") return 0;
+  if (envioACoordinarPorId(order.shippingMethod)) {
+    return order.couponKind === "free-shipping" ? costoReal : 0;
+  }
+  return Math.max(0, costoReal - order.shippingCost);
+}
+
 /** Lo que dice el panel sobre el cupón de una orden, o null si no hubo. */
 export function cuponLabel(order: Order): string | null {
   if (!order.couponCode) return null;

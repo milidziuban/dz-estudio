@@ -32,6 +32,7 @@ import {
   topProducts,
   visitsIn,
 } from "../../lib/admin-stats";
+import { ENVIO_COSTO_REAL } from "../../lib/checkout";
 import { formatPrice } from "../../lib/format";
 
 export default function AdminInicio() {
@@ -99,14 +100,23 @@ export default function AdminInicio() {
     inicioDeMes.setDate(1);
     inicioDeMes.setHours(0, 0, 0, 0);
 
+    const costoRealEnvio =
+      settings?.envios.costoRealEnvio ?? ENVIO_COSTO_REAL;
+
     return {
+      costoRealEnvio,
       periodo: profitFor(
         ordersIn(allOrders, period.from, period.to),
         catalogo,
+        costoRealEnvio,
       ),
-      mes: profitFor(ordersIn(allOrders, inicioDeMes, new Date()), catalogo),
+      mes: profitFor(
+        ordersIn(allOrders, inicioDeMes, new Date()),
+        catalogo,
+        costoRealEnvio,
+      ),
     };
-  }, [range, allOrders, allVisits, products.data]);
+  }, [range, allOrders, allVisits, products.data, settings]);
 
   const meta = settings?.precios.metaGananciaMensual ?? 0;
   const avanceMeta = meta ? Math.min(100, (ganancia.mes.profit / meta) * 100) : 0;
@@ -251,7 +261,7 @@ export default function AdminInicio() {
             Ganancia del período
           </h2>
           <p className="font-mono text-[11px] text-ink/65">
-            facturación − materiales, sin mano de obra
+            facturación − materiales − envío, sin mano de obra
           </p>
         </div>
 
@@ -273,6 +283,26 @@ export default function AdminInicio() {
               {formatPrice(ganancia.periodo.cost)} de materiales
               {ganancia.periodo.revenue > 0 && (
                 <> · margen {formatPercent(ganancia.periodo.margin, 1)}</>
+              )}
+            </p>
+            {/* Línea aparte: es lo que pone la tienda por despachar, no un
+                costo del producto, y con todo retirado en el depósito es cero. */}
+            <p className="mt-1 text-[11px] text-ink/65">
+              −{" "}
+              {formatPrice(ganancia.periodo.shipping)} de envío puesto por la
+              tienda
+              {ganancia.periodo.shippedOrders > 0 ? (
+                <>
+                  {" "}
+                  · {ganancia.periodo.shippedOrders}{" "}
+                  {ganancia.periodo.shippedOrders === 1
+                    ? "orden enviada"
+                    : "órdenes enviadas"}{" "}
+                  a {formatPrice(ganancia.costoRealEnvio)} de costo real menos
+                  lo cobrado
+                </>
+              ) : (
+                <> · ninguna orden se despachó</>
               )}
             </p>
 

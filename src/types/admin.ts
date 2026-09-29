@@ -207,6 +207,10 @@ export type EnviosSettings = {
   options: ShippingOptionSetting[];
   /** Monto desde el que el envío es gratis. null = sin envío gratis */
   freeShippingFrom: number | null;
+  /** Lo que le cuesta a la tienda despachar un pedido, en ARS. Solo lo usa el
+   *  panel: la ganancia de Inicio resta, por orden enviada, la diferencia
+   *  entre esto y lo que se le cobró de envío a la clienta. */
+  costoRealEnvio: number;
   /** Código postal del depósito que despacha, para cotizar Andreani/Correo. */
   origenCp: string;
   /** Paquete tipo en el que sale un pedido — son objetos blandos, no hace

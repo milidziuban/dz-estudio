@@ -2,6 +2,7 @@ import type { TrendPoint } from "../components/admin/TrendChart";
 import {
   dayKey,
   daysSince,
+  envioQuePoneLaTienda,
   formatDayMonth,
   isPaid,
   orderRevenue,
@@ -336,7 +337,12 @@ export type Profit = {
   revenue: number;
   /** Costo de materiales de las unidades vendidas que tienen costo cargado */
   cost: number;
-  /** revenue − cost */
+  /** Lo que la tienda puso de envío: costo real − envío cobrado, sumado sobre
+   *  las órdenes que salieron por transportista (ver `envioQuePoneLaTienda`) */
+  shipping: number;
+  /** Cuántas órdenes cobradas se despacharon, con o sin envío gratis */
+  shippedOrders: number;
+  /** revenue − cost − shipping */
   profit: number;
   /** Ganancia sobre facturación, en % */
   margin: number;
@@ -348,9 +354,16 @@ export type Profit = {
 
 /**
  * Ganancia del período: facturación menos el costo de materiales de lo que se
- * vendió. La mano de obra no entra — es la misma cuenta que hace
- * `/admin/precios` con "Ganancia" por producto, y la decisión está fechada en
- * el vault.
+ * vendió, menos lo que la tienda puso de envío. La mano de obra no entra — la
+ * decisión está fechada en el vault.
+ *
+ * El envío se resta con el costo real y no con el 44% que el precio aparta
+ * para pagarlo (`precios.envioEnPrecioPercent`): ese porcentaje es una
+ * reserva, y restar las dos cosas sería contar el envío dos veces. Así, en
+ * una orden con retiro la reserva queda como ganancia —nadie la gastó—, y en
+ * una con envío gratis se descuenta el costo real entero. `/admin/precios`
+ * hace la cuenta por producto y por eso aparta la reserva; esta es sobre lo
+ * que pasó de verdad.
  *
  * Dos límites que la tarjeta tiene que decir en pantalla:
  *
@@ -361,19 +374,27 @@ export type Profit = {
  * - Un producto sin costo cargado cuenta como costo cero, así que infla la
  *   ganancia. Por eso se devuelven las unidades y los nombres involucrados.
  */
-export function profitFor(orders: Order[], products: AdminProduct[]): Profit {
+export function profitFor(
+  orders: Order[],
+  products: AdminProduct[],
+  costoRealEnvio: number,
+): Profit {
   const costBySlug = new Map(
     products.map((product) => [product.slug, product.cost]),
   );
 
   let revenue = 0;
   let cost = 0;
+  let shipping = 0;
+  let shippedOrders = 0;
   let unitsWithoutCost = 0;
   // slug → nombre, para no repetir el mismo producto en el aviso
   const sinCosto = new Map<string, string>();
 
   for (const order of orders.filter(isPaid)) {
     revenue += orderRevenue(order);
+    if (order.shippingMethod !== "retiro") shippedOrders += 1;
+    shipping += envioQuePoneLaTienda(order, costoRealEnvio);
     for (const item of order.items) {
       // `undefined` = el producto ya no está en el catálogo; `null` = está
       // pero nunca se le cargó el costo. Las dos cosas se avisan igual.
@@ -390,11 +411,13 @@ export function profitFor(orders: Order[], products: AdminProduct[]): Profit {
   // Los costos se cargan a mano y pueden traer decimales; los precios no.
   // Redondear acá evita que la tarjeta muestre $9.149,999999.
   cost = Math.round(cost);
-  const profit = revenue - cost;
+  const profit = revenue - cost - shipping;
 
   return {
     revenue,
     cost,
+    shipping,
+    shippedOrders,
     profit,
     margin: revenue ? (profit / revenue) * 100 : 0,
     unitsWithoutCost,

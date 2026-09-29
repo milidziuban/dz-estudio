@@ -9,7 +9,8 @@ import type { ShippingOptionSetting } from "../../types/admin";
 
 export default function AdminMetodosEnvio() {
   const envios = useSettingsDraft("envios");
-  const { options, freeShippingFrom, origenCp, paquete } = envios.value;
+  const { options, freeShippingFrom, costoRealEnvio, origenCp, paquete } =
+    envios.value;
 
   const setOption = (index: number, patch: Partial<ShippingOptionSetting>) => {
     const next = [...options];
@@ -208,6 +209,29 @@ export default function AdminMetodosEnvio() {
                     ...paquete,
                     altoCm: Number(event.target.value) || 1,
                   },
+                })
+              }
+            />
+          </div>
+        </SettingsSection>
+
+        <SettingsSection
+          title="Costo real del envío"
+          description="Lo que te sale despachar un pedido, promedio para todo el país. La clienta no lo ve: lo usa la ganancia de Inicio para restar lo que ponés vos en cada orden enviada (esto menos lo que se cobró de envío)."
+          footer={saveBar}
+        >
+          <div className="max-w-xs">
+            <TextField
+              id="e-costo-real"
+              label="Costo por envío (ARS)"
+              type="number"
+              min={0}
+              step={500}
+              value={costoRealEnvio}
+              onChange={(event) =>
+                envios.update({
+                  ...envios.value,
+                  costoRealEnvio: Number(event.target.value) || 0,
                 })
               }
             />

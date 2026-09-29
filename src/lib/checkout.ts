@@ -44,6 +44,11 @@ export type ShippingMode = "fijo" | "vivo" | "a-coordinar";
  *  `envio_nacional_y_precios`; estos son el respaldo. */
 export const ENVIO_NACIONAL_COSTO = 15000;
 export const ENVIO_GRATIS_DESDE = 50000;
+/** Lo que le cuesta de verdad a la tienda despachar un pedido. Es solo del
+ *  panel —la clienta nunca lo ve—: con esto la ganancia de Inicio descuenta
+ *  lo que la tienda pone de envío en cada orden enviada. Se edita en
+ *  /admin/envios. */
+export const ENVIO_COSTO_REAL = 22000;
 
 // Métodos de envío.
 //
