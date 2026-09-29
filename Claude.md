@@ -9,11 +9,15 @@
   servilletas, caminos de mesa ni mantas; los totes se pensaron y todavía no
   existen — no inventarlos.
 - Público: adultos jóvenes (28-45) con gusto formado, dispuestos a pagar por diseño con criterio
-- País: Argentina — precios en ARS. Hoy la tienda entrega de dos maneras:
-  retiro en el depósito de Santa Fe Capital o envío a coordinar, que se cotiza
-  por WhatsApp después de la compra. Andreani y Correo Argentino están
-  cargados en el panel pero **apagados** hasta tener las tarifas reales, así
-  que la tienda no muestra ningún precio de envío.
+- País: Argentina — precios en ARS. Desde el 28/09/2026 la tienda entrega de
+  dos maneras: retiro gratis en el depósito de Santa Fe Capital, o **envío a
+  todo el país a $15.000 fijos, gratis desde $50.000** de subtotal (antes de
+  descuentos). El envío real sale ~$22.000: lo que la clienta no paga lo pone
+  la tienda, y por eso el precio publicado de cada producto ya lleva el envío
+  repartido. "Envío a coordinar" quedó apagado (no borrado: hay pedidos viejos
+  con ese método). Andreani y Correo Argentino siguen cargados en el panel y
+  **apagados**. Los textos de envío de la tienda salen de `store_settings`
+  (`useEnvioNacional` + `lib/envio-texto.ts`): no escribir montos a mano.
 - Referencia estética: Coolhouse (thisiscoolhouse.com.ar) pero apuntando más adulto, más editorial y menos "hecho con IA"
 - Personalidad: elegante, maximalista controlado, con ingenio seco — no cursi, no sobreactuada
 
@@ -117,7 +121,8 @@ Dos que no están en la navegación y no hay que dar por existentes:
   de Mili— y hay que escribirla de cero antes de volver a linkearla.
 - **FAQ** está oculta desde el 08/09/2026: el archivo sigue en `src/pages`,
   pero la ruta está comentada en `App.tsx` y en `lib/routes.ts` hasta que el
-  texto se revise.
+  texto se revise. Ojo: todavía explica el envío "a coordinar", que ya no
+  existe; antes de volver a publicarla hay que pasarla al envío fijo.
 
 ## Panel de administración (`/admin`)
 
@@ -143,9 +148,11 @@ envío.
 Seis productos, dos categorías. **La fuente de verdad es la tabla `products`
 de Supabase**, que es la que edita el panel; `src/data/products.ts` es un
 espejo que todavía usa la home (ver T1 en el backlog). Los precios de acá son
-los del 09/09/2026 y cambian sin avisar: si importan, consultarlos.
+los del 28/09/2026 —ya con el envío gratis repartido: precio anterior ÷ 0,56,
+redondeado hacia arriba a $100— y cambian sin avisar: si importan,
+consultarlos.
 
-Almohadones — 40 × 40 cm, pana estampada, 350 g, $18.300:
+Almohadones — 40 × 40 cm, pana estampada, 350 g, $32.600:
 
 1. Almohadón Rombo Rosa — `almohadones-rombo-rosa` — rosa/naranja
 2. Almohadón Rombo Celeste — `almohadones-rombo-celeste` — celeste
@@ -153,9 +160,9 @@ Almohadones — 40 × 40 cm, pana estampada, 350 g, $18.300:
 
 Individuales — pack x2, 30 × 42 cm cada uno, gabardina acrílica impermeable, 400 g:
 
-4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $7.200
-5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $7.200
-6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $5.400
+4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $12.900
+5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $12.900
+6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $9.700
 
 Cuidados, iguales en todos: lavar con agua fría, a ciclo suave o a mano, no
 secar al sol.
@@ -176,8 +183,8 @@ Todo esto vive en `src/lib/site.ts`, que es de donde lo lee el sitio.
 - Instagram: [@dzestudio_](https://instagram.com/dzestudio_)
 - WhatsApp: 342 529 9662
 - Retiro: Tacuarí 7618, Guadalupe, Santa Fe Capital — lunes a viernes de 9 a 20
-- Envíos: retiro en el depósito o envío a coordinar por WhatsApp. Andreani y
-  Correo Argentino, apagados hasta tener las tarifas
+- Envíos: retiro gratis en el depósito, o envío a todo el país a $15.000
+  fijos, gratis desde $50.000. Andreani y Correo Argentino, apagados
 - Pagos: Mercado Pago (tarjetas + efectivo) y transferencia bancaria
 
 ## Convenciones de código

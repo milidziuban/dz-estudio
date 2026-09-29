@@ -13,8 +13,9 @@ import type { Product } from "../types/product";
  *  servido — ver `index.html`.
  *
  *  Regla de oro: acá solo va lo que la página ya dice de verdad. Nada de
- *  reseñas inventadas, ni costos de envío —la tienda no los cotiza: el envío
- *  se coordina y se cobra aparte—, ni una política de devolución que el sitio
+ *  reseñas inventadas, ni costos de envío —salen de /admin/envios y cambian
+ *  sin tocar el código; escritos acá quedarían viejos—, ni una política de
+ *  devolución que el sitio
  *  no promete. Un dato de más acá es una penalización allá.
  */
 

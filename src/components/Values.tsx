@@ -1,7 +1,10 @@
+import { useEnvioNacional } from "../hooks/useEnvioNacional";
 import { useInstallments } from "../hooks/useInstallments";
+import { envioDetalle } from "../lib/envio-texto";
 
 export default function Values() {
   const cuotas = useInstallments();
+  const envio = useEnvioNacional();
 
   // Adentro del componente y no como constante del módulo: el texto de cuotas
   // sale de la base y puede llegar después del primer render.
@@ -9,7 +12,7 @@ export default function Values() {
     {
       symbol: "✦",
       title: "Envíos a todo el país",
-      text: "El costo lo coordinamos por WhatsApp antes de despachar.",
+      text: envioDetalle(envio),
     },
     {
       symbol: "✧",

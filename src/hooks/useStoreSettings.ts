@@ -3,6 +3,7 @@ import { useState } from "react";
 import { GA_ID } from "../lib/analytics";
 import {
   BANK_INFO,
+  ENVIO_GRATIS_DESDE,
   ORIGEN_CP_DEFAULT,
   PAQUETE_DEFAULT_CM,
   SHIPPING_OPTIONS,
@@ -14,6 +15,7 @@ import {
   comboLabel,
   transferLabel,
 } from "../lib/promos";
+import { formatPrice } from "../lib/format";
 import { SITE } from "../lib/site";
 import { supabase } from "../lib/supabase";
 import type { SettingsKey, StoreSettings } from "../types/admin";
@@ -52,6 +54,10 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       ...("provider" in option ? { provider: option.provider } : {}),
       ...("service" in option ? { service: option.service } : {}),
     })),
+    // null a propósito, aunque el envío gratis real sea desde $50.000:
+    // mergeSettings saltea los null de la base, así que con un número acá el
+    // "sin envío gratis" que se guarde desde el panel nunca podría ganar. El
+    // 50.000 lo carga la migración `envio_nacional_y_precios`.
     freeShippingFrom: null,
     origenCp: ORIGEN_CP_DEFAULT,
     paquete: PAQUETE_DEFAULT_CM,
@@ -80,7 +86,7 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       INSTALLMENTS.label,
       transferLabel(DEFAULT_PROMOS),
       comboLabel(DEFAULT_PROMOS),
-      "Envíos a todo el país",
+      `Envío gratis desde ${formatPrice(ENVIO_GRATIS_DESDE)}`,
       "Retiro gratis en Santa Fe Capital",
     ],
     promos: DEFAULT_PROMOS,

@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useEnvioNacional } from "../hooks/useEnvioNacional";
+import { envioFraseCorta } from "../lib/envio-texto";
 import { SITE } from "../lib/site";
 import PaymentMethods from "./PaymentMethods";
 
@@ -10,6 +12,8 @@ const navItems = [
 ];
 
 export default function Footer() {
+  const envio = useEnvioNacional();
+
   return (
     <footer className="bg-ink text-cream">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-3 md:py-20 lg:px-12">
@@ -79,7 +83,7 @@ export default function Footer() {
             </li>
           </ul>
           <p className="mt-6 text-xs text-cream/60">
-            Envíos a todo el país, el costo se coordina por WhatsApp ·
+            {envioFraseCorta(envio)} ·
             Retiro gratis en {SITE.retiro.direccion}
           </p>
         </div>

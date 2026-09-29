@@ -8,12 +8,14 @@ import Seo from "../components/Seo";
 import Tag from "../components/Tag";
 import { CATEGORY_LABEL } from "../data/products";
 import { useCart } from "../hooks/useCart";
+import { useEnvioNacional } from "../hooks/useEnvioNacional";
 import { useInstallments } from "../hooks/useInstallments";
 import { useProducts } from "../hooks/useProducts";
 import { useStoreSettings } from "../hooks/useStoreSettings";
 import { trackAddToCart, trackViewItem } from "../lib/analytics";
 import { cn } from "../lib/cn";
 import { COLOR_HEX } from "../lib/colors";
+import { envioFrase } from "../lib/envio-texto";
 import { formatPrice } from "../lib/format";
 import { comboBanner, DEFAULT_PROMOS } from "../lib/promos";
 import {
@@ -41,6 +43,7 @@ export default function Producto() {
   const { data: settings } = useStoreSettings();
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
   const cuotas = useInstallments();
+  const envio = useEnvioNacional();
 
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
@@ -333,10 +336,7 @@ export default function Producto() {
             <ul className="mt-6 space-y-2 text-sm">
               <li className="flex gap-2.5">
                 <span aria-hidden="true">✦</span>
-                <span>
-                  Envíos a todo el país. El costo del envío lo coordinamos por
-                  WhatsApp antes de despachar.
-                </span>
+                <span>{envioFrase(envio)}</span>
               </li>
               <li className="flex gap-2.5">
                 <span aria-hidden="true">✧</span>

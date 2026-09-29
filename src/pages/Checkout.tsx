@@ -199,8 +199,8 @@ export default function Checkout() {
     else resetField("envio");
   };
 
-  // Con una sola forma de envío —hoy, "a coordinar", con las transportistas
-  // apagadas— no hay nada que elegir: queda marcada y la clienta no se come
+  // Con una sola forma de envío —hoy, el envío a todo el país, con "a
+  // coordinar" y las transportistas apagadas— no hay nada que elegir: queda marcada y la clienta no se come
   // un "Elegí cómo lo recibís" por una lista de una.
   const unicaFormaDeEnvio =
     opcionesDeEnvio.length === 1 ? opcionesDeEnvio[0].id : null;
@@ -241,6 +241,18 @@ export default function Checkout() {
   // El cupón de envío gratis va sobre la línea de envío, no sobre los
   // productos: con él, hasta el envío a coordinar es sin cargo.
   const envioGratisPorCupon = cupon?.kind === "free-shipping";
+  // Cuánto falta para el envío gratis. Solo tiene sentido si hay alguna
+  // opción que se cobre: con retiro y "a coordinar" no hay nada que ahorrar.
+  const cobraAlgunEnvio = opcionesDeEnvio.some(
+    (option) => !esACoordinar(option) && option.cost > 0,
+  );
+  const faltaParaGratis =
+    cobraAlgunEnvio &&
+    !envioGratisPorCupon &&
+    envios.freeShippingFrom !== null &&
+    !envioGratis
+      ? envios.freeShippingFrom - subtotal
+      : null;
 
   /** Cuánto sale el envío. `null` = a coordinar: todavía no lo sabemos, no
    *  se muestra ningún número y no entra en el total. */
@@ -669,6 +681,12 @@ export default function Checkout() {
                     {envioGratis && (
                       <p className="mb-3 rounded-xl bg-verde/20 px-4 py-3 text-xs leading-relaxed">
                         ✦ Tu compra tiene <strong>envío gratis</strong>.
+                      </p>
+                    )}
+                    {faltaParaGratis !== null && (
+                      <p className="mb-3 rounded-xl bg-white px-4 py-3 text-xs leading-relaxed">
+                        ✦ Sumá {formatPrice(faltaParaGratis)} más y el envío
+                        es <strong>gratis</strong>.
                       </p>
                     )}
                     <div className="space-y-3">

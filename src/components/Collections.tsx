@@ -1,5 +1,7 @@
 import { CATEGORY_INTRO, CATEGORY_LABEL } from "../data/products";
-import type { Category } from "../types/product";
+import { useProducts } from "../hooks/useProducts";
+import { formatPrice } from "../lib/format";
+import type { Category, Product } from "../types/product";
 import CollectionCard from "./CollectionCard";
 
 const TAG_COLOR = {
@@ -9,7 +11,22 @@ const TAG_COLOR = {
 
 const CATEGORIES = Object.keys(CATEGORY_LABEL) as Category[];
 
+/** " · $32.600" si todos cuestan lo mismo, " · desde $9.700" si no. */
+function precioDeCategoria(products: Product[], category: Category): string {
+  const precios = products
+    .filter((p) => p.category === category)
+    .map((p) => p.price);
+  if (!precios.length) return "";
+  const min = Math.min(...precios);
+  const max = Math.max(...precios);
+  return min === max
+    ? ` · ${formatPrice(min)}`
+    : ` · desde ${formatPrice(min)}`;
+}
+
 export default function Collections() {
+  const { data: products = [] } = useProducts();
+
   return (
     <section className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
       <div className="mx-auto max-w-6xl">
@@ -35,7 +52,7 @@ export default function Collections() {
                 imageHeight={intro.imageHeight}
                 colorB={intro.colorB}
                 tagColor={TAG_COLOR[category]}
-                tagLabel={intro.tagLabel}
+                tagLabel={`${intro.tagLabel}${precioDeCategoria(products, category)}`}
                 to={`/tienda?categoria=${category}`}
               />
             );

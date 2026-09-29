@@ -41,6 +41,13 @@ export default function CartDrawer() {
   const cotizaEnLaTienda = envios.options.some(
     (option) => option.enabled && option.mode !== "a-coordinar" && option.cost > 0,
   );
+  // El envío gratis se mide sobre el subtotal antes de descuentos, igual que
+  // en recalculate_order_totals: si no, el carrito diría "gratis" y la base
+  // lo cobraría.
+  const gratisDesde = cotizaEnLaTienda ? envios.freeShippingFrom : null;
+  const envioGratis = gratisDesde !== null && subtotal >= gratisDesde;
+  const faltaParaGratis =
+    gratisDesde !== null && !envioGratis ? gratisDesde - subtotal : null;
 
   // El drawer está montado en todas las páginas de la tienda, así que es el
   // lugar donde el carrito guardado se pone al día con el stock de hoy: sin
@@ -135,6 +142,13 @@ export default function CartDrawer() {
                 </p>
               )}
 
+              {faltaParaGratis !== null && (
+                <p className="mb-4 rounded-xl bg-white px-4 py-3 text-xs leading-relaxed">
+                  ✦ Sumá {formatPrice(faltaParaGratis)} más y el envío es{" "}
+                  <strong>gratis</strong>.
+                </p>
+              )}
+
               <dl className="space-y-1.5 font-mono text-sm tracking-wider">
                 <div className="flex justify-between">
                   <dt className="uppercase text-xs">Subtotal</dt>
@@ -151,7 +165,11 @@ export default function CartDrawer() {
                 <div className="flex justify-between gap-3">
                   <dt className="uppercase text-xs">Envío</dt>
                   <dd className="text-xs">
-                    {cotizaEnLaTienda ? "Se calcula al final" : "A coordinar"}
+                    {envioGratis
+                      ? "Gratis"
+                      : cotizaEnLaTienda
+                        ? "Se calcula al final"
+                        : "A coordinar"}
                   </dd>
                 </div>
                 <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">

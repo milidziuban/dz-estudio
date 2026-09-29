@@ -32,6 +32,7 @@ supabase/migrations/20260910203819_embudo_en_la_base.sql
 supabase/migrations/20260911142100_aviso_de_pedido_nuevo.sql
 supabase/migrations/20260911220000_registro_de_produccion.sql
 supabase/migrations/20260912201842_cupon_en_el_checkout.sql
+supabase/migrations/20260928230000_envio_nacional_y_precios.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -49,7 +50,8 @@ Storage `productos`.
 del lanzamiento tal como está en el vault. Sin ella, esa pantalla entra pero
 avisa que falta la migración.
 
-Las de septiembre son arreglos sobre lo anterior —envío a coordinar, stock de
+Las de septiembre son arreglos sobre lo anterior —envío a coordinar (apagado
+desde el 28/09), stock de
 los combos, el costo y el margen fuera de la tienda, los cupones fuera de la
 tienda, el embudo medido en la base, el aviso de pedido nuevo, el cupón
 canjeado en el checkout— y cada una explica arriba de todo qué cambia y por
@@ -59,9 +61,17 @@ qué.
 `stock_movimientos` y la función `registrar_movimiento_stock`, que es la
 única puerta para mover unidades (ver "Stock" más abajo). Deja el stock que
 había ese día como primer movimiento ("saldo inicial"), así el historial cierra
-desde el principio. `cupon_en_el_checkout` es la última: el trigger de las
+desde el principio. `cupon_en_el_checkout`: el trigger de las
 órdenes aprende a validar y aplicar el cupón, y `get_order_tracking` devuelve
 si el envío va sin cargo.
+
+`envio_nacional_y_precios` (28/09/2026) es la última: suma el método
+`envio-nacional` al CHECK de `orders`, lo carga en `store_settings` a $15.000
+fijos con envío gratis desde $50.000, apaga "a coordinar" (sin borrarlo),
+cambia la frase de envío de la marquesina y sube los seis precios (cada
+`update` solo toca el producto si todavía tiene el precio anterior). **Se corre
+DESPUÉS de desplegar el código**: el front viejo no conoce `envio-nacional` y
+el checkout rechazaría el único método de envío prendido.
 
 Todas se pueden correr dos veces sin romper nada, **menos la primera**:
 `catalogo_2026_07` vacía `products` y la vuelve a cargar. Sirve para levantar

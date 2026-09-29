@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatPrice } from "./format";
 
 export const PROVINCIAS = [
   "Buenos Aires",
@@ -36,7 +37,19 @@ export const PROVINCIAS = [
  *    de pasarle el costo a la clienta. */
 export type ShippingMode = "fijo" | "vivo" | "a-coordinar";
 
+/** Envío a todo el país (28/09/2026): costo fijo, y gratis cuando el
+ *  subtotal —antes de descuentos— llega a este monto. El envío real sale
+ *  ~$22.000: la diferencia la pone la tienda y va repartida en el precio de
+ *  los productos. En la base los carga la migración
+ *  `envio_nacional_y_precios`; estos son el respaldo. */
+export const ENVIO_NACIONAL_COSTO = 15000;
+export const ENVIO_GRATIS_DESDE = 50000;
+
 // Métodos de envío.
+//
+// 28/09/2026 — Entra "envio-nacional" a costo fijo y "a coordinar" se apaga.
+// No se borra: hay pedidos viejos con ese método y el CHECK de la base lo
+// sigue aceptando.
 //
 // 07/09/2026 — Hasta tener las tarifas reales de Andreani y del Correo, la
 // tienda no cotiza envíos: se ofrecen dos opciones, retiro y "a coordinar".
@@ -54,12 +67,20 @@ export const SHIPPING_OPTIONS = [
     enabled: true,
   },
   {
+    id: "envio-nacional",
+    label: "Envío a todo el país",
+    detail: `Costo fijo, sin importar a dónde va · gratis desde ${formatPrice(ENVIO_GRATIS_DESDE)}`,
+    mode: "fijo",
+    cost: ENVIO_NACIONAL_COSTO,
+    enabled: true,
+  },
+  {
     id: "envio-a-coordinar",
     label: "Envío a coordinar",
     detail: "Te escribimos por WhatsApp con el costo antes de despachar",
     mode: "a-coordinar",
     cost: 0,
-    enabled: true,
+    enabled: false,
   },
   {
     id: "andreani-sucursal",
@@ -198,6 +219,7 @@ export const checkoutSchema = z
     envio: z.enum(
       [
         "retiro",
+        "envio-nacional",
         "envio-a-coordinar",
         "andreani-sucursal",
         "andreani-domicilio",

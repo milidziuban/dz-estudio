@@ -1,9 +1,23 @@
+import { useEnvioNacional } from "../hooks/useEnvioNacional";
 import { useInstallments } from "../hooks/useInstallments";
+import { useProducts } from "../hooks/useProducts";
+import { envioTitular } from "../lib/envio-texto";
+import { formatPrice } from "../lib/format";
 import Button from "./Button";
 import Tag from "./Tag";
 
 export default function Hero() {
   const cuotas = useInstallments();
+  const envio = useEnvioNacional();
+  const { data: products } = useProducts();
+
+  // El precio sale de la base: escrito a mano quedó viejo con cada aumento.
+  const preciosAlmohadones = (products ?? [])
+    .filter((p) => p.category === "almohadones")
+    .map((p) => p.price);
+  const almohadonesDesde = preciosAlmohadones.length
+    ? Math.min(...preciosAlmohadones)
+    : null;
 
   return (
     <section className="px-5 pb-12 pt-10 sm:px-8 md:pb-16 md:pt-14 lg:px-12">
@@ -27,12 +41,14 @@ export default function Hero() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button to="/tienda">Ver los productos</Button>
             <Button variant="secondary" to="/tienda?categoria=almohadones">
-              Almohadones desde $18.300
+              {almohadonesDesde === null
+                ? "Ver almohadones"
+                : `Almohadones desde ${formatPrice(almohadonesDesde)}`}
             </Button>
           </div>
 
           <p className="mt-6 font-mono text-[11px] uppercase tracking-widest text-ink/65">
-            Envíos a todo el país ✦ Retiro gratis en Santa Fe Capital
+            {envioTitular(envio)} ✦ Retiro gratis en Santa Fe Capital
           </p>
         </div>
 
