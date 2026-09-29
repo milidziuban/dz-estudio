@@ -32,7 +32,7 @@ supabase/migrations/20260910203819_embudo_en_la_base.sql
 supabase/migrations/20260911142100_aviso_de_pedido_nuevo.sql
 supabase/migrations/20260911220000_registro_de_produccion.sql
 supabase/migrations/20260912201842_cupon_en_el_checkout.sql
-supabase/migrations/20260928230000_envio_nacional_y_precios.sql
+supabase/migrations/20260929022440_envio_nacional_y_precios.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
