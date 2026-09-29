@@ -11,7 +11,7 @@ const TAG_COLOR = {
 
 const CATEGORIES = Object.keys(CATEGORY_LABEL) as Category[];
 
-/** " · $32.600" si todos cuestan lo mismo, " · desde $9.700" si no. */
+/** " · $29.300" si todos cuestan lo mismo, " · desde $8.700" si no. */
 function precioDeCategoria(products: Product[], category: Category): string {
   const precios = products
     .filter((p) => p.category === category)

@@ -4,6 +4,7 @@ import SettingsSection from "../../components/admin/SettingsSection";
 import Toggle from "../../components/admin/Toggle";
 import TextField from "../../components/TextField";
 import { useSettingsDraft } from "../../hooks/useStoreSettings";
+import { ENVIO_GRATIS_DESDE } from "../../lib/checkout";
 import { formatPrice } from "../../lib/format";
 import type { ShippingOptionSetting } from "../../types/admin";
 
@@ -250,7 +251,7 @@ export default function AdminMetodosEnvio() {
               onChange={(checked) =>
                 envios.update({
                   ...envios.value,
-                  freeShippingFrom: checked ? 60000 : null,
+                  freeShippingFrom: checked ? ENVIO_GRATIS_DESDE : null,
                 })
               }
             />
