@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useStoreSettings } from "../hooks/useStoreSettings";
 import { formatPrice } from "../lib/format";
 import { COMBO_CATEGORIES, comboBadge, DEFAULT_PROMOS } from "../lib/promos";
+import { productoAgotado } from "../lib/stock";
 import type { Product } from "../types/product";
 import Card from "./Card";
 import ProductImage from "./ProductImage";
@@ -21,11 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     promos.combo.enabled && COMBO_CATEGORIES.includes(product.category);
 
   const [primary, secondary] = product.images;
-  const soldOut =
-    !product.inStock ||
-    (product.variants?.length
-      ? product.variants.every((v) => v.inStock === false)
-      : false);
+  const soldOut = productoAgotado(product);
 
   return (
     <Link

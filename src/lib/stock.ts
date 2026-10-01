@@ -7,6 +7,17 @@ export function inStockFromCount(
   return stock === null || stock === undefined || stock > 0;
 }
 
+/** El producto entero está agotado: apagado, o con todas sus variantes sin
+ *  stock. Una variante disponible alcanza para que siga a la venta. */
+export function productoAgotado(
+  product: Pick<Product, "inStock" | "variants">,
+): boolean {
+  if (!product.inStock) return true;
+  return product.variants?.length
+    ? product.variants.every((v) => v.inStock === false)
+    : false;
+}
+
 /** Tope por línea que acepta la base (`recalculate_order_totals`): más que
  *  esto se rechaza como cantidad inválida. */
 export const MAX_POR_LINEA = 50;

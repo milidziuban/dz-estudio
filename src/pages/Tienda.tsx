@@ -5,6 +5,7 @@ import Seo from "../components/Seo";
 import { CATEGORY_LABEL } from "../data/products";
 import { useProducts } from "../hooks/useProducts";
 import { cn } from "../lib/cn";
+import { productoAgotado } from "../lib/stock";
 import { productListJsonLd } from "../lib/structured-data";
 import type { Category } from "../types/product";
 
@@ -61,6 +62,11 @@ export default function Tienda() {
         sorted.sort((a, b) => b.price - a.price);
         break;
     }
+    // Lo agotado va al fondo sea cual sea el orden elegido. `sort` es estable:
+    // adentro de cada grupo queda el orden de arriba.
+    sorted.sort(
+      (a, b) => Number(productoAgotado(a)) - Number(productoAgotado(b)),
+    );
     return sorted;
   }, [categoria, sort, products]);
 
