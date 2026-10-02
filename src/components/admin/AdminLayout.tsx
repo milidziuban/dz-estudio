@@ -12,8 +12,10 @@ import OrderToastStack from "./OrderToastStack";
 
 function navClasses({ isActive }: { isActive: boolean }): string {
   return cn(
-    "flex items-center gap-3 rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors",
-    isActive ? "bg-cream/15 text-cream" : "text-cream/60 hover:text-cream",
+    "flex items-center gap-3 rounded-lg px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors focus-visible:outline-cream",
+    isActive
+      ? "bg-cream/[0.12] text-cream"
+      : "text-cream/65 hover:bg-cream/[0.06] hover:text-cream",
   );
 }
 
@@ -27,15 +29,22 @@ export default function AdminLayout() {
   // Al navegar, el menú mobile se cierra solo
   useEffect(() => setMenuOpen(false), [location.pathname]);
 
+  // En el celular el sidebar está escondido: la barra de arriba dice dónde estás
+  const seccionActual = ADMIN_NAV.flatMap((group) => group.items).find((item) =>
+    item.exact
+      ? location.pathname === item.to
+      : location.pathname.startsWith(item.to),
+  );
+
   const sidebar = (
-    <div className="flex h-full flex-col gap-8 overflow-y-auto bg-ink px-4 py-6">
-      <Link to="/admin" className="px-3">
+    <div className="flex h-full flex-col gap-8 overflow-y-auto bg-ink px-3 py-6">
+      <Link to="/admin" className="rounded-lg px-3 focus-visible:outline-cream">
         <img
           src="/logo-extendido-cream.svg"
           alt="DZ Estudio"
           className="h-6 w-auto"
         />
-        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60">
+        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream/60">
           Panel de gestión
         </p>
       </Link>
@@ -43,7 +52,7 @@ export default function AdminLayout() {
       <nav aria-label="Secciones del panel" className="flex-1 space-y-6">
         {ADMIN_NAV.map((group) => (
           <div key={group.title}>
-            <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60">
+            <p className="px-3 pb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-cream/60">
               {group.title}
             </p>
             <ul className="space-y-0.5">
@@ -54,8 +63,18 @@ export default function AdminLayout() {
                     end={item.exact}
                     className={navClasses}
                   >
-                    <AdminIcon name={item.icon} className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    {({ isActive }) => (
+                      <>
+                        <AdminIcon
+                          name={item.icon}
+                          className={cn(
+                            "h-4 w-4 shrink-0 transition-colors",
+                            isActive && "text-pink",
+                          )}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </>
+                    )}
                   </NavLink>
                 </li>
               ))}
@@ -68,11 +87,11 @@ export default function AdminLayout() {
         <p className="font-mono text-[11px] text-cream/70">
           {nombre ?? "Admin"}
         </p>
-        <p className="truncate font-mono text-[10px] text-cream/60">{email}</p>
+        <p className="truncate font-mono text-[11px] text-cream/60">{email}</p>
         <button
           type="button"
           onClick={() => void signOut()}
-          className="mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-cream/60 transition-colors hover:text-pink"
+          className="mt-3 flex items-center gap-2 rounded font-mono text-[11px] uppercase tracking-[0.12em] text-cream/65 transition-colors hover:text-pink focus-visible:outline-cream"
         >
           <AdminIcon name="salir" className="h-4 w-4" />
           Cerrar sesión
@@ -86,7 +105,7 @@ export default function AdminLayout() {
       <Seo title="Panel" noindex />
 
       {/* Sidebar fijo en desktop */}
-      <aside className="fixed inset-y-0 left-0 hidden w-60 lg:block">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 lg:block">
         {sidebar}
       </aside>
 
@@ -107,7 +126,7 @@ export default function AdminLayout() {
         />
         <div
           className={cn(
-            "absolute inset-y-0 left-0 w-64 max-w-[85vw] shadow-2xl transition-transform duration-300",
+            "absolute inset-y-0 left-0 w-72 max-w-[85vw] shadow-2xl transition-transform duration-300",
             menuOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
@@ -115,7 +134,7 @@ export default function AdminLayout() {
         </div>
       </div>
 
-      <div className="lg:pl-60">
+      <div className="lg:pl-64">
         <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur lg:px-10">
           <button
             type="button"
@@ -136,6 +155,12 @@ export default function AdminLayout() {
             </svg>
           </button>
 
+          {seccionActual && (
+            <p className="truncate font-mono text-[11px] uppercase tracking-[0.12em] lg:hidden">
+              {seccionActual.label}
+            </p>
+          )}
+
           <div className="flex flex-1 items-center justify-end gap-4">
             <NotificationBell
               alerts={alerts}
@@ -152,7 +177,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="px-5 py-8 lg:px-10">
+        <main className="mx-auto w-full max-w-[1320px] px-5 pb-16 pt-8 lg:px-10 lg:pt-10">
           <Suspense fallback={<PageLoader />}>
             <Outlet />
           </Suspense>

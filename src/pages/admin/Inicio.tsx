@@ -218,7 +218,7 @@ export default function AdminInicio() {
         <AhoraMismo />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard
           label="Facturación"
           value={formatCompactPrice(actual.facturacion)}
@@ -309,7 +309,7 @@ export default function AdminInicio() {
             {meta > 0 && (
               <div className="mt-6 border-t border-ink/[0.08] pt-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                     Meta del mes
                   </p>
                   <p className="font-mono text-xs">
@@ -402,7 +402,7 @@ export default function AdminInicio() {
             </h2>
             <Link
               to="/admin/productos"
-              className="font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
+              className="font-mono text-[11px] uppercase tracking-widest text-ink/65 hover:text-ink"
             >
               Ver todo →
             </Link>
@@ -455,7 +455,7 @@ export default function AdminInicio() {
             </h2>
             <Link
               to="/admin/ventas"
-              className="font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
+              className="font-mono text-[11px] uppercase tracking-widest text-ink/65 hover:text-ink"
             >
               Ver todas →
             </Link>
@@ -478,7 +478,7 @@ export default function AdminInicio() {
                 >
                   <span className="min-w-0">
                     <span className="block truncate">{order.customerName}</span>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                       {formatDate(order.createdAt)} ·{" "}
                       {order.id.slice(0, 8).toUpperCase()}
                     </span>

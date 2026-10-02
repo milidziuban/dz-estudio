@@ -59,7 +59,7 @@ export default function NotificationBell({
       >
         <AdminIcon name="campana" className="h-[18px] w-[18px] text-ink/70" />
         {unseenCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-pink px-1 font-mono text-[9px] font-bold text-cream">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-pink px-1 font-mono text-[10px] font-bold text-cream">
             {unseenCount > 9 ? "9+" : unseenCount}
           </span>
         )}
@@ -74,7 +74,7 @@ export default function NotificationBell({
             onClick={() => setOpen(false)}
           />
           <div className="absolute right-0 z-50 mt-2 w-80 max-w-[90vw] rounded-2xl bg-white p-2 shadow-2xl">
-            <p className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/65">
+            <p className="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink/65">
               Pedidos recientes
             </p>
             {alerts.length === 0 ? (
@@ -108,10 +108,10 @@ export default function NotificationBell({
                         </span>
                       </div>
                       <div className="mt-0.5 flex items-center justify-between gap-3">
-                        <span className="truncate font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                        <span className="truncate font-mono text-[11px] uppercase tracking-widest text-ink/65">
                           {estadoCorto(order)}
                         </span>
-                        <span className="shrink-0 font-mono text-[10px] text-ink/65">
+                        <span className="shrink-0 font-mono text-[11px] text-ink/65">
                           {timeAgo(order.createdAt)}
                         </span>
                       </div>

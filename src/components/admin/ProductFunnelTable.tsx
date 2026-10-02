@@ -168,12 +168,12 @@ export default function ProductFunnelTable({
                     {row.name}
                   </div>
                   {!row.inCatalog && (
-                    <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+                    <p className="mt-0.5 font-mono text-[11px] uppercase tracking-widest text-ink/50">
                       fuera del catálogo
                     </p>
                   )}
                   {row.signal && (
-                    <span className="mt-1.5 inline-block whitespace-nowrap rounded-full bg-lila px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest">
+                    <span className="mt-1.5 inline-block whitespace-nowrap rounded-full bg-lila px-2 py-0.5 font-mono text-[11px] uppercase tracking-widest">
                       {SIGNAL_LABEL[row.signal]}
                     </span>
                   )}
@@ -213,7 +213,7 @@ export default function ProductFunnelTable({
             ))}
           </AdminTable>
 
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+          <p className="mt-3 font-mono text-[11px] uppercase tracking-widest text-ink/50">
             {funnel.views.toLocaleString("es-AR")} vistas de ficha ·{" "}
             {funnel.units} {funnel.units === 1 ? "unidad" : "unidades"} ·{" "}
             {funnel.orders} {funnel.orders === 1 ? "orden" : "órdenes"} ·

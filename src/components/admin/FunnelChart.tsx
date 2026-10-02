@@ -37,7 +37,7 @@ export default function FunnelChart({ steps }: { steps: FunnelStep[] }) {
               <p className="text-sm">
                 {step.label}
                 {step.nota && (
-                  <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+                  <span className="ml-2 font-mono text-[11px] uppercase tracking-widest text-ink/50">
                     {step.nota}
                   </span>
                 )}
@@ -71,7 +71,7 @@ export default function FunnelChart({ steps }: { steps: FunnelStep[] }) {
             </div>
 
             {caida !== null && (
-              <p className="mt-1.5 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+              <p className="mt-1.5 font-mono text-[11px] uppercase tracking-widest text-ink/50">
                 {caida <= 0
                   ? "sin caída respecto del paso anterior"
                   : `se cae ${formatPercent(caida, 0)} del paso anterior`}

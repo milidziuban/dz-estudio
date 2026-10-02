@@ -61,7 +61,7 @@ export default function AdminMetodosPago() {
             />
 
             <div className="rounded-xl bg-cream p-4 text-xs leading-relaxed text-ink/65">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                 Cuotas
               </p>
               <p className="mt-2">
@@ -125,7 +125,7 @@ export default function AdminMetodosPago() {
                   verdad, armado con los dos números de arriba tal como están
                   en el borrador. */}
               <div className="mt-4 rounded-xl bg-white p-4">
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                   {pagos.dirty
                     ? "Cómo lo va a anunciar la tienda al guardar"
                     : "Cómo se anuncia hoy en la tienda"}
@@ -149,7 +149,7 @@ export default function AdminMetodosPago() {
             </div>
 
             <div className="rounded-xl bg-cream p-4 text-xs leading-relaxed text-ink/65">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                 Credenciales
               </p>
               <p className="mt-2">

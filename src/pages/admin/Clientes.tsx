@@ -146,7 +146,7 @@ export default function AdminClientes() {
         </Button>
       </PageHeading>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-5 [&>*:last-child]:col-span-2 xl:[&>*:last-child]:col-span-1">
         <StatCard
           label="Clientes"
           value={String(resumen.total)}
@@ -189,7 +189,7 @@ export default function AdminClientes() {
         <div
           role="group"
           aria-label="Filtrar clientes"
-          className="flex flex-wrap gap-1 rounded-full bg-white p-1"
+          className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-white p-1 [scrollbar-width:none]"
         >
           {(["todos", "dormidos"] as const).map((id) => (
             <button
@@ -198,7 +198,7 @@ export default function AdminClientes() {
               aria-pressed={filtro === id}
               onClick={() => setFiltro(id)}
               className={cn(
-                "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+                "shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
                 filtro === id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
               )}
             >
@@ -208,7 +208,7 @@ export default function AdminClientes() {
           ))}
         </div>
 
-        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:ml-auto">
+        <p className="font-mono text-[11px] uppercase tracking-widest text-ink/65 sm:ml-auto">
           {visibles.length} {visibles.length === 1 ? "cliente" : "clientes"}
         </p>
       </div>
@@ -243,7 +243,7 @@ export default function AdminClientes() {
               <span className="block max-w-[15rem] truncate text-sm">
                 {customer.nombre}
               </span>
-              <span className="block max-w-[15rem] truncate font-mono text-[10px] text-ink/65">
+              <span className="block max-w-[15rem] truncate font-mono text-[11px] text-ink/65">
                 {customer.email}
               </span>
             </td>
@@ -272,7 +272,7 @@ export default function AdminClientes() {
                   : formatDaysAgo(lapso.dias)}
               </span>
               {customer.lastPaidOrderAt && (
-                <span className="block font-mono text-[10px] text-ink/65">
+                <span className="block font-mono text-[11px] text-ink/65">
                   {formatDate(customer.lastPaidOrderAt)}
                 </span>
               )}
@@ -292,16 +292,16 @@ export default function AdminClientes() {
           <div className="space-y-7">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-white p-4">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                   Compró
                 </p>
                 <p className="mt-1 font-mono text-lg">
                   {formatPrice(abierto.totalSpent)}
                 </p>
-                <p className="mt-1 text-[10px] text-ink/65">sin el envío</p>
+                <p className="mt-1 text-[11px] text-ink/65">sin el envío</p>
               </div>
               <div className="rounded-xl bg-white p-4">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                <p className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                   Compras
                 </p>
                 <p className="mt-1 font-mono text-lg">{abierto.paidCount}</p>
@@ -319,10 +319,10 @@ export default function AdminClientes() {
                 {abierto.ciudad && abierto.provincia ? ", " : ""}
                 {abierto.provincia}
               </p>
-              <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-widest text-ink/65">
                 Cliente desde {formatDate(abierto.firstOrderAt)}
               </p>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+              <p className="mt-1 font-mono text-[11px] uppercase tracking-widest text-ink/65">
                 {abierto.lastPaidOrderAt
                   ? `Última compra ${formatDaysAgo(
                       lapsos.get(abierto.email)?.dias ?? 0,
@@ -331,14 +331,14 @@ export default function AdminClientes() {
               </p>
               <a
                 href={`mailto:${abierto.email}`}
-                className="mt-3 inline-block font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
+                className="mt-3 inline-block font-mono text-[11px] uppercase tracking-widest text-ink/65 hover:text-ink"
               >
                 Mandar mail ↗
               </a>
             </section>
 
             <section>
-              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+              <h3 className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                 Sus órdenes
               </h3>
               <ul className="divide-y divide-ink/[0.08] rounded-xl bg-white px-4">
@@ -354,7 +354,7 @@ export default function AdminClientes() {
                     </div>
                     <div className="mt-1.5 flex items-center gap-2">
                       <StatusBadge kind="pago" value={order.status} />
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                         {formatDate(order.createdAt)} ·{" "}
                         {PAYMENT_LABEL[order.paymentMethod]}
                       </span>

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import AdminTable from "../../components/admin/AdminTable";
+import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
 import SaveBar from "../../components/admin/SaveBar";
@@ -17,6 +19,9 @@ export default function AdminMarketing() {
   const marketing = useSettingsDraft("marketing");
   const subscribers = useSubscribers();
   const deleteSubscriber = useDeleteSubscriber();
+  const [aBorrar, setABorrar] = useState<{ id: string; email: string } | null>(
+    null,
+  );
 
   const lista = subscribers.data ?? [];
   const delMes = lista.filter((subscriber) => {
@@ -125,7 +130,7 @@ export default function AdminMarketing() {
                   onClick={() =>
                     setMarquee(marquee.filter((_, i) => i !== index))
                   }
-                  className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                  className="font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Quitar
                 </button>
@@ -136,7 +141,7 @@ export default function AdminMarketing() {
           <button
             type="button"
             onClick={() => setMarquee([...marquee, ""])}
-            className="mt-4 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+            className="mt-4 font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
           >
             + Agregar frase
           </button>
@@ -229,7 +234,7 @@ export default function AdminMarketing() {
               className="border-b border-ink/[0.06] last:border-0"
             >
               <td className="px-4 py-3 font-mono text-xs">{subscriber.email}</td>
-              <td className="hidden px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:table-cell">
+              <td className="hidden px-4 py-3 font-mono text-[11px] uppercase tracking-widest text-ink/65 sm:table-cell">
                 {subscriber.source}
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-[11px] text-ink/65">
@@ -239,11 +244,9 @@ export default function AdminMarketing() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm(`¿Borrar ${subscriber.email}?`)) {
-                      deleteSubscriber.mutate(subscriber.id);
-                    }
+                    setABorrar({ id: subscriber.id, email: subscriber.email });
                   }}
-                  className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                  className="font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Borrar
                 </button>
@@ -252,6 +255,20 @@ export default function AdminMarketing() {
           ))}
         </AdminTable>
       )}
+
+      <ConfirmDialog
+        open={aBorrar !== null}
+        title="¿Borrar este suscriptor?"
+        description={aBorrar ? `${aBorrar.email} sale de la lista y no se puede deshacer.` : undefined}
+        confirmLabel="Borrar"
+        destructive
+        pending={deleteSubscriber.isPending}
+        onConfirm={() => {
+          if (!aBorrar) return;
+          deleteSubscriber.mutate(aBorrar.id, { onSettled: () => setABorrar(null) });
+        }}
+        onCancel={() => setABorrar(null)}
+      />
     </>
   );
 }

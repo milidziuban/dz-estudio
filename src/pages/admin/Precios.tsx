@@ -121,7 +121,7 @@ function PriceCell({
           type="button"
           onClick={usarSugerido}
           title="Costo + margen (y el combo, si el producto ya viene en pack) sugieren este precio."
-          className="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+          className="whitespace-nowrap font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
         >
           Sugerido {formatPrice(listPrice)} — usar ✦
         </button>
@@ -408,7 +408,7 @@ export default function AdminPrecios() {
                 <span className="block max-w-[14rem] truncate text-sm font-semibold">
                   {product.name}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                   {product.category}
                 </span>
               </td>

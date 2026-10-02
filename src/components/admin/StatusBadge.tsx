@@ -37,7 +37,7 @@ export default function StatusBadge(props: StatusBadgeProps) {
     <span
       className={cn(
         "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1",
-        "font-mono text-[10px] font-medium uppercase tracking-widest",
+        "font-mono text-[11px] font-medium uppercase tracking-widest",
         classes,
         props.className,
       )}

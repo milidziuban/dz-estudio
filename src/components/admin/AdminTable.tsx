@@ -47,7 +47,7 @@ export default function AdminTable({
   return (
     <div className={cn("overflow-hidden rounded-2xl bg-white", className)}>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-full border-collapse text-sm">
+        <table className="w-full min-w-full border-collapse text-sm tabular-nums">
           <thead>
             <tr className="border-b border-ink/10">
               {columns.map((column) => {
@@ -61,7 +61,7 @@ export default function AdminTable({
                       active ? (sort?.dir === "asc" ? "ascending" : "descending") : undefined
                     }
                     className={cn(
-                      "whitespace-nowrap px-4 py-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/65",
+                      "whitespace-nowrap px-4 py-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-ink/65",
                       alignClass(column.align),
                       column.hideOnMobile && "hidden sm:table-cell",
                     )}
@@ -77,7 +77,7 @@ export default function AdminTable({
                         )}
                       >
                         {column.label}
-                        <span className={cn("text-[9px]", !active && "text-ink/55")}>
+                        <span className={cn("text-[10px]", !active && "text-ink/55")}>
                           {active ? (sort?.dir === "asc" ? "↑" : "↓") : "↕"}
                         </span>
                       </button>
@@ -91,14 +91,39 @@ export default function AdminTable({
           </thead>
           <tbody>
             {isLoading ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="animate-pulse px-4 py-16 text-center font-mono text-xs uppercase tracking-widest text-ink/65"
+              // Esqueleto con la forma de la tabla: al llegar los datos la
+              // página no salta, y se lee que algo está viniendo
+              Array.from({ length: 5 }, (_, row) => (
+                <tr
+                  key={row}
+                  aria-hidden={row > 0 || undefined}
+                  className="border-b border-ink/[0.06] last:border-0"
                 >
-                  ✦ Cargando…
-                </td>
-              </tr>
+                  {columns.map((column, cell) => (
+                    <td
+                      key={column.label}
+                      className={cn(
+                        "px-4 py-4",
+                        column.hideOnMobile && "hidden sm:table-cell",
+                      )}
+                    >
+                      {row === 0 && cell === 0 && (
+                        <span className="sr-only" role="status">
+                          Cargando…
+                        </span>
+                      )}
+                      <span
+                        className={cn(
+                          "block h-3 animate-pulse rounded-full bg-ink/[0.07]",
+                          cell === 0 ? "w-3/4" : "w-1/2",
+                          column.align === "right" && "ml-auto",
+                          column.align === "center" && "mx-auto",
+                        )}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))
             ) : isEmpty ? (
               <tr>
                 <td

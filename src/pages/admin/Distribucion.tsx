@@ -125,7 +125,7 @@ export default function AdminDistribucion() {
         description="Desde dónde sale cada pedido, qué hay en stock, qué se cosió este mes y qué unidades ya están comprometidas."
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard
           label="Unidades en stock"
           value={unidadesTotales.toLocaleString("es-AR")}
@@ -175,7 +175,7 @@ export default function AdminDistribucion() {
                     ],
                   })
                 }
-                className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+                className="font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
               >
                 + Agregar depósito
               </button>
@@ -186,7 +186,7 @@ export default function AdminDistribucion() {
             {locations.map((location, index) => (
               <li key={location.id} className="rounded-xl bg-cream p-5">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                     {location.principal ? "✦ Principal" : "Depósito"}
                   </p>
                   {locations.length > 1 && (
@@ -198,7 +198,7 @@ export default function AdminDistribucion() {
                           locations: locations.filter((_, i) => i !== index),
                         })
                       }
-                      className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                      className="font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                     >
                       Quitar
                     </button>
@@ -370,7 +370,7 @@ export default function AdminDistribucion() {
                     type="button"
                     onClick={() => abrir(line, "produccion")}
                     aria-label={`Registrar producción de ${nombre}`}
-                    className="font-mono text-[10px] uppercase tracking-widest text-verde transition-opacity hover:opacity-70"
+                    className="font-mono text-[11px] uppercase tracking-widest text-verde transition-opacity hover:opacity-70"
                   >
                     + Producción
                   </button>
@@ -378,7 +378,7 @@ export default function AdminDistribucion() {
                     type="button"
                     onClick={() => abrir(line, "ajuste")}
                     aria-label={`Ajustar el stock de ${nombre}`}
-                    className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+                    className="font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
                   >
                     Ajustar a…
                   </button>
@@ -398,7 +398,7 @@ export default function AdminDistribucion() {
                           {line.productName}
                         </span>
                       )}
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                         {mismoProductoQueAnterior ? "↳ " : ""}
                         {line.variantLabel}
                         {!line.productInStock && " · apagado"}
@@ -409,7 +409,7 @@ export default function AdminDistribucion() {
                       <span className="block max-w-[16rem] truncate text-sm">
                         {line.productName}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                         {line.category}
                         {!line.productInStock && " · apagado"}
                       </span>
@@ -453,7 +453,7 @@ export default function AdminDistribucion() {
                 </td>
                 <td className="hidden whitespace-nowrap px-4 py-3 text-right sm:table-cell">
                   {acciones("justify-end") ?? (
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink/40">
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-ink/40">
                       —
                     </span>
                   )}

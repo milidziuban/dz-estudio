@@ -52,7 +52,7 @@ export default function TrendChart({
       {/* Lectura única: en vez de un tooltip flotante que se corta en los
           bordes, el valor apuntado se muestra siempre en el mismo lugar. */}
       <div className="flex items-baseline justify-between gap-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink/65">
+        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink/65">
           {active ? active.label : summaryLabel}
         </p>
         <p className="font-mono text-sm font-medium">
@@ -109,7 +109,7 @@ export default function TrendChart({
         </ul>
       </div>
 
-      <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest text-ink/65">
+      <div className="mt-2 flex justify-between font-mono text-[11px] uppercase tracking-widest text-ink/65">
         <span>{points[0].label}</span>
         {points.length > 2 && (
           <span className="hidden sm:inline">

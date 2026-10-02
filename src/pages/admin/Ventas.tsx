@@ -398,7 +398,7 @@ export default function AdminVentas() {
         </Button>
       </PageHeading>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard
           label={hayFecha ? "Facturado del período" : "Facturado total"}
           value={formatCompactPrice(totales.facturado)}
@@ -440,7 +440,7 @@ export default function AdminVentas() {
         <div
           role="group"
           aria-label="Filtrar por estado"
-          className="flex flex-wrap gap-1 rounded-full bg-white p-1"
+          className="flex max-w-full gap-1 overflow-x-auto rounded-full bg-white p-1 [scrollbar-width:none]"
         >
           {ESTADOS.map((id) => (
             <button
@@ -454,7 +454,7 @@ export default function AdminVentas() {
                 setSearchParams(next, { replace: true });
               }}
               className={cn(
-                "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+                "shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
                 estado === id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
               )}
             >
@@ -462,7 +462,7 @@ export default function AdminVentas() {
             </button>
           ))}
 
-          <span aria-hidden="true" className="my-1 w-px bg-ink/10" />
+          <span aria-hidden="true" className="my-1 w-px shrink-0 bg-ink/10" />
 
           {ATAJOS.map((id) => {
             const cuantas =
@@ -478,7 +478,7 @@ export default function AdminVentas() {
                   setSearchParams(next, { replace: true });
                 }}
                 className={cn(
-                  "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+                  "shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
                   estado === id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
                 )}
               >
@@ -492,7 +492,7 @@ export default function AdminVentas() {
         <div
           role="group"
           aria-label="Cambiar vista"
-          className="flex gap-1 rounded-full bg-white p-1 sm:ml-auto"
+          className="flex w-fit gap-1 rounded-full bg-white p-1 sm:ml-auto"
         >
           {VISTAS.map((v) => (
             <button
@@ -506,7 +506,7 @@ export default function AdminVentas() {
                 setSearchParams(next, { replace: true });
               }}
               className={cn(
-                "rounded-full px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+                "rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
                 vista === v ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
               )}
             >
@@ -519,7 +519,7 @@ export default function AdminVentas() {
       {/* Fechas: el atajo del mes cubre el caso real ("bajame septiembre") y
           las dos fechas sueltas quedan para cualquier otro corte. */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+        <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
           Fechas
         </span>
 
@@ -571,14 +571,14 @@ export default function AdminVentas() {
           <button
             type="button"
             onClick={() => setFechas("", "")}
-            className="rounded-full px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-ink/65 underline-offset-4 transition-colors hover:text-ink hover:underline"
+            className="rounded-full px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-ink/65 underline-offset-4 transition-colors hover:text-ink hover:underline"
           >
             Limpiar
           </button>
         )}
 
         {hayFecha && (
-          <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+          <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
             {enFecha.length} {enFecha.length === 1 ? "orden" : "órdenes"} en el
             período
           </span>
@@ -642,16 +642,16 @@ export default function AdminVentas() {
                     )}
                   >
                     <div className="flex items-center justify-between px-1">
-                      <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-ink/65">
+                      <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-ink/65">
                         {SHIPPING_STATUS_LABEL[columna]}
                       </h3>
-                      <span className="font-mono text-[10px] text-ink/65">
+                      <span className="font-mono text-[11px] text-ink/65">
                         {enColumna.length}
                       </span>
                     </div>
 
                     {enColumna.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-ink/15 px-3 py-6 text-center font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                      <p className="rounded-xl border border-dashed border-ink/15 px-3 py-6 text-center font-mono text-[11px] uppercase tracking-widest text-ink/65">
                         Vacío
                       </p>
                     ) : (
@@ -673,23 +673,23 @@ export default function AdminVentas() {
                           )}
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[10px] font-medium">
+                            <span className="font-mono text-[11px] font-medium">
                               {order.id.slice(0, 8).toUpperCase()}
                             </span>
-                            <span className="font-mono text-[10px] text-ink/65">
+                            <span className="font-mono text-[11px] text-ink/65">
                               {formatDate(order.createdAt)}
                             </span>
                           </div>
                           <p className="mt-1.5 truncate text-sm">
                             {order.customerName}
                           </p>
-                          <p className="truncate font-mono text-[10px] text-ink/65">
+                          <p className="truncate font-mono text-[11px] text-ink/65">
                             {order.items.length}{" "}
                             {order.items.length === 1 ? "ítem" : "ítems"} ·{" "}
                             {formatPrice(order.total)}
                           </p>
                           {order.trackingCode && (
-                            <p className="mt-1 truncate font-mono text-[10px] text-petroleo">
+                            <p className="mt-1 truncate font-mono text-[11px] text-petroleo">
                               {order.trackingCode}
                             </p>
                           )}
@@ -736,7 +736,7 @@ export default function AdminVentas() {
               <span className="block font-mono text-xs font-medium">
                 {order.id.slice(0, 8).toUpperCase()}
               </span>
-              <span className="font-mono text-[10px] text-ink/65">
+              <span className="font-mono text-[11px] text-ink/65">
                 {formatDate(order.createdAt)}
               </span>
             </td>
@@ -745,13 +745,13 @@ export default function AdminVentas() {
               <span className="block max-w-[14rem] truncate text-sm">
                 {order.customerName}
               </span>
-              <span className="block max-w-[14rem] truncate font-mono text-[10px] text-ink/65">
+              <span className="block max-w-[14rem] truncate font-mono text-[11px] text-ink/65">
                 {order.customerEmail}
               </span>
             </td>
 
             <td className="hidden px-4 py-3 sm:table-cell">
-              <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/65">
+              <span className="block font-mono text-[11px] uppercase tracking-widest text-ink/65">
                 {SHIPPING_METHOD_LABEL[order.shippingMethod] ??
                   order.shippingMethod}
               </span>
@@ -761,12 +761,12 @@ export default function AdminVentas() {
                   : order.shippingAddress?.provincia}
               </span>
               {envioPorCobrar(order) && (
-                <span className="mt-1 inline-block rounded-full bg-amarillo px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-ink">
+                <span className="mt-1 inline-block rounded-full bg-amarillo px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ink">
                   Falta cobrar envío
                 </span>
               )}
               {order.couponKind === "free-shipping" && (
-                <span className="mt-1 inline-block rounded-full bg-verde px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-cream">
+                <span className="mt-1 inline-block rounded-full bg-verde px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-cream">
                   Envío sin cargo · cupón
                 </span>
               )}
@@ -774,11 +774,11 @@ export default function AdminVentas() {
 
             <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs">
               {formatPrice(order.total)}
-              <span className="block text-[10px] text-ink/65">
+              <span className="block text-[11px] text-ink/65">
                 {PAYMENT_LABEL[order.paymentMethod]}
               </span>
               {order.couponCode && (
-                <span className="block text-[10px] uppercase tracking-widest text-ink/65">
+                <span className="block text-[11px] uppercase tracking-widest text-ink/65">
                   Cupón {order.couponCode}
                 </span>
               )}
@@ -793,7 +793,7 @@ export default function AdminVentas() {
                 return stage ? (
                   <span
                     className={cn(
-                      "mt-1 block font-mono text-[10px]",
+                      "mt-1 block font-mono text-[11px]",
                       // La vencida se destaca con peso y no con color: el
                       // naranja a 10px no llega al contraste mínimo (D10)
                       stage === "vencida"
@@ -858,7 +858,7 @@ export default function AdminVentas() {
         {abierta && patch && (
           <div className="space-y-7">
             <section>
-              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+              <h3 className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                 Cliente
               </h3>
               <div className="rounded-xl bg-white p-4 text-sm leading-relaxed">
@@ -885,7 +885,7 @@ export default function AdminVentas() {
                     {abierta.shippingAddress?.cp})
                   </p>
                 )}
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-widest text-ink/65">
                   {SHIPPING_METHOD_LABEL[abierta.shippingMethod] ??
                     abierta.shippingMethod}
                 </p>
@@ -908,14 +908,14 @@ export default function AdminVentas() {
                       href={whatsappLink(abierta)!}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-[10px] uppercase tracking-widest text-verde-ink hover:underline"
+                      className="font-mono text-[11px] uppercase tracking-widest text-verde-ink hover:underline"
                     >
                       Escribir por WhatsApp ↗
                     </a>
                   )}
                   <a
                     href={`mailto:${abierta.customerEmail}`}
-                    className="font-mono text-[10px] uppercase tracking-widest text-ink/65 hover:text-ink"
+                    className="font-mono text-[11px] uppercase tracking-widest text-ink/65 hover:text-ink"
                   >
                     Mandar mail ↗
                   </a>
@@ -924,7 +924,7 @@ export default function AdminVentas() {
             </section>
 
             <section>
-              <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+              <h3 className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                 Lo que pidió
               </h3>
               <ul className="divide-y divide-ink/[0.08] rounded-xl bg-white px-4">
@@ -982,14 +982,14 @@ export default function AdminVentas() {
               </dl>
 
               {abierta.mpPaymentId && (
-                <p className="mt-2 font-mono text-[10px] text-ink/65">
+                <p className="mt-2 font-mono text-[11px] text-ink/65">
                   Pago de Mercado Pago #{abierta.mpPaymentId}
                 </p>
               )}
 
               {abierta.customerNotes && (
                 <div className="mt-3 rounded-xl bg-amarillo/25 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                     Nota del cliente
                   </p>
                   <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed">
@@ -1000,7 +1000,7 @@ export default function AdminVentas() {
             </section>
 
             <section className="space-y-4 border-t border-ink/10 pt-5">
-              <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+              <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                 Gestión
               </h3>
 

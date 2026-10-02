@@ -53,16 +53,16 @@ export default function AdminMetodosEnvio() {
               <li key={option.id} className="rounded-xl bg-cream p-5">
                 <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
                   <div className="flex items-center gap-2">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                       {option.id}
                     </p>
                     {option.mode === "vivo" && (
-                      <span className="rounded-full bg-verde/25 px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-petroleo">
+                      <span className="rounded-full bg-verde/25 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-petroleo">
                         Cotiza en vivo
                       </span>
                     )}
                     {option.mode === "a-coordinar" && (
-                      <span className="rounded-full bg-amarillo/40 px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-ink">
+                      <span className="rounded-full bg-amarillo/40 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ink">
                         Se cobra aparte
                       </span>
                     )}
@@ -114,7 +114,7 @@ export default function AdminMetodosEnvio() {
                   />
                 </div>
 
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-widest text-ink/65">
                   {option.mode === "a-coordinar"
                     ? "En el checkout: A coordinar. No muestra precio ni suma al total — el envío lo cobrás vos después de despachar."
                     : option.mode === "vivo"
@@ -157,7 +157,7 @@ export default function AdminMetodosEnvio() {
             />
           </div>
 
-          <p className="mb-3 mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+          <p className="mb-3 mt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
             Paquete estándar
           </p>
           <p className="mb-4 text-[11px] leading-relaxed text-ink/65">

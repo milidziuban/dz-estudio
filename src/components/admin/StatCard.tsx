@@ -27,14 +27,14 @@ export default function StatCard({
   const flat = showVariation && Math.abs(variation!) < 0.05;
 
   return (
-    <div className="rounded-2xl bg-white p-5">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+    <div className="min-w-0 rounded-2xl bg-white p-4 sm:p-5">
+      <p className="truncate font-mono text-[11px] uppercase tracking-[0.15em] text-ink/65">
         {label}
       </p>
-      <p className="mt-2.5 font-mono text-2xl font-medium tracking-tight">
+      <p className="mt-2.5 truncate font-mono text-xl font-medium tabular-nums tracking-tight sm:text-2xl">
         {value}
       </p>
-      <div className="mt-2 flex items-baseline gap-2">
+      <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         {showVariation && (
           <span
             className={cn(
@@ -46,7 +46,7 @@ export default function StatCard({
             {formatPercent(Math.abs(variation!))}
           </span>
         )}
-        {hint && <span className="text-[11px] text-ink/65">{hint}</span>}
+        {hint && <span className="text-xs leading-snug text-ink/65">{hint}</span>}
       </div>
     </div>
   );

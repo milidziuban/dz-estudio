@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AdminDrawer from "../../components/admin/AdminDrawer";
 import AdminTable from "../../components/admin/AdminTable";
+import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
 import Toggle, { ToggleSwitch } from "../../components/admin/Toggle";
@@ -52,6 +53,9 @@ export default function AdminDescuentos() {
 
   const [draft, setDraft] = useState<DiscountDraft | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [aBorrar, setABorrar] = useState<{ id: string; code: string } | null>(
+    null,
+  );
 
   const guardarCupon = async () => {
     if (!draft) return;
@@ -157,7 +161,7 @@ export default function AdminDescuentos() {
               </td>
               <td className="px-4 py-3 text-sm">
                 {valorDelCupon(discount)}
-                <span className="block font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                <span className="block font-mono text-[11px] uppercase tracking-widest text-ink/65">
                   {KIND_LABEL[discount.kind]}
                 </span>
               </td>
@@ -170,7 +174,7 @@ export default function AdminDescuentos() {
                   <span className="text-ink/65"> / {discount.maxUses}</span>
                 )}
               </td>
-              <td className="hidden whitespace-nowrap px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-ink/65 sm:table-cell">
+              <td className="hidden whitespace-nowrap px-4 py-3 font-mono text-[11px] uppercase tracking-widest text-ink/65 sm:table-cell">
                 {discount.startsAt || discount.endsAt ? (
                   <>
                     {discount.startsAt ? formatDate(discount.startsAt) : "hoy"}
@@ -202,20 +206,16 @@ export default function AdminDescuentos() {
                     setFormError(null);
                     setDraft(draftFromDiscount(discount));
                   }}
-                  className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+                  className="font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
                 >
                   Editar
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    if (
-                      window.confirm(`¿Borrar el cupón ${discount.code}?`)
-                    ) {
-                      deleteDiscount.mutate(discount.id);
-                    }
+                    setABorrar({ id: discount.id, code: discount.code });
                   }}
-                  className="ml-3 font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                  className="ml-3 font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Borrar
                 </button>
@@ -366,6 +366,20 @@ export default function AdminDescuentos() {
           </div>
         )}
       </AdminDrawer>
+
+      <ConfirmDialog
+        open={aBorrar !== null}
+        title="¿Borrar el cupón?"
+        description={aBorrar ? `${aBorrar.code} deja de funcionar en el checkout y no se puede deshacer.` : undefined}
+        confirmLabel="Borrar"
+        destructive
+        pending={deleteDiscount.isPending}
+        onConfirm={() => {
+          if (!aBorrar) return;
+          deleteDiscount.mutate(aBorrar.id, { onSettled: () => setABorrar(null) });
+        }}
+        onCancel={() => setABorrar(null)}
+      />
     </>
   );
 }

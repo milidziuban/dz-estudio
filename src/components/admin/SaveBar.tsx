@@ -33,7 +33,7 @@ export default function SaveBar({
         <button
           type="button"
           onClick={onReset}
-          className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+          className="font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
         >
           Descartar
         </button>
@@ -42,7 +42,7 @@ export default function SaveBar({
       {saved && !dirty && (
         <p
           role="status"
-          className="font-mono text-[10px] uppercase tracking-widest text-verde-ink"
+          className="font-mono text-[11px] uppercase tracking-widest text-verde-ink"
         >
           ✦ Guardado
         </p>

@@ -31,7 +31,7 @@ function MotivoBadge({ motivo }: { motivo: StockMotivo }) {
     <span
       className={cn(
         "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1",
-        "font-mono text-[10px] font-medium uppercase tracking-widest",
+        "font-mono text-[11px] font-medium uppercase tracking-widest",
         MOTIVO_CLASSES[motivo],
       )}
     >
@@ -141,7 +141,7 @@ function MovimientoForm({ line, modo, onModoChange }: FormProps) {
               registrar.reset();
             }}
             className={cn(
-              "rounded-full px-4 py-2 font-mono text-[10px] font-medium uppercase tracking-widest transition-colors",
+              "rounded-full px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
               modo === tab
                 ? "bg-ink text-cream"
                 : "border border-ink/20 text-ink/65 hover:border-ink hover:text-ink",
@@ -273,7 +273,7 @@ export default function StockDrawer({
       {line && (
         <div className="space-y-7">
           <section>
-            <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+            <h3 className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
               Registrar
             </h3>
             {/* La key reinicia el formulario al cambiar de línea */}
@@ -286,7 +286,7 @@ export default function StockDrawer({
           </section>
 
           <section>
-            <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+            <h3 className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
               Historial
             </h3>
             {error ? (
@@ -308,7 +308,7 @@ export default function StockDrawer({
                 {historial.map((mov) => (
                   <li key={mov.id} className="py-3">
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                         {formatDateTime(mov.createdAt)}
                       </span>
                       <span className="whitespace-nowrap font-mono text-xs text-ink/65">
@@ -324,7 +324,7 @@ export default function StockDrawer({
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 font-mono text-[10px] text-ink/65">
+                    <p className="mt-1 font-mono text-[11px] text-ink/65">
                       {mov.autor ?? (mov.orderId ? "despacho" : "sistema")}
                     </p>
                   </li>

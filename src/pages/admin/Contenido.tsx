@@ -3,6 +3,7 @@ import AdminDrawer from "../../components/admin/AdminDrawer";
 import PageHeading from "../../components/admin/PageHeading";
 import QueryError from "../../components/admin/QueryError";
 import StatCard from "../../components/admin/StatCard";
+import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import ContentMonth from "../../components/admin/ContentMonth";
 import Button from "../../components/Button";
 import SelectField from "../../components/SelectField";
@@ -61,6 +62,9 @@ export default function AdminContenido() {
   );
   const [draft, setDraft] = useState<ContentPostDraft | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [aBorrar, setABorrar] = useState<{ id: string; title: string } | null>(
+    null,
+  );
   const [subiendo, setSubiendo] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -164,7 +168,7 @@ export default function AdminContenido() {
               type="button"
               onClick={() => setVista(opcion)}
               className={cn(
-                "rounded-full px-4 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors",
+                "rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors",
                 vista === opcion
                   ? "bg-ink text-cream"
                   : "text-ink/65 hover:text-ink",
@@ -182,7 +186,7 @@ export default function AdminContenido() {
         </Button>
       </PageHeading>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           label="Piezas del mes"
           value={delMes.length.toLocaleString("es-AR")}
@@ -229,7 +233,7 @@ export default function AdminContenido() {
           <button
             type="button"
             onClick={irAHoy}
-            className="ml-1 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+            className="ml-1 font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
           >
             Hoy
           </button>
@@ -239,7 +243,7 @@ export default function AdminContenido() {
           {(Object.keys(STATUS_LABEL) as ContentStatus[]).map((status) => (
             <li
               key={status}
-              className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-ink/65"
+              className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-ink/65"
             >
               <span
                 aria-hidden="true"
@@ -431,7 +435,7 @@ export default function AdminContenido() {
                   <button
                     type="button"
                     onClick={() => setDraft({ ...draft, mediaUrl: "" })}
-                    className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                    className="font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                   >
                     Quitar
                   </button>
@@ -457,7 +461,7 @@ export default function AdminContenido() {
                 type="button"
                 disabled={subiendo}
                 onClick={() => fileInput.current?.click()}
-                className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-50"
+                className="mt-3 font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-50"
               >
                 {subiendo ? "Subiendo…" : "+ Subir foto"}
               </button>
@@ -489,7 +493,7 @@ export default function AdminContenido() {
                 <button
                   type="button"
                   onClick={copiarTexto}
-                  className="mt-2 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+                  className="mt-2 font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
                 >
                   {copiado ? "✓ Copiado" : "Copiar texto + hashtags"}
                 </button>
@@ -525,13 +529,11 @@ export default function AdminContenido() {
                 <button
                   type="button"
                   onClick={() => {
-                    const id = draft.id;
-                    if (id && window.confirm(`¿Borrar "${draft.title}"?`)) {
-                      deletePost.mutate(id);
-                      setDraft(null);
+                    if (draft.id) {
+                      setABorrar({ id: draft.id, title: draft.title });
                     }
                   }}
-                  className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                  className="font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Borrar la pieza
                 </button>
@@ -540,6 +542,21 @@ export default function AdminContenido() {
           </div>
         )}
       </AdminDrawer>
+
+      <ConfirmDialog
+        open={aBorrar !== null}
+        title="¿Borrar la pieza?"
+        description={aBorrar ? `"${aBorrar.title}" sale del calendario y no se puede deshacer.` : undefined}
+        confirmLabel="Borrar"
+        destructive
+        pending={deletePost.isPending}
+        onConfirm={() => {
+          if (!aBorrar) return;
+          deletePost.mutate(aBorrar.id, { onSettled: () => setABorrar(null) });
+          setDraft(null);
+        }}
+        onCancel={() => setABorrar(null)}
+      />
     </>
   );
 }
@@ -569,7 +586,7 @@ function Agenda({ posts, onSelect, onTogglePublicado }: AgendaProps) {
     <div className="space-y-6">
       {dias.map(([key, delDia]) => (
         <section key={key}>
-          <h3 className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+          <h3 className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
             {formatDiaLargo(new Date(`${key}T12:00`))}
           </h3>
           <ul className="space-y-2">
@@ -590,7 +607,7 @@ function Agenda({ posts, onSelect, onTogglePublicado }: AgendaProps) {
                       className="h-14 w-14 shrink-0 rounded-lg object-cover"
                     />
                   ) : (
-                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-cream text-center font-mono text-[9px] uppercase tracking-widest text-ink/45">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-cream text-center font-mono text-[10px] uppercase tracking-widest text-ink/45">
                       {post.format === "tarea" ? "✦" : "sin foto"}
                     </span>
                   )}
@@ -608,14 +625,14 @@ function Agenda({ posts, onSelect, onTogglePublicado }: AgendaProps) {
                           STATUS_DOT[post.status],
                         )}
                       />
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
                         {STATUS_LABEL[post.status]}
                       </span>
                     </span>
                     <span className="mt-0.5 block truncate text-sm font-semibold">
                       {post.title}
                     </span>
-                    <span className="block truncate font-mono text-[10px] uppercase tracking-widest text-ink/65">
+                    <span className="block truncate font-mono text-[11px] uppercase tracking-widest text-ink/65">
                       {FORMAT_LABEL[post.format]} · {KIND_LABEL[post.kind]} ·{" "}
                       {CHANNEL_LABEL[post.channel]}
                     </span>
@@ -626,7 +643,7 @@ function Agenda({ posts, onSelect, onTogglePublicado }: AgendaProps) {
                   <button
                     type="button"
                     onClick={() => onTogglePublicado(post)}
-                    className="shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+                    className="shrink-0 whitespace-nowrap font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
                   >
                     {post.status === "publicado"
                       ? "Despublicar"
@@ -668,7 +685,7 @@ function MezclaDelMes({ posts }: { posts: ContentPost[] }) {
           const ancho = Math.min(100, (hay / objetivo) * 100);
           return (
             <li key={kind} className="flex items-center gap-4">
-              <span className="w-24 shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink/65">
+              <span className="w-24 shrink-0 font-mono text-[11px] uppercase tracking-widest text-ink/65">
                 {KIND_LABEL[kind]}
               </span>
               <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/10">

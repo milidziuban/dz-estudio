@@ -23,7 +23,7 @@ export default function OrderToastStack({
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-pink">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-pink">
                 Nuevo pedido ✦
               </p>
               <p className="mt-1 truncate text-sm">

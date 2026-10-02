@@ -98,7 +98,7 @@ export default function AhoraMismo() {
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             <div>
-              <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+              <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                 Qué están mirando
               </h3>
               <ul className="mt-3 space-y-2">
@@ -119,7 +119,7 @@ export default function AhoraMismo() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+              <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
                 Lo último que hicieron
               </h3>
               {data.eventos.length === 0 ? (
@@ -150,7 +150,7 @@ export default function AhoraMismo() {
                           </>
                         )}
                       </span>
-                      <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink/50">
+                      <span className="shrink-0 font-mono text-[11px] uppercase tracking-widest text-ink/50">
                         {timeAgo(evento.createdAt)}
                       </span>
                     </li>

@@ -114,7 +114,7 @@ export default function AdminLogin() {
           </form>
         </div>
 
-        <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-ink/65">
+        <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-widest text-ink/65">
           El acceso se gestiona desde Supabase
         </p>
       </div>

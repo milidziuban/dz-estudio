@@ -35,7 +35,7 @@ function StockActual({ stock, nuevo }: { stock: number; nuevo: boolean }) {
         {!nuevo && (
           <Link
             to="/admin/distribucion"
-            className="font-mono text-[10px] uppercase tracking-widest text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink"
+            className="font-mono text-[11px] uppercase tracking-widest text-ink underline decoration-ink/25 underline-offset-4 hover:decoration-ink"
           >
             Ir a Distribución →
           </Link>
@@ -55,7 +55,7 @@ function Bloque({
 }) {
   return (
     <section className="border-t border-ink/10 pt-5">
-      <h3 className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65">
+      <h3 className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
         {title}
       </h3>
       {children}
@@ -130,7 +130,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
           value={draft.slug}
           onChange={(event) => set("slug", slugify(event.target.value))}
         />
-        <p className="-mt-2 font-mono text-[10px] text-ink/65">
+        <p className="-mt-2 font-mono text-[11px] text-ink/65">
           /producto/{draft.slug || "…"}
         </p>
 
@@ -208,7 +208,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                 aria-pressed={selected}
                 onClick={() => toggleColor(color)}
                 className={cn(
-                  "flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors",
+                  "flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition-colors",
                   selected
                     ? "border-ink bg-ink text-cream"
                     : "border-ink/20 text-ink/65 hover:border-ink",
@@ -343,7 +343,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                         };
                         set("images", images);
                       }}
-                      className="rounded-lg border border-ink/20 bg-transparent px-2 py-1.5 font-mono text-[10px] uppercase tracking-widest focus:border-ink focus:outline-none"
+                      className="rounded-lg border border-ink/20 bg-transparent px-2 py-1.5 font-mono text-[11px] uppercase tracking-widest focus:border-ink focus:outline-none"
                     >
                       <option value="cover">Ambientada (cover)</option>
                       <option value="contain">Recorte (contain)</option>
@@ -360,7 +360,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                         };
                         set("images", images);
                       }}
-                      className="rounded-lg border border-ink/20 bg-transparent px-2 py-1.5 font-mono text-[10px] uppercase tracking-widest focus:border-ink focus:outline-none"
+                      className="rounded-lg border border-ink/20 bg-transparent px-2 py-1.5 font-mono text-[11px] uppercase tracking-widest focus:border-ink focus:outline-none"
                     >
                       {COLOR_TOKENS.map((color) => (
                         <option key={color} value={color}>
@@ -378,7 +378,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   aria-label="Subir la foto en el orden"
                   onClick={() => moveImage(index, -1)}
                   disabled={index === 0}
-                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-30"
+                  className="rounded-full px-2 py-1 font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-30"
                 >
                   ↑
                 </button>
@@ -387,7 +387,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   aria-label="Bajar la foto en el orden"
                   onClick={() => moveImage(index, 1)}
                   disabled={index === draft.images.length - 1}
-                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-30"
+                  className="rounded-full px-2 py-1 font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink disabled:opacity-30"
                 >
                   ↓
                 </button>
@@ -399,7 +399,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                       draft.images.filter((_, i) => i !== index),
                     )
                   }
-                  className="rounded-full px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                  className="rounded-full px-2 py-1 font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
                 >
                   Quitar
                 </button>
@@ -409,7 +409,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
         </ul>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="cursor-pointer rounded-full border border-ink px-5 py-2.5 font-mono text-[10px] uppercase tracking-widest transition-colors hover:bg-ink hover:text-cream">
+          <label className="cursor-pointer rounded-full border border-ink px-5 py-2.5 font-mono text-[11px] uppercase tracking-widest transition-colors hover:bg-ink hover:text-cream">
             {uploading ? "Subiendo…" : "Subir foto"}
             <input
               type="file"
@@ -429,7 +429,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
             onClick={() =>
               set("images", [...draft.images, { src: "", fit: "cover" }])
             }
-            className="font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+            className="font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
           >
             + Agregar por ruta
           </button>
@@ -478,7 +478,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                   };
                   set("variants", variants);
                 }}
-                className="rounded-lg border border-ink/20 bg-transparent px-2 py-2 font-mono text-[10px] uppercase tracking-widest focus:border-ink focus:outline-none"
+                className="rounded-lg border border-ink/20 bg-transparent px-2 py-2 font-mono text-[11px] uppercase tracking-widest focus:border-ink focus:outline-none"
               >
                 {COLOR_TOKENS.map((color) => (
                   <option key={color} value={color}>
@@ -511,7 +511,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
                     draft.variants.filter((_, i) => i !== index),
                   )
                 }
-                className="font-mono text-[10px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
+                className="font-mono text-[11px] uppercase tracking-widest text-orange-ink transition-colors hover:text-ink"
               >
                 Quitar
               </button>
@@ -546,7 +546,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
               stock: draft.variants.length === 0 ? null : draft.stock,
             })
           }
-          className="mt-4 font-mono text-[10px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
+          className="mt-4 font-mono text-[11px] uppercase tracking-widest text-ink/65 transition-colors hover:text-ink"
         >
           + Agregar variante
         </button>

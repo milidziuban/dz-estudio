@@ -40,7 +40,7 @@ export default function ContentMonth({
           {DIAS_CORTOS.map((dia) => (
             <div
               key={dia}
-              className="px-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/65"
+              className="px-2 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65"
             >
               {dia}
             </div>
@@ -100,7 +100,7 @@ export default function ContentMonth({
                           )}
                         />
                         <span className="min-w-0 flex-1">
-                          <span className="block font-mono text-[10px] text-ink/65">
+                          <span className="block font-mono text-[11px] text-ink/65">
                             {post.format === "tarea"
                               ? FORMAT_LABEL.tarea
                               : formatHora(post.scheduledAt)}

@@ -228,7 +228,7 @@ export default function AdminEstadisticas() {
         <QueryError error={visits.error} what="las visitas" />
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <StatCard
               label="Vistas de página"
               value={actual.visitas.toLocaleString("es-AR")}
