@@ -6,6 +6,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import ProductImage from "../components/ProductImage";
 import SelectField from "../components/SelectField";
+import Seo from "../components/Seo";
 import TextareaField from "../components/TextareaField";
 import TextField from "../components/TextField";
 import { useCart } from "../hooks/useCart";
@@ -344,6 +345,7 @@ export default function Checkout() {
   if (resolved.length === 0) {
     return (
       <div className="px-5 py-24 text-center">
+        <Seo title="Checkout" path="/checkout" noindex />
         <p className="font-serif text-3xl italic">
           No hay nada para pagar todavía ✧
         </p>
@@ -504,6 +506,7 @@ export default function Checkout() {
 
   return (
     <div className="px-5 py-12 sm:px-8 md:py-16 lg:px-12">
+      <Seo title="Checkout" path="/checkout" noindex />
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest">
           ✦ Checkout
@@ -563,6 +566,7 @@ export default function Checkout() {
                     label="Email"
                     id="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="tu@email.com"
                     error={errors.email?.message}
                     className="sm:col-span-2"
@@ -572,6 +576,7 @@ export default function Checkout() {
                     label="Teléfono"
                     id="telefono"
                     type="tel"
+                    autoComplete="tel"
                     placeholder="11 5555 5555"
                     error={errors.telefono?.message}
                     className="sm:col-span-2"
@@ -580,12 +585,14 @@ export default function Checkout() {
                   <TextField
                     label="Nombre"
                     id="nombre"
+                    autoComplete="given-name"
                     error={errors.nombre?.message}
                     {...register("nombre")}
                   />
                   <TextField
                     label="Apellido"
                     id="apellido"
+                    autoComplete="family-name"
                     error={errors.apellido?.message}
                     {...register("apellido")}
                   />
@@ -744,6 +751,7 @@ export default function Checkout() {
                       <TextField
                         label="Dirección"
                         id="direccion"
+                        autoComplete="street-address"
                         placeholder="Calle y número, piso, depto"
                         error={errors.direccion?.message}
                         className="sm:col-span-2"
@@ -752,12 +760,14 @@ export default function Checkout() {
                       <TextField
                         label="Ciudad"
                         id="ciudad"
+                        autoComplete="address-level2"
                         error={errors.ciudad?.message}
                         {...register("ciudad")}
                       />
                       <SelectField
                         label="Provincia"
                         id="provincia"
+                        autoComplete="address-level1"
                         error={errors.provincia?.message}
                         {...register("provincia")}
                       >

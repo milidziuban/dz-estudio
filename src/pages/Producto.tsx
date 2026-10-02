@@ -296,8 +296,9 @@ export default function Producto() {
                 <button
                   type="button"
                   aria-label="Restar una unidad"
+                  disabled={qtyEnRango <= 1}
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="px-4 py-3 text-lg font-bold hover:text-pink-ink"
+                  className="px-4 py-3 text-lg font-bold hover:text-pink-ink disabled:cursor-not-allowed disabled:text-ink/30 disabled:hover:text-ink/30"
                 >
                   −
                 </button>

@@ -146,8 +146,9 @@ export type ShippingId = (typeof SHIPPING_OPTIONS)[number]["id"];
 export const ORIGEN_CP_DEFAULT = "3000";
 
 /** Paquete tipo: son objetos textiles blandos, salen todos en el mismo
- *  tipo de paquete sin importar el producto. */
-export const PAQUETE_DEFAULT_CM = { largoCm: 40, anchoCm: 30, altoCm: 10 };
+ *  tipo de paquete sin importar el producto. El que manda es el de
+ *  /admin/envios; este es el respaldo y copia lo que está cargado ahí. */
+export const PAQUETE_DEFAULT_CM = { largoCm: 50, anchoCm: 50, altoCm: 10 };
 
 /** Peso a usar cuando un producto no tiene peso_gramos cargado. */
 export const PESO_GRAMOS_DEFAULT = 400;

@@ -13,6 +13,27 @@ import { supabase } from "./supabase";
 
 const SESSION_KEY = "dz-session";
 
+/** Marca que deja el panel en el navegador de quien administra. Vive en
+ *  localStorage y no se borra al cerrar sesión: cuando Mili recorre la tienda
+ *  para revisarla, sus visitas y sus "agregar al carrito" no son tráfico. */
+const ADMIN_KEY = "dz-admin";
+
+export function marcarNavegadorAdmin(): void {
+  try {
+    localStorage.setItem(ADMIN_KEY, "1");
+  } catch {
+    // Storage bloqueado: se cuentan sus visitas, como antes.
+  }
+}
+
+export function esNavegadorAdmin(): boolean {
+  try {
+    return localStorage.getItem(ADMIN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 function getSession(): { id: string; isNew: boolean } {
   try {
     const existing = sessionStorage.getItem(SESSION_KEY);
@@ -43,6 +64,8 @@ let lastPath: string | null = null;
 export async function trackVisit(path: string): Promise<void> {
   // El panel no es tráfico de la tienda
   if (path.startsWith("/admin")) return;
+  // Ni quien lo administra, aunque esté mirando la tienda
+  if (esNavegadorAdmin()) return;
   // StrictMode monta dos veces en desarrollo: sin esto, cada vista va doble
   if (path === lastPath) return;
   lastPath = path;

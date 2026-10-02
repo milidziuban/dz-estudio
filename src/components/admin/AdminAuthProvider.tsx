@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { supabase } from "../../lib/supabase";
+import { marcarNavegadorAdmin } from "../../lib/visits";
 
 export type AdminAuthStatus =
   /** Todavía no sabemos si hay sesión */
@@ -86,6 +87,7 @@ export default function AdminAuthProvider({
         return;
       }
 
+      marcarNavegadorAdmin();
       setStatus("admin");
       setEmail(data.email);
       setNombre(data.nombre);

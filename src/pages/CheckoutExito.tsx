@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import Button from "../components/Button";
 import Card from "../components/Card";
+import Seo from "../components/Seo";
 import { useCart } from "../hooks/useCart";
+import { useOrderTotal } from "../hooks/useOrderTracking";
 import {
   discardStashedPurchase,
   trackStashedPurchase,
@@ -72,8 +74,17 @@ export default function CheckoutExito() {
     state?.orderNumber ??
     (externalRef ? externalRef.slice(0, 8).toUpperCase() : undefined);
 
+  // El total que se muestra es el de la base, no el que calculó el checkout:
+  // los dos coinciden salvo que un precio haya cambiado en el medio, y en ese
+  // caso manda el que se cobra. Mientras carga (o si falla) queda el del
+  // checkout, que es el mismo en el 99% de los pedidos.
+  const { data: totalGuardado } = useOrderTotal(orderNumber, state?.email);
+  const total =
+    typeof totalGuardado === "number" ? totalGuardado : state?.total;
+
   return (
     <div className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
+      <Seo title="Gracias por tu compra" path="/checkout/exito" noindex />
       <Card className="mx-auto max-w-2xl overflow-hidden text-center">
         <div
           className={cn("pb-10 pt-10", isPending ? "bg-amarillo" : "bg-verde")}
@@ -120,9 +131,9 @@ export default function CheckoutExito() {
             </p>
           )}
 
-          {typeof state?.total === "number" && (
+          {typeof total === "number" && (
             <p className="mt-3 font-mono text-lg font-medium tracking-wider">
-              Total: {formatPrice(state.total)}
+              Total: {formatPrice(total)}
             </p>
           )}
 

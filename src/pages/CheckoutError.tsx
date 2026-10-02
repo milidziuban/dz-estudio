@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Button from "../components/Button";
 import Card from "../components/Card";
+import Seo from "../components/Seo";
 import { discardStashedPurchase } from "../lib/analytics";
 
 export default function CheckoutError() {
@@ -11,6 +12,7 @@ export default function CheckoutError() {
 
   return (
     <div className="px-5 py-16 sm:px-8 md:py-24 lg:px-12">
+      <Seo title="El pago no salió" path="/checkout/error" noindex />
       <Card className="mx-auto max-w-2xl overflow-hidden text-center">
         <div className="bg-orange pb-10 pt-10 text-cream">
           <p className="text-5xl" aria-hidden="true">

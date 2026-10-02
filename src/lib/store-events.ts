@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { sessionId } from "./visits";
+import { esNavegadorAdmin, sessionId } from "./visits";
 
 /**
  * Los dos pasos del medio del embudo, guardados en la base de la tienda.
@@ -26,6 +26,7 @@ export async function trackStoreEvent(
   kind: StoreEventKind,
   payload: StoreEventPayload = {},
 ): Promise<void> {
+  if (esNavegadorAdmin()) return;
   try {
     await supabase.from("store_events").insert({
       kind,

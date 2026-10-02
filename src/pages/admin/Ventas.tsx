@@ -589,8 +589,10 @@ export default function AdminVentas() {
         <div className="space-y-3">
           <p className="rounded-xl bg-white px-4 py-3 text-xs leading-relaxed text-ink/65">
             ✦ Arrastrá un pedido a otra columna para cambiar su estado de
-            envío. Al soltarlo en <strong>Despachado</strong>, el stock baja
-            solo — ya no queda solo "comprometido".
+            envío. Al soltarlo en <strong>Despachado</strong> (o en{" "}
+            <strong>Entregado</strong>, si es un retiro) el stock baja solo. Si
+            después lo cancelás o lo marcás devuelto, las unidades vuelven
+            solas.
           </p>
 
           {kanbanError && (

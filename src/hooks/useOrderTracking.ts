@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import type { OrderStatus, ShippingStatus } from "../types/admin";
 
@@ -66,5 +66,27 @@ export function useOrderTracking() {
       const rows = data as TrackingRow[] | null;
       return rows && rows.length > 0 ? mapTracking(rows[0]) : null;
     },
+  });
+}
+
+/** El total que guardó la base para un pedido recién hecho. La base recalcula
+ *  precios, descuentos y envío al insertar: si algo cambió con la pestaña
+ *  abierta, el monto que calculó el navegador ya no es el que se cobra, y en
+ *  transferencia la clienta transfiere lo que lee en pantalla. */
+export function useOrderTotal(code?: string, email?: string) {
+  return useQuery({
+    queryKey: ["order-total", code, email],
+    enabled: Boolean(code && email),
+    queryFn: async (): Promise<number | null> => {
+      const { data, error } = await supabase.rpc("get_order_tracking", {
+        p_order_code: code,
+        p_email: email,
+      });
+      if (error) throw error;
+      const rows = data as TrackingRow[] | null;
+      return rows && rows.length > 0 ? Number(rows[0].total) : null;
+    },
+    staleTime: Infinity,
+    retry: 1,
   });
 }

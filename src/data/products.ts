@@ -32,7 +32,7 @@ export const CATEGORY_INTRO: Record<
     tagLabel: "3 modelos",
     description:
       "Fundas de 40x40 en rombos y rayas de dos colores. Llevando 2 o más, 10% de descuento.",
-    image: "/productos/almohadon-rayas-cama.jpg",
+    image: "/productos/almohadon-rayas-cama.webp",
     imageAlt: "Almohadones de rayas blanco y negro sobre una cama",
     imageFit: "cover",
     imageWidth: 857,
@@ -166,7 +166,7 @@ export const products: Product[] = [
         background: "cream",
       },
       {
-        src: "/productos/individuales-reversibles-rosa-mesa.jpg",
+        src: "/productos/individuales-reversibles-rosa-mesa.webp",
         fit: "cover",
       },
     ],
