@@ -4,6 +4,7 @@ import type {
   Product,
   TiendaCategory,
 } from "../types/product";
+import { PLIEGO_PATH } from "../lib/pliego";
 
 // Catálogo de respaldo: espejo de la tabla `products` de Supabase
 // (sincronizado 28/09/2026). La tienda lee siempre de la base; esto es lo que
@@ -23,6 +24,14 @@ export const TIENDA_CATEGORIES: TiendaCategory[] = ["almohadones", "individuales
  *  desde /pliego. */
 export function esDeLaTienda(product: Pick<Product, "category">): boolean {
   return product.category !== "pliego";
+}
+
+/** La URL de la ficha. Los de Pliego tienen la suya, con el diseño de
+ *  Pliego: /pliego/bandeja, no /producto/bandeja. */
+export function rutaDeProducto(product: Pick<Product, "category" | "slug">): string {
+  return esDeLaTienda(product)
+    ? `/producto/${product.slug}`
+    : `${PLIEGO_PATH}/${product.slug}`;
 }
 
 /** Copy y foto de portada de cada categoría para la home. */

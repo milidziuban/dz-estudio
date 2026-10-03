@@ -10,7 +10,15 @@ type Estado = "idle" | "sending" | "ok" | "error";
  *  Ojo: el mail es único en la tabla. Si alguien ya estaba suscripta desde la
  *  home, el alta no cambia su origen (la policy no deja actualizar desde la
  *  tienda); para ella el resultado es el mismo y se le muestra "listo". */
-export default function PliegoEspera() {
+type PliegoEsperaProps = {
+  titulo?: string;
+  texto?: string;
+};
+
+export default function PliegoEspera({
+  titulo = "Sumate a la lista de espera",
+  texto = "Te escribimos una sola vez, cuando salgan las primeras unidades.",
+}: PliegoEsperaProps) {
   const [email, setEmail] = useState("");
   const [estado, setEstado] = useState<Estado>("idle");
   const inputId = useId();
@@ -36,10 +44,8 @@ export default function PliegoEspera() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-medium leading-7">Sumate a la lista de espera</h2>
-        <p className="text-pliego-tinta-suave">
-          Te escribimos una sola vez, cuando salgan las primeras unidades.
-        </p>
+        <h2 className="text-xl font-medium leading-7">{titulo}</h2>
+        <p className="text-pliego-tinta-suave">{texto}</p>
       </div>
 
       {estado === "ok" ? (

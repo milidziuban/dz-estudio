@@ -124,8 +124,13 @@ Ejemplo: `Maximalismo, <em>editado</em>` donde `<em>` va en Instrument Serif ita
 6. **Contacto** — form + Instagram + WhatsApp + email
 7. **Pedido** — seguimiento de una orden por número y mail
 8. **Pliego** (`/pliego`) — página de la línea de escritorio, sin marquesina:
-   portada, accesorios, plano con medidas, Sistema completo con lista de
-   espera (tabla `newsletter_subscribers`, `source: "pliego"`) y preguntas
+   portada, la base (Soporte 24), accesorios, Sistema completo, plano con
+   medidas y preguntas. Cada pieza tiene su ficha en `/pliego/<slug>`
+   (`PliegoPieza.tsx`), con el diseño de Pliego; el contenido está en
+   `lib/pliego.ts` (`PIEZAS`) y el precio y el stock salen del producto del
+   panel con el mismo slug. Mientras `PLIEGO_ETAPA` sea `"espera"`, o la
+   pieza no esté cargada, el botón es la lista de espera (tabla
+   `newsletter_subscribers`, `source: "pliego"`)
 
 Dos que no están en la navegación y no hay que dar por existentes:
 

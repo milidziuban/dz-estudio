@@ -17,6 +17,7 @@ export const pageLoaders = {
   contacto: () => import("../pages/Contacto"),
   pedido: () => import("../pages/Pedido"),
   pliego: () => import("../pages/Pliego"),
+  pliegoPieza: () => import("../pages/PliegoPieza"),
   notFound: () => import("../pages/NotFound"),
 };
 
@@ -44,6 +45,7 @@ type PageKey = keyof typeof pageLoaders;
  *  inicial, no hay nada que precargar. */
 function pageFor(pathname: string): PageKey | null {
   if (pathname.startsWith("/producto/")) return "producto";
+  if (pathname.startsWith("/pliego/")) return "pliegoPieza";
   switch (pathname) {
     case "/tienda":
       return "tienda";

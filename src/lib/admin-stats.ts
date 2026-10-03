@@ -224,7 +224,7 @@ export function funnelFor(
   const sesiones = new Set(visits.map((visit) => visit.sessionId));
   const fichas = new Set(
     visits
-      .filter((visit) => visit.path.startsWith("/producto/"))
+      .filter((visit) => productSlugFromPath(visit.path) !== null)
       .map((visit) => visit.sessionId),
   );
   const sesionesDe = (kind: StoreEvent["kind"]) =>
@@ -650,7 +650,7 @@ export function topReferrers(visits: PageView[], limit = 8): PathCount[] {
 
 /** Con lo que la tienda rutea las fichas. `page_views` no guarda el producto:
  *  guarda el `path`, y el slug es lo que viene después de este prefijo. */
-const PRODUCT_PATH = "/producto/";
+const PRODUCT_PATHS = ["/producto/", "/pliego/"];
 
 /**
  * Slug de la ficha que mira una visita, o null si esa visita no es una ficha.
@@ -662,8 +662,10 @@ const PRODUCT_PATH = "/producto/";
  */
 export function productSlugFromPath(path: string): string | null {
   const clean = path.split("?")[0].split("#")[0].replace(/\/+$/, "");
-  if (!clean.startsWith(PRODUCT_PATH)) return null;
-  return clean.slice(PRODUCT_PATH.length) || null;
+  // Las fichas de Pliego van por /pliego/<slug>, con su diseño.
+  const prefijo = PRODUCT_PATHS.find((p) => clean.startsWith(p));
+  if (!prefijo) return null;
+  return clean.slice(prefijo.length) || null;
 }
 
 /** Debajo de estas vistas no hay con qué opinar: cinco visitas sin compra

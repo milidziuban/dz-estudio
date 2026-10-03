@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import BuyBar from "../components/BuyBar";
 import Button from "../components/Button";
 import ProductCard from "../components/ProductCard";
 import ProductImage from "../components/ProductImage";
 import Seo from "../components/Seo";
 import Tag from "../components/Tag";
-import { CATEGORY_LABEL, esDeLaTienda } from "../data/products";
+import { CATEGORY_LABEL, esDeLaTienda, rutaDeProducto } from "../data/products";
 import { useCart } from "../hooks/useCart";
 import { useEnvioNacional } from "../hooks/useEnvioNacional";
 import { useInstallments } from "../hooks/useInstallments";
@@ -133,6 +133,12 @@ export default function Producto() {
         </Link>
       </div>
     );
+  }
+
+  // Pliego tiene su propia ficha, con su diseño: un link viejo a
+  // /producto/bandeja lleva a /pliego/bandeja.
+  if (!esDeLaTienda(product)) {
+    return <Navigate to={rutaDeProducto(product)} replace />;
   }
 
   // Primero los de la misma categoría, después el resto. Pliego y los

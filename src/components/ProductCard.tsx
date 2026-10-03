@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { rutaDeProducto } from "../data/products";
 import { useStoreSettings } from "../hooks/useStoreSettings";
 import { formatPrice } from "../lib/format";
 import { comboBadge, DEFAULT_PROMOS, entraEnCombo } from "../lib/promos";
@@ -26,7 +27,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link
-      to={`/producto/${product.slug}`}
+      to={rutaDeProducto(product)}
       className="group block rounded-2xl"
       aria-label={`${product.name} — ${formatPrice(product.price)}`}
     >

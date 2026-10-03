@@ -60,14 +60,19 @@ async function slugsFromSupabase() {
   const key = process.env.VITE_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error("faltan VITE_SUPABASE_URL / ANON_KEY");
 
-  const res = await fetch(`${url}/rest/v1/products?select=slug&order=id`, {
+  const res = await fetch(`${url}/rest/v1/products?select=slug,category&order=id`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
     signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new Error(`Supabase respondió ${res.status}`);
 
   const rows = await res.json();
-  const slugs = rows.map((row) => row.slug).filter(Boolean);
+  // Pliego tiene sus fichas en /pliego/<slug>; el resto, en /producto/<slug>.
+  const slugs = rows
+    .filter((row) => row.slug)
+    .map((row) =>
+      row.category === "pliego" ? `/pliego/${row.slug}` : `/producto/${row.slug}`,
+    );
   if (!slugs.length) throw new Error("la tabla products vino vacía");
   return slugs;
 }
@@ -79,7 +84,7 @@ function slugsFromMirror() {
   const source = readFileSync(resolve(root, "src/data/products.ts"), "utf8");
   const slugs = [...source.matchAll(/\bslug:\s*"([^"]+)"/g)].map((m) => m[1]);
   if (!slugs.length) throw new Error("no encontré slugs en el catálogo espejo");
-  return [...new Set(slugs)];
+  return [...new Set(slugs)].map((slug) => `/producto/${slug}`);
 }
 
 const escape = (value) =>
@@ -137,7 +142,7 @@ async function main() {
   const pages = [
     ...STATIC_PAGES,
     ...slugs.map((slug) => ({
-      path: `/producto/${slug}`,
+      path: slug,
       changefreq: "weekly",
       priority: "0.8",
     })),

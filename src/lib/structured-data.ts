@@ -1,4 +1,4 @@
-import { CATEGORY_LABEL } from "../data/products";
+import { CATEGORY_LABEL, rutaDeProducto } from "../data/products";
 import { COLOR_LABEL } from "./colors";
 import { PLIEGO_PATH } from "./pliego";
 import { SITE } from "./site";
@@ -27,7 +27,7 @@ const abs = (path: string) =>
 
 /** El producto: nombre, fotos, precio y disponibilidad. */
 export function productJsonLd(product: Product): JsonLd {
-  const url = abs(`/producto/${product.slug}`);
+  const url = abs(rutaDeProducto(product));
 
   return {
     "@context": "https://schema.org",
@@ -90,7 +90,7 @@ export function productBreadcrumbJsonLd(product: Product): JsonLd {
     return breadcrumbJsonLd([
       { name: "Inicio", path: "/" },
       { name: CATEGORY_LABEL.pliego, path: PLIEGO_PATH },
-      { name: product.name, path: `/producto/${product.slug}` },
+      { name: product.name, path: rutaDeProducto(product) },
     ]);
   }
   return breadcrumbJsonLd([
@@ -100,7 +100,7 @@ export function productBreadcrumbJsonLd(product: Product): JsonLd {
       name: CATEGORY_LABEL[product.category],
       path: `/tienda?categoria=${product.category}`,
     },
-    { name: product.name, path: `/producto/${product.slug}` },
+    { name: product.name, path: rutaDeProducto(product) },
   ]);
 }
 
@@ -114,7 +114,7 @@ export function productListJsonLd(products: Product[]): JsonLd {
     itemListElement: products.map((product, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: abs(`/producto/${product.slug}`),
+      url: abs(rutaDeProducto(product)),
       name: product.name,
     })),
   };

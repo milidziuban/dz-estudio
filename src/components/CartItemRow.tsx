@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { rutaDeProducto } from "../data/products";
 import { useCart } from "../hooks/useCart";
 import type { ResolvedCartItem } from "../lib/cart";
 import { formatPrice } from "../lib/format";
@@ -23,7 +24,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
   return (
     <li className="flex gap-4 border-b border-ink/10 py-4">
       <Link
-        to={`/producto/${product.slug}`}
+        to={rutaDeProducto(product)}
         onClick={close}
         className="shrink-0"
         tabIndex={-1}
@@ -39,7 +40,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
       <div className="flex flex-1 flex-col">
         <div className="flex items-start justify-between gap-2">
           <Link
-            to={`/producto/${product.slug}`}
+            to={rutaDeProducto(product)}
             onClick={close}
             className="text-sm font-bold leading-snug hover:underline"
           >

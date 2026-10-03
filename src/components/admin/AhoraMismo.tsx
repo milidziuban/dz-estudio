@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAdminProducts } from "../../hooks/useAdminProducts";
 import { VENTANA_MINUTOS, useAhoraMismo } from "../../hooks/useAhoraMismo";
 import { timeAgo } from "../../lib/admin";
+import { productSlugFromPath } from "../../lib/admin-stats";
 import { formatPrice } from "../../lib/format";
 import QueryError from "./QueryError";
 
@@ -15,6 +16,7 @@ const PAGINA_FIJA: Record<string, string> = {
   "/checkout/error": "Pago rechazado",
   "/contacto": "Contacto",
   "/pedido": "Seguimiento de pedido",
+  "/pliego": "Pliego",
 };
 
 export default function AhoraMismo() {
@@ -27,10 +29,8 @@ export default function AhoraMismo() {
 
   const nombreDePagina = (path: string): string => {
     if (PAGINA_FIJA[path]) return PAGINA_FIJA[path];
-    if (path.startsWith("/producto/")) {
-      const slug = path.slice("/producto/".length);
-      return nombrePorSlug.get(slug) ?? slug;
-    }
+    const slug = productSlugFromPath(path);
+    if (slug) return nombrePorSlug.get(slug) ?? slug;
     return path;
   };
 
