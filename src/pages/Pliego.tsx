@@ -27,7 +27,10 @@ import { SITE } from "../lib/site";
  * Manrope para leer e IBM Plex Mono solo para medidas. Esquinas R10 en
  * tarjetas y fotos, R2 en botones, como los plegados del soporte. */
 
-const contenedor = "mx-auto max-w-6xl px-5 sm:px-8 lg:px-12";
+// Misma grilla que el resto de la tienda: DZ pone el padding en la sección y
+// el max-w-6xl (1152 px de contenido) adentro. Acá va en un solo elemento, así
+// que el ancho máximo suma los 48 px de cada lado: 1152 + 96 = 1248 px.
+const contenedor = "mx-auto max-w-[78rem] px-5 sm:px-8 lg:px-12";
 const rotulo =
   "font-pliego-mono text-[11px] font-medium uppercase leading-4 tracking-[0.08em]";
 const botonPrimario =
@@ -225,8 +228,8 @@ export default function Pliego() {
       </div>
 
       {/* Portada */}
-      <section className={`${contenedor} pt-12 md:pt-16`}>
-        <div className="grid items-end gap-x-16 gap-y-6 md:grid-cols-2">
+      <section className={`${contenedor} pb-12 pt-10 md:pb-16 md:pt-14`}>
+        <div className="grid items-end gap-8 md:grid-cols-2 md:gap-14">
           <div className="flex flex-col gap-4">
             <p className={`${rotulo} text-pliego-tinta-suave`}>
               Soporte 24 · Acero plegado
@@ -270,7 +273,7 @@ export default function Pliego() {
           className="mt-10 block aspect-[2.12/1] w-full rounded-[10px] bg-pliego-linea object-cover md:mt-12"
         />
 
-        <dl className="grid gap-x-6 gap-y-4 pt-6 sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="grid gap-x-6 gap-y-4 pt-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {DATOS_PORTADA.map((dato) => (
             <PliegoDato
               key={dato.rotulo}
@@ -283,8 +286,8 @@ export default function Pliego() {
       </section>
 
       {/* Beneficios */}
-      <section className={`${contenedor} pt-20 md:pt-28`}>
-        <div className="grid gap-x-12 gap-y-10 md:grid-cols-3">
+      <section className={`${contenedor} py-16 md:py-24`}>
+        <div className="grid gap-10 md:grid-cols-3 md:gap-8">
           {BENEFICIOS.map((b) => (
             <div key={b.titulo} className="flex flex-col gap-3">
               <svg
@@ -306,7 +309,7 @@ export default function Pliego() {
       </section>
 
       {/* Accesorios */}
-      <section id="accesorios" className={`${contenedor} scroll-mt-28 pt-20 md:pt-28`}>
+      <section id="accesorios" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
         <div className="mb-8 flex max-w-xl flex-col gap-2">
           <h2 className="text-[28px] font-medium leading-[34px]">
             Accesorios que encastran
@@ -317,7 +320,7 @@ export default function Pliego() {
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
           {ACCESORIOS.map((a) => (
             <article
               key={a.nombre}
@@ -365,11 +368,11 @@ export default function Pliego() {
       </section>
 
       {/* Cómo encastra */}
-      <section className={`${contenedor} pt-20 md:pt-28`}>
+      <section className={`${contenedor} py-16 md:py-24`}>
         <h2 className="mb-8 text-[28px] font-medium leading-[34px]">
           Cambiás el escritorio en segundos
         </h2>
-        <ol className="grid gap-x-12 gap-y-8 md:grid-cols-3">
+        <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
           {PASOS.map((paso, i) => (
             <li
               key={paso.titulo}
@@ -386,7 +389,7 @@ export default function Pliego() {
       </section>
 
       {/* Medidas */}
-      <section id="medidas" className={`${contenedor} scroll-mt-28 pt-20 md:pt-28`}>
+      <section id="medidas" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
         <div className="flex flex-wrap gap-x-14 gap-y-10 rounded-[10px] border border-pliego-linea bg-pliego-superficie p-6 md:p-12">
           <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-8">
             <div className="flex flex-col gap-2">
@@ -416,8 +419,8 @@ export default function Pliego() {
       </section>
 
       {/* Sistema completo + lista de espera o compra */}
-      <section id="sistema" className={`${contenedor} scroll-mt-28 pt-20 md:pt-28`}>
-        <div className="flex flex-wrap gap-6">
+      <section id="sistema" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
+        <div className="flex flex-wrap gap-6 lg:gap-8">
           <div className="flex min-w-0 flex-[999_1_480px] flex-col gap-6 rounded-[10px] bg-pliego-salvia-suave p-6 md:p-12">
             <div className="flex flex-col gap-2">
               <p className={`${rotulo} text-pliego-salvia-texto`}>Sistema completo</p>
@@ -476,7 +479,7 @@ export default function Pliego() {
       </section>
 
       {/* Preguntas frecuentes */}
-      <section id="preguntas" className={`${contenedor} scroll-mt-28 pt-20 md:pt-28`}>
+      <section id="preguntas" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
         <div className="flex flex-wrap gap-x-16 gap-y-6">
           <h2 className="flex-[1_1_280px] text-[28px] font-medium leading-[34px]">
             Preguntas frecuentes
@@ -505,7 +508,7 @@ export default function Pliego() {
       </section>
 
       {/* Firma: Pliego, de DZ Estudio */}
-      <section className={`${contenedor} pb-24 pt-20 md:pb-28 md:pt-28`}>
+      <section className={`${contenedor} py-16 md:py-24`}>
         <div className="flex flex-wrap items-center justify-between gap-x-12 gap-y-6 rounded-[10px] border border-pliego-linea bg-pliego-superficie p-7 md:p-14">
           <div className="flex min-w-0 flex-[999_1_420px] items-start gap-6">
             <img
