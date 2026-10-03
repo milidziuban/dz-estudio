@@ -1,4 +1,4 @@
-import type { Category } from "../types/product";
+import type { Category, TiendaCategory } from "../types/product";
 import type { ResolvedCartItem } from "./cart";
 import { formatPrice } from "./format";
 
@@ -11,12 +11,18 @@ import { formatPrice } from "./format";
  *  y 2 packs de individuales dan 10% sobre los individuales. Llevar uno de
  *  cada uno no alcanza — son dos promos que corren en paralelo, no una sola
  *  sobre el carrito entero. */
-export const COMBO_CATEGORIES: Category[] = ["almohadones", "individuales"];
+export const COMBO_CATEGORIES: TiendaCategory[] = ["almohadones", "individuales"];
+
+/** true si a esta categoría le corre el combo. Pliego no entra. Del lado del
+ *  servidor manda `v_combo_categories` en recalculate_order_totals. */
+export function entraEnCombo(category: Category): category is TiendaCategory {
+  return (COMBO_CATEGORIES as Category[]).includes(category);
+}
 
 /** Cómo se nombra cada categoría dentro de los textos de la promo.
  *  Los individuales se venden por pack, así que "2 individuales" confundiría:
  *  lo que hay que llevar son dos packs. */
-const COMBO_NOUN: Record<Category, { singular: string; plural: string }> = {
+const COMBO_NOUN: Record<TiendaCategory, { singular: string; plural: string }> = {
   almohadones: { singular: "almohadón", plural: "almohadones" },
   individuales: { singular: "pack", plural: "packs" },
 };
@@ -146,7 +152,7 @@ export function comboBanner(
   category: Category,
   config: PromoConfig,
 ): string | null {
-  if (!config.combo.enabled || !COMBO_CATEGORIES.includes(category)) return null;
+  if (!config.combo.enabled || !entraEnCombo(category)) return null;
   const { plural } = COMBO_NOUN[category];
   return `Llevando ${config.combo.minQty} ${plural} o más, ${config.combo.percent}% de descuento`;
 }
@@ -169,10 +175,10 @@ export type AppliedDiscount = {
 function comboDiscount(
   items: ResolvedCartItem[],
   config: PromoConfig,
-): { amount: number; categories: Category[] } {
+): { amount: number; categories: TiendaCategory[] } {
   if (!config.combo.enabled) return { amount: 0, categories: [] };
   let amount = 0;
-  const categories: Category[] = [];
+  const categories: TiendaCategory[] = [];
   for (const category of COMBO_CATEGORIES) {
     const rows = items.filter((i) => i.product.category === category);
     const qty = rows.reduce((sum, i) => sum + i.qty, 0);

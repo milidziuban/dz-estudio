@@ -16,7 +16,7 @@ import {
 } from "../../hooks/useStoreSettings";
 import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
-import { COMBO_CATEGORIES } from "../../lib/promos";
+import { entraEnCombo } from "../../lib/promos";
 import {
   computeListPrice,
   computeProfit,
@@ -146,7 +146,7 @@ export default function AdminPrecios() {
   const filas = useMemo(() => {
     return (products.data ?? []).map((product) => {
       const cost = product.cost;
-      const comboAplica = COMBO_CATEGORIES.includes(product.category);
+      const comboAplica = entraEnCombo(product.category);
       // "Vendido en pack" descuenta el combo directo del precio sugerido solo
       // si el carrito NO se lo va a dar: si la categoría ya tiene la promo,
       // bajarlo también acá sería descontar dos veces sobre el mismo producto.

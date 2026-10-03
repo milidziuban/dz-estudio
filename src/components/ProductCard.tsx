@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useStoreSettings } from "../hooks/useStoreSettings";
 import { formatPrice } from "../lib/format";
-import { COMBO_CATEGORIES, comboBadge, DEFAULT_PROMOS } from "../lib/promos";
+import { comboBadge, DEFAULT_PROMOS, entraEnCombo } from "../lib/promos";
 import { productoAgotado } from "../lib/stock";
 import type { Product } from "../types/product";
 import Card from "./Card";
@@ -19,7 +19,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { data: settings } = useStoreSettings();
   const promos = settings?.marketing.promos ?? DEFAULT_PROMOS;
   const conCombo =
-    promos.combo.enabled && COMBO_CATEGORIES.includes(product.category);
+    promos.combo.enabled && entraEnCombo(product.category);
 
   const [primary, secondary] = product.images;
   const soldOut = productoAgotado(product);

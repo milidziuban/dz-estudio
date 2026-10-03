@@ -1,5 +1,6 @@
 import { CATEGORY_LABEL } from "../data/products";
 import { COLOR_LABEL } from "./colors";
+import { PLIEGO_PATH } from "./pliego";
 import { SITE } from "./site";
 import type { Product } from "../types/product";
 
@@ -84,6 +85,14 @@ export function breadcrumbJsonLd(
 }
 
 export function productBreadcrumbJsonLd(product: Product): JsonLd {
+  // Pliego no pasa por /tienda: Inicio › Pliego › Producto.
+  if (product.category === "pliego") {
+    return breadcrumbJsonLd([
+      { name: "Inicio", path: "/" },
+      { name: CATEGORY_LABEL.pliego, path: PLIEGO_PATH },
+      { name: product.name, path: `/producto/${product.slug}` },
+    ]);
+  }
   return breadcrumbJsonLd([
     { name: "Inicio", path: "/" },
     { name: "Tienda", path: "/tienda" },

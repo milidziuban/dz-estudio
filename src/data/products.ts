@@ -1,4 +1,9 @@
-import type { Category, ColorToken, Product } from "../types/product";
+import type {
+  Category,
+  ColorToken,
+  Product,
+  TiendaCategory,
+} from "../types/product";
 
 // Catálogo de respaldo: espejo de la tabla `products` de Supabase
 // (sincronizado 28/09/2026). La tienda lee siempre de la base; esto es lo que
@@ -8,11 +13,21 @@ import type { Category, ColorToken, Product } from "../types/product";
 export const CATEGORY_LABEL: Record<Category, string> = {
   almohadones: "Almohadones",
   individuales: "Individuales",
+  pliego: "Pliego",
 };
+
+/** Las categorías que se filtran en /tienda y se presentan en la home. */
+export const TIENDA_CATEGORIES: TiendaCategory[] = ["almohadones", "individuales"];
+
+/** true si el producto va en la tienda común. Los de Pliego no: se venden
+ *  desde /pliego. */
+export function esDeLaTienda(product: Pick<Product, "category">): boolean {
+  return product.category !== "pliego";
+}
 
 /** Copy y foto de portada de cada categoría para la home. */
 export const CATEGORY_INTRO: Record<
-  Category,
+  TiendaCategory,
   {
     colorB: ColorToken;
     /** Sin precio: Collections le suma "· $X" o "· desde $X" con lo que

@@ -1,5 +1,5 @@
 import type { ShippingId, ShippingMode } from "../lib/checkout";
-import type { ColorToken, Product } from "./product";
+import type { Category, ColorToken, Product } from "./product";
 
 /** Variante con el número real de unidades: eso solo lo ve el panel — la
  *  tienda solo recibe `inStock` (boolean) por variante, calculado a partir
@@ -275,7 +275,7 @@ export type ProductDraft = {
   id: number | null;
   slug: string;
   name: string;
-  category: "almohadones" | "individuales";
+  category: Category;
   colors: ColorToken[];
   price: number;
   stock: number | null;

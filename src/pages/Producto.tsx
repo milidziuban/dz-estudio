@@ -6,7 +6,7 @@ import ProductCard from "../components/ProductCard";
 import ProductImage from "../components/ProductImage";
 import Seo from "../components/Seo";
 import Tag from "../components/Tag";
-import { CATEGORY_LABEL } from "../data/products";
+import { CATEGORY_LABEL, esDeLaTienda } from "../data/products";
 import { useCart } from "../hooks/useCart";
 import { useEnvioNacional } from "../hooks/useEnvioNacional";
 import { useInstallments } from "../hooks/useInstallments";
@@ -17,6 +17,7 @@ import { cn } from "../lib/cn";
 import { COLOR_HEX } from "../lib/colors";
 import { envioFrase } from "../lib/envio-texto";
 import { formatPrice } from "../lib/format";
+import { PLIEGO_PATH } from "../lib/pliego";
 import { comboBanner, DEFAULT_PROMOS } from "../lib/promos";
 import {
   avisoDeUnidades,
@@ -134,9 +135,11 @@ export default function Producto() {
     );
   }
 
-  // Primero los de la misma categoría, después el resto
+  // Primero los de la misma categoría, después el resto. Pliego y los
+  // textiles no se mezclan: cada uno sugiere solo de su lado.
   const related = [...products]
     .filter((p) => p.slug !== product.slug)
+    .filter((p) => esDeLaTienda(p) === esDeLaTienda(product))
     .sort(
       (a, b) =>
         Number(b.category === product.category) -
@@ -175,10 +178,10 @@ export default function Producto() {
       />
       <div className="mx-auto max-w-6xl">
         <Link
-          to="/tienda"
+          to={esDeLaTienda(product) ? "/tienda" : PLIEGO_PATH}
           className="font-mono text-xs font-medium uppercase tracking-widest underline decoration-1 underline-offset-4 transition-colors hover:text-pink-ink"
         >
-          ← Volver a la tienda
+          {esDeLaTienda(product) ? "← Volver a la tienda" : "← Volver a Pliego"}
         </Link>
 
         <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-14">

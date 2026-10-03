@@ -1,7 +1,11 @@
-import { CATEGORY_INTRO, CATEGORY_LABEL } from "../data/products";
+import {
+  CATEGORY_INTRO,
+  CATEGORY_LABEL,
+  TIENDA_CATEGORIES,
+} from "../data/products";
 import { useProducts } from "../hooks/useProducts";
 import { formatPrice } from "../lib/format";
-import type { Category, Product } from "../types/product";
+import type { Product, TiendaCategory } from "../types/product";
 import CollectionCard from "./CollectionCard";
 
 const TAG_COLOR = {
@@ -9,10 +13,13 @@ const TAG_COLOR = {
   individuales: "celeste",
 } as const;
 
-const CATEGORIES = Object.keys(CATEGORY_LABEL) as Category[];
+const CATEGORIES = TIENDA_CATEGORIES;
 
 /** " · $29.300" si todos cuestan lo mismo, " · desde $8.700" si no. */
-function precioDeCategoria(products: Product[], category: Category): string {
+function precioDeCategoria(
+  products: Product[],
+  category: TiendaCategory,
+): string {
   const precios = products
     .filter((p) => p.category === category)
     .map((p) => p.price);

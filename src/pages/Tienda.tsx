@@ -2,16 +2,20 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import Seo from "../components/Seo";
-import { CATEGORY_LABEL } from "../data/products";
+import {
+  CATEGORY_LABEL,
+  esDeLaTienda,
+  TIENDA_CATEGORIES,
+} from "../data/products";
 import { useProducts } from "../hooks/useProducts";
 import { cn } from "../lib/cn";
 import { productoAgotado } from "../lib/stock";
 import { productListJsonLd } from "../lib/structured-data";
-import type { Category } from "../types/product";
+import type { TiendaCategory } from "../types/product";
 
-type CategoriaActiva = Category | "all";
+type CategoriaActiva = TiendaCategory | "all";
 
-const CATEGORIAS = Object.keys(CATEGORY_LABEL) as Category[];
+const CATEGORIAS = TIENDA_CATEGORIES;
 
 /** Cualquier valor que no sea una categoría real (o ninguno) muestra todo. */
 const categoriaFromParam = (param: string | null): CategoriaActiva =>
@@ -44,10 +48,12 @@ export default function Tienda() {
   const [sort, setSort] = useState<SortId>("novedades");
 
   const visible = useMemo(() => {
+    // Pliego tiene su propia página: acá no aparece ni en "Todo".
+    const textiles = products.filter(esDeLaTienda);
     const filtered =
       categoria === "all"
-        ? products
-        : products.filter((p) => p.category === categoria);
+        ? textiles
+        : textiles.filter((p) => p.category === categoria);
 
     const sorted = [...filtered];
     switch (sort) {

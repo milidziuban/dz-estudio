@@ -1,11 +1,14 @@
 import Button from "./Button";
 import ProductCard from "./ProductCard";
+import { esDeLaTienda } from "../data/products";
 import { useProducts } from "../hooks/useProducts";
 
 /** Catálogo completo en la home: con cinco productos no tiene sentido
  *  esconderlos detrás de un click. */
 export default function FeaturedProducts() {
-  const { data: products = [], isLoading } = useProducts();
+  const { data = [], isLoading } = useProducts();
+  // Pliego ya tiene su bloque en la home: acá van solo los textiles.
+  const products = data.filter(esDeLaTienda);
 
   return (
     <section

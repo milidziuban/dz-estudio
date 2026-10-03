@@ -9,8 +9,12 @@ export type ColorToken =
   | "ink"
   | "cream";
 
-/** Las dos categorías que existen en Tienda Nube. */
-export type Category = "almohadones" | "individuales";
+/** Las categorías de los textiles: las que se ven en /tienda. */
+export type TiendaCategory = "almohadones" | "individuales";
+
+/** Pliego, la línea de escritorio, vive aparte: tiene su página (/pliego) y
+ *  no aparece en /tienda, en la grilla de la home ni en el combo. */
+export type Category = TiendaCategory | "pliego";
 
 export type ProductImage = {
   /** Foto real del catálogo, servida desde /public/productos */

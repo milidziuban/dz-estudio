@@ -145,6 +145,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
           >
             <option value="almohadones">Almohadones</option>
             <option value="individuales">Individuales</option>
+            <option value="pliego">Pliego</option>
           </SelectField>
 
           <TextField
