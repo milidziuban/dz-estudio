@@ -16,6 +16,7 @@ export const pageLoaders = {
   // faq: () => import("../pages/Faq"),
   contacto: () => import("../pages/Contacto"),
   pedido: () => import("../pages/Pedido"),
+  pliego: () => import("../pages/Pliego"),
   notFound: () => import("../pages/NotFound"),
 };
 
@@ -56,6 +57,8 @@ function pageFor(pathname: string): PageKey | null {
       return "contacto";
     case "/pedido":
       return "pedido";
+    case "/pliego":
+      return "pliego";
     default:
       return null;
   }

@@ -8,6 +8,15 @@
   de 2, 30 × 42 cm, gabardina acrílica impermeable). Nada de manteles,
   servilletas, caminos de mesa ni mantas; los totes se pensaron y todavía no
   existen — no inventarlos.
+- **Pliego** (desde el 03/10/2026): la línea de escritorio en acero, "Pliego,
+  de DZ Estudio". Es una marca dentro de la tienda, con identidad propia
+  (paleta "Acero y salvia", Manrope + IBM Plex Mono, logo con la P de hombros
+  redondeados) y un sistema de marca aparte. Primer producto: Soporte 24 y sus
+  accesorios, todavía en prototipo. Vive en `/pliego` (sin marquesina), entra
+  al menú con su logotipo y tiene un bloque en la home. Constantes, medidas y
+  etapa del lanzamiento en `src/lib/pliego.ts`; colores `pliego-*` y fuentes
+  `font-pliego*` en `tailwind.config.js`. Las reglas de diseño de DZ de este
+  archivo no se aplican adentro de Pliego, y las de Pliego no salen de ahí.
 - Público: adultos jóvenes (28-45) con gusto formado, dispuestos a pagar por diseño con criterio
 - País: Argentina — precios en ARS. Desde el 28/09/2026 la tienda entrega de
   dos maneras: retiro gratis en el depósito de Santa Fe Capital, o **envío a
@@ -114,6 +123,9 @@ Ejemplo: `Maximalismo, <em>editado</em>` donde `<em>` va en Instrument Serif ita
 5. **Checkout** — formulario en pasos: contacto → envío → pago (MP + transferencia)
 6. **Contacto** — form + Instagram + WhatsApp + email
 7. **Pedido** — seguimiento de una orden por número y mail
+8. **Pliego** (`/pliego`) — página de la línea de escritorio, sin marquesina:
+   portada, accesorios, plano con medidas, Sistema completo con lista de
+   espera (tabla `newsletter_subscribers`, `source: "pliego"`) y preguntas
 
 Dos que no están en la navegación y no hay que dar por existentes:
 

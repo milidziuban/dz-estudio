@@ -3,6 +3,7 @@ import { useCart } from "../hooks/useCart";
 import { useHideOnScroll } from "../hooks/useHideOnScroll";
 import { cartCount } from "../lib/cart";
 import { cn } from "../lib/cn";
+import PliegoLinkMenu from "./pliego/PliegoLinkMenu";
 
 const NAV_LINKS: { label: string; short?: string; to: string }[] = [
   { label: "Todo", to: "/tienda" },
@@ -18,7 +19,13 @@ const NAV_LINKS: { label: string; short?: string; to: string }[] = [
   },
 ];
 
-export default function Header() {
+type HeaderProps = {
+  /** false en las páginas sin marquesina (Pliego): el header pega arriba de
+   *  todo también en desktop. */
+  conMarquesina?: boolean;
+};
+
+export default function Header({ conMarquesina = true }: HeaderProps) {
   const items = useCart((s) => s.items);
   const openCart = useCart((s) => s.open);
   const count = cartCount(items);
@@ -35,7 +42,8 @@ export default function Header() {
           para que la altura no cambie y el scroll no salte. */}
       <header
         className={cn(
-          "sticky top-0 z-40 border-b bg-cream px-5 py-3 transition-colors sm:px-8 md:top-9 md:border-ink/10 md:py-4 lg:px-12",
+          "sticky top-0 z-40 border-b bg-cream px-5 py-3 transition-colors sm:px-8 md:border-ink/10 md:py-4 lg:px-12",
+          conMarquesina && "md:top-9",
           categories.hidden ? "border-ink/10" : "border-transparent",
         )}
       >
@@ -63,6 +71,7 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
+                <PliegoLinkMenu />
               </div>
             </nav>
 
@@ -122,6 +131,7 @@ export default function Header() {
             {link.short ?? link.label}
           </Link>
         ))}
+        <PliegoLinkMenu mobile />
       </nav>
     </>
   );

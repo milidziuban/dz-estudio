@@ -36,6 +36,7 @@ const OUT = resolve(root, "dist/sitemap.xml");
 const STATIC_PAGES = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/tienda", changefreq: "daily", priority: "0.9" },
+  { path: "/pliego", changefreq: "weekly", priority: "0.8" },
   { path: "/contacto", changefreq: "monthly", priority: "0.5" },
 ];
 

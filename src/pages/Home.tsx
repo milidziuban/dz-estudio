@@ -2,6 +2,7 @@ import Collections from "../components/Collections";
 import FeaturedProducts from "../components/FeaturedProducts";
 import Hero from "../components/Hero";
 import Newsletter from "../components/Newsletter";
+import PliegoBloque from "../components/pliego/PliegoBloque";
 import Seo from "../components/Seo";
 import Values from "../components/Values";
 
@@ -13,6 +14,7 @@ export default function Home() {
       {/* El catálogo va antes que cualquier texto de marca */}
       <FeaturedProducts />
       <Collections />
+      <PliegoBloque />
       <Values />
       {/* Sobre la marca: oculta por el momento a pedido */}
       <Newsletter />

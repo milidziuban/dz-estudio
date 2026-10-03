@@ -20,6 +20,7 @@ const CheckoutError = lazy(pageLoaders.checkoutError);
 // const Faq = lazy(pageLoaders.faq); — oculta, ver lib/routes.ts
 const Contacto = lazy(pageLoaders.contacto);
 const Pedido = lazy(pageLoaders.pedido);
+const Pliego = lazy(pageLoaders.pliego);
 const NotFound = lazy(pageLoaders.notFound);
 
 // Panel de administración: mismo criterio, pero además nunca se precarga.
@@ -55,6 +56,7 @@ export default function App() {
           {/* <Route path="/faq" element={<Faq />} /> — oculta, ver lib/routes.ts */}
           <Route path="/contacto" element={<Contacto />} />
           <Route path="/pedido" element={<Pedido />} />
+          <Route path="/pliego" element={<Pliego />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

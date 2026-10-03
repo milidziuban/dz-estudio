@@ -6,6 +6,7 @@ import PaymentMethods from "./PaymentMethods";
 
 const navItems = [
   { label: "Tienda", to: "/tienda" },
+  { label: "Pliego", to: "/pliego" },
   // { label: "FAQ", to: "/faq" }, — oculta, ver lib/routes.ts
   { label: "Contacto", to: "/contacto" },
   { label: "Seguí tu pedido", to: "/pedido" },
@@ -26,7 +27,8 @@ export default function Footer() {
             className="h-6 w-auto"
           />
           <p className="mt-3 text-sm leading-relaxed text-cream/80">
-            Almohadones e individuales estampados, hechos en Argentina.
+            Almohadones e individuales estampados, hechos en Argentina. Y
+            Pliego, la línea de escritorio.
           </p>
         </div>
 
