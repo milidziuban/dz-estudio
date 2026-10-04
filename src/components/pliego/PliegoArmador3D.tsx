@@ -1128,8 +1128,11 @@ function crearEscena(
   const ro = new ResizeObserver(ajustar);
   ro.observe(contenedor);
   // Fuera de pantalla no se dibuja: la página sigue liviana al scrollear.
-  const io = new IntersectionObserver(([e]) => {
-    visible = e.isIntersecting;
+  // Vale la última entrada: si llegan varias juntas (pasa en el celular al
+  // saltar con el ancla mientras se arma la escena), la primera ya es vieja y
+  // el visor quedaba congelado.
+  const io = new IntersectionObserver((entradas) => {
+    visible = entradas[entradas.length - 1].isIntersecting;
     reloj.getDelta();
   });
   io.observe(contenedor);
