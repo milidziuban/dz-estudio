@@ -3,35 +3,29 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import PliegoArmador from "../components/pliego/PliegoArmador";
 import PliegoCheck from "../components/pliego/PliegoCheck";
-import PliegoCompra from "../components/pliego/PliegoCompra";
 import PliegoDato from "../components/pliego/PliegoDato";
 import PliegoEspera from "../components/pliego/PliegoEspera";
 import PliegoFlecha from "../components/pliego/PliegoFlecha";
-import PliegoPlano from "../components/pliego/PliegoPlano";
 import PliegoPrecio from "../components/pliego/PliegoPrecio";
 import PliegoSubbarra from "../components/pliego/PliegoSubbarra";
 import PliegoTarjeta from "../components/pliego/PliegoTarjeta";
 import Seo from "../components/Seo";
 import { useEnvioNacional } from "../hooks/useEnvioNacional";
 import { useInstallments } from "../hooks/useInstallments";
-import { fotosDe, sumaPorSeparado, usePliego } from "../hooks/usePliego";
+import { fotosDe, usePliego } from "../hooks/usePliego";
 import { useStoreSettings } from "../hooks/useStoreSettings";
 import { envioFraseCorta } from "../lib/envio-texto";
-import { formatPrice } from "../lib/format";
 import {
   DATOS_PORTADA,
   PLIEGO_CARGA_KG,
   PLIEGO_FUENTES,
   SISTEMA,
-  SISTEMA_COMPLETO,
   SOPORTE,
-  datosMedidas,
   rutaPieza,
 } from "../lib/pliego";
 import {
   ancla,
   botonPrimario,
-  botonSecundario,
   contenedor,
   paginaPliego,
   rotulo,
@@ -106,12 +100,6 @@ export default function Pliego() {
   const accesorios = items.filter((i) => i.pieza.tipo === "accesorio");
   const fotoSoporte = fotosDe(soporte)[0];
   const enEspera = soporte.estado === "espera";
-
-  const separado = sumaPorSeparado(items);
-  const ahorro =
-    separado !== null && sistema.producto
-      ? separado - sistema.producto.price
-      : null;
 
   const preguntas: { q: string; a: string }[] = [
     {
@@ -392,83 +380,6 @@ export default function Pliego() {
       {/* Armador: los accesorios puestos en el soporte, en 3D */}
       <section id="armar" className={`${contenedor} ${ancla} py-16 md:py-24`}>
         <PliegoArmador items={items} />
-      </section>
-
-      {/* Sistema completo */}
-      <section id="sistema" className={`${contenedor} ${ancla} py-16 md:py-24`}>
-        <div className="flex flex-wrap gap-6 lg:gap-8">
-          <div className="flex min-w-0 flex-[999_1_480px] flex-col gap-6 rounded-[10px] bg-pliego-salvia-suave p-6 md:p-12">
-            <div className="flex flex-col gap-2">
-              <p className={`${rotulo} text-pliego-salvia-texto`}>Sistema completo</p>
-              <h2 className={tituloSeccion}>Todo el escritorio, de una vez</h2>
-              <p>{SISTEMA.bajada}</p>
-            </div>
-            <ul className="grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
-              {SISTEMA_COMPLETO.map((parte) => (
-                <li key={parte.slug}>
-                  <Link
-                    to={rutaPieza(parte.slug)}
-                    className="flex items-center gap-2.5 hover:underline"
-                  >
-                    <PliegoCheck />
-                    {parte.nombre}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            {ahorro !== null && ahorro > 0 && separado !== null && (
-              <p className="border-t border-pliego-salvia pt-5 text-pliego-salvia-texto">
-                Por separado suman {formatPrice(separado)}: en el sistema
-                ahorrás {formatPrice(ahorro)}.
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-[1_1_340px] flex-col justify-center gap-5 rounded-[10px] border border-pliego-linea bg-pliego-superficie p-6 md:p-10">
-            <PliegoCompra item={sistema} />
-            <div className="flex flex-col gap-3 border-t border-pliego-linea pt-5">
-              <Link to={rutaPieza(SISTEMA.slug)} className={botonSecundario}>
-                Ver el Sistema completo
-              </Link>
-              <Link
-                to={rutaPieza(SOPORTE.slug)}
-                className="text-center text-[15px] font-medium text-pliego-salvia-texto underline underline-offset-4"
-              >
-                Prefiero empezar por el soporte
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Medidas */}
-      <section id="medidas" className={`${contenedor} ${ancla} py-16 md:py-24`}>
-        <div className="flex flex-wrap gap-x-14 gap-y-10 rounded-[10px] border border-pliego-linea bg-pliego-superficie p-6 md:p-12">
-          <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-8">
-            <div className="flex flex-col gap-2">
-              <h2 className={tituloSeccion}>Medidas</h2>
-              <p className="text-pliego-tinta-suave">
-                Antes de comprar, medí la base de tu monitor: tiene que entrar
-                en la superficie del soporte.
-              </p>
-            </div>
-            <PliegoPlano />
-          </div>
-          <dl className="flex flex-[1_1_280px] flex-col">
-            {datosMedidas().map((dato, i, todos) => (
-              <PliegoDato
-                key={dato.rotulo}
-                rotulo={dato.rotulo}
-                valor={dato.valor}
-                className={
-                  i < todos.length - 1
-                    ? "border-b border-pliego-linea py-3.5"
-                    : "py-3.5"
-                }
-              />
-            ))}
-          </dl>
-        </div>
       </section>
 
       {/* Preguntas frecuentes */}

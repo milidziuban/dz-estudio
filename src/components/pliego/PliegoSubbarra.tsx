@@ -8,8 +8,6 @@ const SECCIONES = [
   { id: "soporte", label: "Soporte 24" },
   { id: "accesorios", label: "Accesorios" },
   { id: "armar", label: "Armalo" },
-  { id: "sistema", label: "Sistema" },
-  { id: "medidas", label: "Medidas" },
   { id: "preguntas", label: "Preguntas" },
 ];
 
