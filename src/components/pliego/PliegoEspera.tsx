@@ -67,7 +67,11 @@ export default function PliegoEspera({
         >
           <label
             htmlFor={inputId}
-            className={compacta ? "sr-only" : "text-[13px] leading-5 text-pliego-tinta-suave"}
+            className={cn(
+              "text-[13px] leading-5 text-pliego-tinta-suave",
+              // En una fila, el rótulo va solo arriba del campo y el botón.
+              compacta && "-mb-1 basis-full",
+            )}
           >
             Tu mail
           </label>

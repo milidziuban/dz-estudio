@@ -48,9 +48,15 @@ export default {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-50%)" },
         },
+        // Pliego: la portada entra una sola vez, de abajo hacia arriba.
+        "pliego-entrar": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         marquee: "marquee 28s linear infinite",
+        "pliego-entrar": "pliego-entrar 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
     },
   },

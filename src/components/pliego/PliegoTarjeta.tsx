@@ -1,23 +1,29 @@
 import { Link } from "react-router-dom";
 import { fotosDe, type PliegoItem } from "../../hooks/usePliego";
+import { cn } from "../../lib/cn";
 import { rutaPieza } from "../../lib/pliego";
 import PliegoFlecha from "./PliegoFlecha";
 import PliegoPrecio from "./PliegoPrecio";
 
 type PliegoTarjetaProps = {
   item: PliegoItem;
+  /** Para ubicarla en la grilla (cuántas columnas ocupa). */
+  className?: string;
 };
 
 /** Una pieza en la grilla: foto, nombre, para qué sirve y precio. Toda la
  *  tarjeta lleva a su ficha. */
-export default function PliegoTarjeta({ item }: PliegoTarjetaProps) {
+export default function PliegoTarjeta({ item, className }: PliegoTarjetaProps) {
   const { pieza } = item;
   const foto = fotosDe(item)[0];
 
   return (
     <Link
       to={rutaPieza(pieza.slug)}
-      className="group flex flex-col overflow-hidden rounded-[10px] border border-pliego-linea bg-pliego-superficie transition-colors hover:border-pliego-piedra"
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-[10px] border border-pliego-linea bg-pliego-superficie transition-colors hover:border-pliego-piedra",
+        className,
+      )}
     >
       <div className="overflow-hidden bg-pliego-linea">
         <img

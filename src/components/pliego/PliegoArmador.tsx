@@ -177,7 +177,6 @@ export default function PliegoArmador({ items }: PliegoArmadorProps) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex max-w-xl flex-col gap-2">
-        <p className={`${rotulo} text-pliego-tinta-suave`}>Armador</p>
         <h2 className={tituloSeccion}>Armalo a tu manera</h2>
         <p className="text-pliego-tinta-suave">
           Tocá un accesorio para ponerlo en el soporte y elegí en qué ranura va.
