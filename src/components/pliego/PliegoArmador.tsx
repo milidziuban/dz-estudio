@@ -186,11 +186,14 @@ export default function PliegoArmador({ items }: PliegoArmadorProps) {
 
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr] lg:gap-8">
         {/* Visor. En el celular queda pegado arriba mientras se tocan los
-            accesorios de abajo: si no, el cambio pasa fuera de la pantalla. */}
+            accesorios de abajo: si no, el cambio pasa fuera de la pantalla.
+            En escritorio ocupa el alto de la pantalla (menos la subbarra y
+            el rótulo de abajo): la lista de la derecha es más alta que la
+            pantalla, y así el visor la acompaña entera al bajar. */}
         <div className="sticky top-16 z-10 -mx-5 flex flex-col gap-2 bg-pliego-fondo px-5 pb-3 pt-3 sm:-mx-8 sm:px-8 md:top-[4.5rem] lg:top-36 lg:mx-0 lg:gap-3 lg:self-start lg:px-0 lg:pb-0 lg:pt-0">
           <div
             ref={visorRef}
-            className="relative aspect-[16/11] overflow-hidden rounded-[10px] border border-pliego-linea bg-pliego-superficie md:aspect-[16/10]"
+            className="relative aspect-[16/11] overflow-hidden rounded-[10px] border border-pliego-linea bg-pliego-superficie md:aspect-[16/10] lg:aspect-auto lg:h-[calc(100svh-12.5rem)] lg:max-h-[860px] lg:min-h-[440px]"
           >
             {sin3d ? (
               <img
