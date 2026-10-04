@@ -130,7 +130,7 @@ export default function Pliego() {
           foto va entre el titular y el texto, así se ve el producto sin bajar. */}
       <section className={`${contenedor} pb-16 pt-8 md:pb-24 lg:pt-10`}>
         <div className="grid gap-8 lg:grid-cols-12 lg:items-start lg:gap-x-12 lg:gap-y-8">
-          <div className="flex flex-col items-start gap-5 motion-safe:animate-pliego-entrar lg:order-1 lg:col-span-5">
+          <div className="flex flex-col items-start gap-5 motion-safe:animate-pliego-entrar lg:order-1 lg:col-span-6">
             <p className={`${rotulo} flex flex-wrap items-center gap-3 text-pliego-tinta-suave`}>
               Soporte 24 · Acero plegado
               {enEspera && (
@@ -143,6 +143,12 @@ export default function Pliego() {
               Tu escritorio,{" "}
               <span className="whitespace-nowrap">más ordenado.</span>
             </h1>
+            <a
+              href="#armar"
+              className="inline-flex min-h-11 items-center gap-2 self-start text-[15px] font-medium text-pliego-salvia-texto"
+            >
+              Probalo en 3D <PliegoFlecha />
+            </a>
           </div>
           <img
             src="/pliego/soporte-24-escritorio.webp"
@@ -152,8 +158,8 @@ export default function Pliego() {
             fetchpriority="high"
             className="block aspect-[2.12/1] w-full rounded-[10px] bg-pliego-linea object-cover object-[50%_40%] [animation-delay:120ms] motion-safe:animate-pliego-entrar lg:order-3 lg:col-span-12 lg:aspect-[2.8/1]"
           />
-          <div className="flex flex-col gap-4 motion-safe:animate-pliego-entrar lg:order-2 lg:col-span-7">
-            <p className="max-w-[60ch] text-lg leading-[29px]">
+          <div className="flex flex-col gap-4 motion-safe:animate-pliego-entrar lg:order-2 lg:col-span-6">
+            <p className="max-w-[60ch] text-balance text-lg leading-[29px]">
               Soporte de monitor de acero, con accesorios que encastran en sus
               ranuras.
             </p>
@@ -169,12 +175,6 @@ export default function Pliego() {
                 {soporte.estado === "venta" ? "Comprar el Soporte 24" : "Ver el Soporte 24"}
               </Link>
             )}
-            <a
-              href="#armar"
-              className="inline-flex min-h-11 items-center gap-2 self-start text-[15px] font-medium text-pliego-salvia-texto"
-            >
-              Probalo en 3D <PliegoFlecha />
-            </a>
           </div>
         </div>
       </section>
