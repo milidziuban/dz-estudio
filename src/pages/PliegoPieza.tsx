@@ -29,7 +29,7 @@ import {
   rutaPieza,
   type PliegoTipo,
 } from "../lib/pliego";
-import { contenedor, paginaPliego, rotulo, tituloSeccion } from "../lib/pliego-clases";
+import { ancla, contenedor, paginaPliego, rotulo, tituloSeccion } from "../lib/pliego-clases";
 import { SITE } from "../lib/site";
 import {
   breadcrumbJsonLd,
@@ -275,7 +275,7 @@ export default function PliegoPieza() {
         {pieza.tipo === "soporte" && (
           <section
             id="medidas"
-            className="mt-16 flex scroll-mt-28 flex-wrap gap-x-14 gap-y-10 rounded-[10px] border border-pliego-linea bg-pliego-superficie p-6 md:mt-24 md:p-12"
+            className={`mt-16 flex ${ancla} flex-wrap gap-x-14 gap-y-10 rounded-[10px] border border-pliego-linea bg-pliego-superficie p-6 md:mt-24 md:p-12`}
           >
             <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-8">
               <div className="flex flex-col gap-2">
@@ -315,10 +315,11 @@ export default function PliegoPieza() {
                   : "Las piezas, una por una"}
             </h2>
             <Link
-              to={`${PLIEGO_PATH}#accesorios`}
+              to={`${PLIEGO_PATH}#${pieza.tipo === "sistema" ? "accesorios" : "armar"}`}
               className="inline-flex items-center gap-2 font-medium text-pliego-salvia-texto"
             >
-              Ver todo Pliego <PliegoFlecha />
+              {pieza.tipo === "sistema" ? "Ver todo Pliego" : "Armalo en 3D"}{" "}
+              <PliegoFlecha />
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">

@@ -12,7 +12,14 @@ type PliegoPrecioProps = {
 export default function PliegoPrecio({ item, className }: PliegoPrecioProps) {
   const { producto, estado } = item;
   return (
-    <p className={cn("font-pliego-mono", className)}>
+    <p
+      className={cn(
+        "font-pliego-mono",
+        // Sin precio todavía, el rótulo no compite con el nombre de la pieza.
+        !producto && "text-pliego-tinta-suave",
+        className,
+      )}
+    >
       {producto ? formatPrice(producto.price) : "Próximamente"}
       {estado === "agotada" && (
         <span className="text-pliego-tinta-suave"> · Sin stock</span>

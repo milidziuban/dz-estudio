@@ -18,6 +18,19 @@
         "preview"
       ],
       "port": 4173
+    },
+    {
+      "name": "dz-estudio-alt",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5180",
+        "--strictPort"
+      ],
+      "port": 5180
     }
   ]
 }

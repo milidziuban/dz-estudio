@@ -22,3 +22,8 @@ export const tituloSeccion = "text-[28px] font-medium leading-[34px]";
 /** El fondo de toda página de Pliego. */
 export const paginaPliego =
   "bg-pliego-fondo pb-4 font-pliego text-base leading-[26px] text-pliego-tinta";
+
+/** Las secciones a las que se salta desde la subbarra. En escritorio la
+ *  subbarra queda fija debajo del header, así que el salto deja lugar para
+ *  los dos (72 + 57 px). */
+export const ancla = "scroll-mt-28 lg:scroll-mt-40";

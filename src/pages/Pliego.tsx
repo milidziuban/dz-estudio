@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import PliegoArmador from "../components/pliego/PliegoArmador";
 import PliegoCheck from "../components/pliego/PliegoCheck";
 import PliegoCompra from "../components/pliego/PliegoCompra";
 import PliegoDato from "../components/pliego/PliegoDato";
+import PliegoEspera from "../components/pliego/PliegoEspera";
 import PliegoFlecha from "../components/pliego/PliegoFlecha";
 import PliegoPlano from "../components/pliego/PliegoPlano";
 import PliegoPrecio from "../components/pliego/PliegoPrecio";
@@ -27,6 +29,7 @@ import {
   rutaPieza,
 } from "../lib/pliego";
 import {
+  ancla,
   botonPrimario,
   botonSecundario,
   contenedor,
@@ -102,6 +105,7 @@ export default function Pliego() {
   const sistema = item(SISTEMA.slug)!;
   const accesorios = items.filter((i) => i.pieza.tipo === "accesorio");
   const fotoSoporte = fotosDe(soporte)[0];
+  const enEspera = soporte.estado === "espera";
 
   const separado = sumaPorSeparado(items);
   const ahorro =
@@ -170,8 +174,13 @@ export default function Pliego() {
       <section className={`${contenedor} pb-12 pt-10 md:pb-16 md:pt-14`}>
         <div className="grid items-end gap-8 md:grid-cols-2 md:gap-14">
           <div className="flex flex-col gap-4">
-            <p className={`${rotulo} text-pliego-tinta-suave`}>
+            <p className={`${rotulo} flex flex-wrap items-center gap-3 text-pliego-tinta-suave`}>
               Soporte 24 · Acero plegado
+              {enEspera && (
+                <span className="rounded-sm bg-pliego-salvia-suave px-2 py-1 text-pliego-salvia-texto">
+                  Próximamente
+                </span>
+              )}
             </p>
             <h1 className="text-[40px] font-medium leading-[1.08] tracking-[-0.015em] lg:text-[60px]">
               Tu escritorio, más claro.
@@ -183,19 +192,44 @@ export default function Pliego() {
               Los accesorios encastran en sus ranuras y se cambian en segundos.
               Sin tornillos.
             </p>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link to={rutaPieza(SOPORTE.slug)} className={botonPrimario}>
-                {soporte.estado === "venta"
-                  ? "Comprar el Soporte 24"
-                  : "Ver el Soporte 24"}
-              </Link>
-              <a
-                href="#accesorios"
-                className="inline-flex min-h-12 items-center text-[15px] font-medium underline underline-offset-4"
-              >
-                Ver accesorios
-              </a>
-            </div>
+            {/* Antes del lanzamiento lo que se puede hacer acá es anotarse:
+                el botón de compra recién aparece al final de la ficha. */}
+            {enEspera ? (
+              <div className="flex flex-col gap-1">
+                <PliegoEspera
+                  compacta
+                  texto="Todavía no está a la venta. Dejá tu mail y te avisamos cuando salgan las primeras unidades."
+                />
+                <div className="flex flex-wrap gap-x-6">
+                  <Link
+                    to={rutaPieza(SOPORTE.slug)}
+                    className="inline-flex min-h-11 items-center text-[15px] font-medium underline underline-offset-4"
+                  >
+                    Ver el Soporte 24
+                  </Link>
+                  <a
+                    href="#accesorios"
+                    className="inline-flex min-h-11 items-center text-[15px] font-medium underline underline-offset-4"
+                  >
+                    Ver accesorios
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <Link to={rutaPieza(SOPORTE.slug)} className={botonPrimario}>
+                  {soporte.estado === "venta"
+                    ? "Comprar el Soporte 24"
+                    : "Ver el Soporte 24"}
+                </Link>
+                <a
+                  href="#accesorios"
+                  className="inline-flex min-h-12 items-center text-[15px] font-medium underline underline-offset-4"
+                >
+                  Ver accesorios
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -244,7 +278,7 @@ export default function Pliego() {
       </section>
 
       {/* La base: el Soporte 24 */}
-      <section id="soporte" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
+      <section id="soporte" className={`${contenedor} ${ancla} py-16 md:py-24`}>
         <div className="grid overflow-hidden rounded-[10px] border border-pliego-linea bg-pliego-superficie md:grid-cols-[3fr_2fr]">
           <Link to={rutaPieza(SOPORTE.slug)} className="group overflow-hidden bg-pliego-linea">
             <img
@@ -292,13 +326,19 @@ export default function Pliego() {
       </section>
 
       {/* Accesorios */}
-      <section id="accesorios" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
+      <section id="accesorios" className={`${contenedor} ${ancla} py-16 md:py-24`}>
         <div className="mb-8 flex max-w-xl flex-col gap-2">
           <h2 className={tituloSeccion}>Accesorios que encastran</h2>
           <p className="text-pliego-tinta-suave">
             Calzan en cualquier ranura del Soporte 24 y se cambian de lugar sin
             herramientas. Usá los que necesites hoy y sumá otros después.
           </p>
+          <a
+            href="#armar"
+            className="inline-flex min-h-11 items-center gap-2 self-start font-medium text-pliego-salvia-texto"
+          >
+            Probalos en el soporte, en 3D <PliegoFlecha />
+          </a>
         </div>
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
@@ -330,7 +370,7 @@ export default function Pliego() {
         </div>
       </section>
 
-      {/* Cómo encastra */}
+      {/* Cómo encastra: va antes del armador, que es donde se prueba */}
       <section className={`${contenedor} py-16 md:py-24`}>
         <h2 className={`mb-8 ${tituloSeccion}`}>Cambiás el escritorio en segundos</h2>
         <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
@@ -349,8 +389,13 @@ export default function Pliego() {
         </ol>
       </section>
 
+      {/* Armador: los accesorios puestos en el soporte, en 3D */}
+      <section id="armar" className={`${contenedor} ${ancla} py-16 md:py-24`}>
+        <PliegoArmador items={items} />
+      </section>
+
       {/* Sistema completo */}
-      <section id="sistema" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
+      <section id="sistema" className={`${contenedor} ${ancla} py-16 md:py-24`}>
         <div className="flex flex-wrap gap-6 lg:gap-8">
           <div className="flex min-w-0 flex-[999_1_480px] flex-col gap-6 rounded-[10px] bg-pliego-salvia-suave p-6 md:p-12">
             <div className="flex flex-col gap-2">
@@ -383,7 +428,7 @@ export default function Pliego() {
             <PliegoCompra item={sistema} />
             <div className="flex flex-col gap-3 border-t border-pliego-linea pt-5">
               <Link to={rutaPieza(SISTEMA.slug)} className={botonSecundario}>
-                Ver qué trae
+                Ver el Sistema completo
               </Link>
               <Link
                 to={rutaPieza(SOPORTE.slug)}
@@ -397,7 +442,7 @@ export default function Pliego() {
       </section>
 
       {/* Medidas */}
-      <section id="medidas" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
+      <section id="medidas" className={`${contenedor} ${ancla} py-16 md:py-24`}>
         <div className="flex flex-wrap gap-x-14 gap-y-10 rounded-[10px] border border-pliego-linea bg-pliego-superficie p-6 md:p-12">
           <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-8">
             <div className="flex flex-col gap-2">
@@ -427,7 +472,7 @@ export default function Pliego() {
       </section>
 
       {/* Preguntas frecuentes */}
-      <section id="preguntas" className={`${contenedor} scroll-mt-28 py-16 md:py-24`}>
+      <section id="preguntas" className={`${contenedor} ${ancla} py-16 md:py-24`}>
         <div className="flex flex-wrap gap-x-16 gap-y-6">
           <h2 className={`flex-[1_1_280px] ${tituloSeccion}`}>Preguntas frecuentes</h2>
           <div className="min-w-0 flex-[999_1_560px] border-t border-pliego-linea">
