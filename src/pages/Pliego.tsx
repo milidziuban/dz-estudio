@@ -197,31 +197,29 @@ export default function Pliego() {
             />
           </Link>
 
-          <div className="flex flex-col gap-10 lg:col-span-5">
-            <div className="flex flex-col gap-3">
-              <h2 className="text-[36px] font-medium leading-[1.1] tracking-[-0.02em] lg:text-[44px]">
-                <Link to={rutaPieza(SOPORTE.slug)} className="hover:underline">
-                  {SOPORTE.nombre}
-                </Link>
+          <div className="flex flex-col gap-7 lg:col-span-5">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-[32px] font-medium leading-[1.1] tracking-[-0.02em] lg:text-[38px]">
+                {SOPORTE.nombre}
               </h2>
-              <p className="text-lg leading-[29px] text-pliego-tinta-suave">
+              <p className="text-[17px] leading-[27px] text-pliego-tinta-suave">
                 {SOPORTE.bajada}
               </p>
             </div>
 
-            <dl className="flex flex-col gap-6">
+            <dl className="flex flex-col gap-4">
               {BENEFICIOS.map((b) => (
                 <div
                   key={b.titulo}
-                  className="flex flex-col gap-1.5 border-t border-pliego-linea pt-5"
+                  className="flex flex-col gap-1 border-t border-pliego-linea pt-4"
                 >
-                  <dt className="text-xl font-medium leading-7">{b.titulo}</dt>
-                  <dd className="text-pliego-tinta-suave">{b.texto}</dd>
+                  <dt className="text-lg font-medium leading-6">{b.titulo}</dt>
+                  <dd className="text-[15px] leading-6 text-pliego-tinta-suave">{b.texto}</dd>
                 </div>
               ))}
             </dl>
 
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-5 rounded-[10px] bg-pliego-superficie p-5">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-[10px] bg-pliego-superficie p-4">
               {DATOS_PORTADA.map((dato) => (
                 <PliegoDato key={dato.rotulo} rotulo={dato.rotulo} valor={dato.valor} />
               ))}
@@ -296,19 +294,6 @@ export default function Pliego() {
               })}
             </div>
           </Link>
-        </div>
-      </section>
-
-      {/* Cómo encastra: va antes del armador, que es donde se prueba */}
-      <section className={`${contenedor} py-16 md:py-24`}>
-        <div className="flex max-w-4xl flex-col gap-5 border-t border-pliego-tinta pt-10">
-          <h2 className="text-[30px] font-medium leading-[1.2] tracking-[-0.015em] md:text-[40px]">
-            Elegí una ranura, calzá el accesorio y movelo cuando quieras.
-          </h2>
-          <p className="max-w-[60ch] text-lg leading-[29px] text-pliego-tinta-suave">
-            La lengüeta entra en la ranura y el accesorio queda firme, sin
-            tornillos. Adelante va lo que usás todo el día; atrás, los cables.
-          </p>
         </div>
       </section>
 
