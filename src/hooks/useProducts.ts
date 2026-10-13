@@ -43,7 +43,7 @@ type ProductRow = {
  *  `grant select (…) to anon` de la base: pedir una columna de más falla, y
  *  la tienda se cae al catálogo espejo. */
 // prettier-ignore
-const COLUMNAS_PUBLICAS = "id,slug,name,category,colors,price,description,medidas,peso,peso_gramos,material,cuidados,variants,images,in_stock,stock";
+const COLUMNAS_PUBLICAS = "id,slug,name,category,colors,price,description,medidas,peso,peso_gramos,material,cuidados,variants,images,in_stock,stock,orden";
 
 function mapVariant(row: ProductVariantRow): ProductVariant {
   return {
@@ -86,10 +86,13 @@ export function useProducts() {
         // está recortado en la base (migración `costo_fuera_de_la_tienda`),
         // que es lo que lo hace de verdad — este `select` es el que hace que
         // la consulta siga siendo válida.
+        // En el orden que se arma desde el panel (/admin/productos): la
+        // grilla de la home lo sigue tal cual y /tienda lo usa por defecto.
         const { data, error } = await supabase
           .from("products")
           .select(COLUMNAS_PUBLICAS)
-          .order("id");
+          .order("orden")
+          .order("id", { ascending: false });
         if (error) throw error;
         if (data?.length) return (data as ProductRow[]).map(mapRow);
       } catch (error) {

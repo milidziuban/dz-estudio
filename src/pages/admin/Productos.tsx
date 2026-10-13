@@ -15,6 +15,7 @@ import {
   useAdminProducts,
   useDeleteProduct,
   useQuickUpdateProduct,
+  useReorderProducts,
   useSaveProduct,
 } from "../../hooks/useAdminProducts";
 import { useStoreSettings } from "../../hooks/useStoreSettings";
@@ -134,6 +135,7 @@ export default function AdminProductos() {
   const saveProduct = useSaveProduct();
   const deleteProduct = useDeleteProduct();
   const quickUpdate = useQuickUpdateProduct();
+  const reorder = useReorderProducts();
   const { data: settings } = useStoreSettings();
 
   const [busqueda, setBusqueda] = useState("");
@@ -185,6 +187,23 @@ export default function AdminProductos() {
     () => (products.data ?? []).filter((product) => isLowStock(product, lowStock)).length,
     [products.data, lowStock],
   );
+
+  /** Cambia de lugar un producto con el de al lado en la lista que se ve.
+   *  Con un filtro puesto, "al lado" es el vecino visible: el cambio se hace
+   *  igual sobre el catálogo entero, así que el resto no se mueve. */
+  const mover = (product: AdminProduct, paso: -1 | 1) => {
+    const vecino = visibles[visibles.indexOf(product) + paso];
+    if (!vecino) return;
+    const ids = (products.data ?? []).map((p) => p.id);
+    const a = ids.indexOf(product.id);
+    const b = ids.indexOf(vecino.id);
+    [ids[a], ids[b]] = [ids[b], ids[a]];
+    reorder.mutate(ids);
+  };
+
+  // Las flechas solo tienen sentido sobre el orden de la tienda: con la
+  // tabla ordenada por nombre, precio o stock, "arriba" sería otra cosa.
+  const puedeOrdenar = sort === null;
 
   const guardar = async () => {
     if (!draft) return;
@@ -251,7 +270,7 @@ export default function AdminProductos() {
             </em>
           </>
         }
-        description="Precios, stock y fichas. Lo que guardás acá es lo que ve la tienda."
+        description="Precios, stock y fichas. Lo que guardás acá es lo que ve la tienda, y en el mismo orden: las flechas suben o bajan cada producto."
       >
         <Button
           className="px-6 py-3"
@@ -334,6 +353,7 @@ export default function AdminProductos() {
 
       <AdminTable
         columns={[
+          { label: "Orden" },
           { label: "Producto", sortKey: "name" },
           { label: "Categoría", hideOnMobile: true },
           { label: "Precio", align: "right", sortKey: "price" },
@@ -351,11 +371,36 @@ export default function AdminProductos() {
             : "El catálogo está vacío. Cargá el primer producto."
         }
       >
-        {visibles.map((product) => (
+        {visibles.map((product, index) => (
           <tr
             key={product.id}
             className="border-b border-ink/[0.06] transition-colors last:border-0 hover:bg-ink/[0.02]"
           >
+            <td className="w-0 px-2 py-3 sm:px-4">
+              <div
+                className={cn("flex flex-col items-center", !puedeOrdenar && "invisible")}
+              >
+                {(
+                  [
+                    [-1, "↑", "Subir", index === 0],
+                    [1, "↓", "Bajar", index === visibles.length - 1],
+                  ] as const
+                ).map(([paso, flecha, accion, tope]) => (
+                  <button
+                    key={paso}
+                    type="button"
+                    disabled={tope || reorder.isPending}
+                    onClick={() => mover(product, paso)}
+                    aria-label={`${accion} ${product.name} en el orden de la tienda`}
+                    title={`${accion} en el orden de la tienda`}
+                    className="flex h-6 w-7 items-center justify-center rounded-md font-mono text-sm text-ink/65 transition-colors hover:bg-ink/[0.06] hover:text-ink disabled:pointer-events-none disabled:opacity-25"
+                  >
+                    {flecha}
+                  </button>
+                ))}
+              </div>
+            </td>
+
             <td className="px-4 py-3">
               <div className="flex items-center gap-3">
                 <div

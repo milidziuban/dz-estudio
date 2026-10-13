@@ -41,6 +41,7 @@ type AdminProductRow = {
   sku: string | null;
   cost: number | null;
   is_bundle: boolean;
+  orden: number;
 };
 
 function mapProduct(row: AdminProductRow): AdminProduct {
@@ -64,6 +65,7 @@ function mapProduct(row: AdminProductRow): AdminProduct {
     sku: row.sku,
     cost: row.cost,
     isBundle: row.is_bundle,
+    orden: row.orden,
   };
 }
 
@@ -76,6 +78,7 @@ export function useAdminProducts() {
       const { data, error } = await supabase
         .from("products")
         .select("*")
+        .order("orden")
         .order("id", { ascending: false });
       if (error) throw error;
       return (data as AdminProductRow[]).map(mapProduct);
@@ -197,9 +200,23 @@ export function useSaveProduct() {
         if (error) throw error;
         if (data) row = conservarStock(draft, data as StockActual);
       }
+      // Un producto nuevo entra primero en el orden de la tienda, como pasaba
+      // cuando se ordenaba por novedades. Al editar, `orden` no viaja en el
+      // upsert y la base conserva el que tenía.
+      let orden: { orden?: number } = {};
+      if (draft.id === null) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("orden")
+          .order("orden")
+          .limit(1)
+          .maybeSingle();
+        if (error) throw error;
+        orden = { orden: ((data as { orden: number } | null)?.orden ?? 1) - 1 };
+      }
       const { error } = await supabase
         .from("products")
-        .upsert(rowFromDraft(row), { onConflict: "id" });
+        .upsert({ ...rowFromDraft(row), ...orden }, { onConflict: "id" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -255,6 +272,54 @@ export function useQuickUpdateProduct() {
       if (error) throw error;
     },
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+      void queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+}
+
+/** Guarda el orden de la tienda: recibe los ids en el orden nuevo y le da a
+ *  cada uno su lugar. Son pocos productos, así que va un update por fila. */
+export function useReorderProducts() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ids: number[]) => {
+      const results = await Promise.all(
+        ids.map((id, index) =>
+          supabase.from("products").update({ orden: index + 1 }).eq("id", id),
+        ),
+      );
+      const failed = results.find((result) => result.error);
+      if (failed?.error) throw failed.error;
+    },
+    onMutate: async (ids) => {
+      // Se mueve en pantalla al toque; si falla, onError lo devuelve.
+      await queryClient.cancelQueries({ queryKey: ["admin", "products"] });
+      const previous = queryClient.getQueryData<AdminProduct[]>([
+        "admin",
+        "products",
+      ]);
+      if (previous) {
+        const lugar = new Map(ids.map((id, index) => [id, index + 1]));
+        queryClient.setQueryData<AdminProduct[]>(
+          ["admin", "products"],
+          previous
+            .map((product) => ({
+              ...product,
+              orden: lugar.get(product.id) ?? product.orden,
+            }))
+            .sort((a, b) => a.orden - b.orden),
+        );
+      }
+      return { previous };
+    },
+    onError: (_error, _ids, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["admin", "products"], context.previous);
+      }
+    },
+    onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
       void queryClient.invalidateQueries({ queryKey: ["products"] });
     },

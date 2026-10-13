@@ -33,9 +33,10 @@ const CATEGORY_LINKS: { id: CategoriaActiva; label: string; to: string }[] = [
   })),
 ];
 
-type SortId = "novedades" | "precio-asc" | "precio-desc";
+type SortId = "destacados" | "novedades" | "precio-asc" | "precio-desc";
 
 const SORT_OPTIONS: { id: SortId; label: string }[] = [
+  { id: "destacados", label: "Destacados" },
   { id: "novedades", label: "Novedades" },
   { id: "precio-asc", label: "Precio: menor a mayor" },
   { id: "precio-desc", label: "Precio: mayor a menor" },
@@ -45,7 +46,7 @@ export default function Tienda() {
   const { data: products = [], isLoading, isError, refetch } = useProducts();
   const [searchParams] = useSearchParams();
   const categoria = categoriaFromParam(searchParams.get("categoria"));
-  const [sort, setSort] = useState<SortId>("novedades");
+  const [sort, setSort] = useState<SortId>("destacados");
 
   const visible = useMemo(() => {
     // Pliego tiene su propia página: acá no aparece ni en "Todo".
@@ -57,6 +58,9 @@ export default function Tienda() {
 
     const sorted = [...filtered];
     switch (sort) {
+      case "destacados":
+        // Ya viene en el orden que se arma en /admin/productos
+        break;
       case "novedades":
         // El id de Tienda Nube crece con el alta: mayor id = más nuevo
         sorted.sort((a, b) => b.id - a.id);
