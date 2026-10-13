@@ -25,6 +25,9 @@ export type AdminProduct = Omit<Product, "variants"> & {
    *  el precio de lista sugerido en /admin/precios le aplica el descuento
    *  por combo directo, en vez de esperar a que el cliente lleve 2. */
   isBundle: boolean;
+  /** Lugar en el orden de la tienda (home y /tienda): menor va antes. Se
+   *  arma con las flechas del listado de /admin/productos. */
+  orden: number;
 };
 
 /** Estado del pago. Lo escribe el webhook de Mercado Pago o el panel. */
