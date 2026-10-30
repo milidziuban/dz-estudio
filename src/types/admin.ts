@@ -142,18 +142,41 @@ export type PageView = {
   referrer: string | null;
   sessionId: string;
   isNewSession: boolean;
+  /** Origen de la visita, solo en la primera vista de la sesión y desde el
+   *  30/10/2026 (ver `lib/origen.ts`). */
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  clickId: string | null;
+  app: string | null;
+  device: string | null;
 };
 
-/** Los dos pasos del medio del embudo. Comparten `sessionId` con `PageView`,
+/** Lo que pasa adentro de la tienda. Comparten `sessionId` con `PageView`,
  *  que es lo que permite contar por sesión y no por evento suelto. */
 export type StoreEvent = {
   createdAt: string;
-  kind: "add_to_cart" | "begin_checkout";
+  kind:
+    | "add_to_cart"
+    | "begin_checkout"
+    | "view_item"
+    | "checkout_step"
+    | "order_created"
+    | "checkout_error"
+    | "contact_click"
+    | "filter"
+    | "scroll";
   sessionId: string;
-  /** Solo en `add_to_cart`: en el checkout el carrito puede tener varios */
+  /** El producto, cuando el evento es de uno solo */
   slug: string | null;
+  /** Unidades; en `scroll`, el porcentaje alcanzado */
   qty: number | null;
   value: number | null;
+  /** Dónde pasó (desde el 30/10/2026) */
+  path: string | null;
+  /** El dato chico: el paso del checkout, el filtro, el canal */
+  detail: string | null;
 };
 
 // ── store_settings ────────────────────────────────────────────

@@ -50,6 +50,25 @@ export function pedirDatosWhatsappUrl(
   ]);
 }
 
+/**
+ * Desde la ficha: la duda de antes de comprar. La más común —"¿combina con lo
+ * que tengo?"— se contesta con una foto, así que el mensaje ya la pide. Si el
+ * producto está agotado, el mensaje es para que avisen cuando vuelva.
+ */
+export function productoWhatsappUrl(
+  nombre: string,
+  agotado: boolean,
+): string {
+  return build(
+    agotado
+      ? [`¡Hola DZ Estudio! Vi que se agotó ${nombre}. ¿Me avisás cuando vuelva?`]
+      : [
+          `¡Hola DZ Estudio! Estoy mirando ${nombre}.`,
+          "Te mando una foto de donde lo pondría, ¿me decís si combina?",
+        ],
+  );
+}
+
 /** Pedido armado desde el carrito, sin pasar por el checkout. */
 export function cartWhatsappUrl(
   items: ResolvedCartItem[],

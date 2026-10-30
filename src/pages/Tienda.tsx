@@ -5,6 +5,7 @@ import Seo from "../components/Seo";
 import { CATEGORY_LABEL } from "../data/products";
 import { useProducts } from "../hooks/useProducts";
 import { cn } from "../lib/cn";
+import { trackFilter } from "../lib/analytics";
 import { productoAgotado } from "../lib/stock";
 import { productListJsonLd } from "../lib/structured-data";
 import type { Category } from "../types/product";
@@ -105,6 +106,9 @@ export default function Tienda() {
                   key={link.id}
                   to={link.to}
                   aria-current={selected ? "page" : undefined}
+                  onClick={() => {
+                    if (!selected) trackFilter("categoria", link.id);
+                  }}
                   className={cn(
                     "rounded-full border px-4 py-2 font-mono text-[11px] font-medium uppercase tracking-widest transition-colors",
                     selected
@@ -136,7 +140,10 @@ export default function Tienda() {
               <select
                 id="sort"
                 value={sort}
-                onChange={(e) => setSort(e.target.value as SortId)}
+                onChange={(e) => {
+                  setSort(e.target.value as SortId);
+                  trackFilter("orden", e.target.value);
+                }}
                 className="rounded-lg border border-ink/25 bg-transparent px-3 py-2 font-mono text-xs uppercase tracking-wider transition-colors focus:border-ink focus:outline-none"
               >
                 {SORT_OPTIONS.map((option) => (

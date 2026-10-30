@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import AdminTable from "../../components/admin/AdminTable";
 import FunnelChart from "../../components/admin/FunnelChart";
+import LinkBuilder from "../../components/admin/LinkBuilder";
+import OrigenTable from "../../components/admin/OrigenTable";
+import ScrollDepth from "../../components/admin/ScrollDepth";
 import PageHeading from "../../components/admin/PageHeading";
 import ProductFunnelTable from "../../components/admin/ProductFunnelTable";
 import QueryError from "../../components/admin/QueryError";
@@ -27,13 +30,20 @@ import {
   bucketKey,
   bucketStart,
   buildSeries,
+  contactosPorPagina,
+  erroresDeCheckout,
   eventsIn,
+  filtrosUsados,
   funnelFor,
   kpisFor,
   ordersIn,
   periodFor,
+  porCampana,
+  porDevice,
+  porOrigen,
+  profundidad,
+  resumirSesiones,
   topPaths,
-  topReferrers,
   visitsIn,
 } from "../../lib/admin-stats";
 import Button from "../../components/Button";
@@ -99,6 +109,35 @@ export default function AdminEstadisticas() {
       eventsIn(allEvents, period.from, period.to),
       ordersIn(allOrders, period.from, period.to),
     );
+  }, [range, allOrders, allVisits, allEvents]);
+
+  // De dónde vienen y qué hacen adentro. Todo por sesión, cruzando visitas y
+  // eventos del período elegido.
+  const recorrido = useMemo(() => {
+    const period = periodFor(range, allOrders, allVisits);
+    const visitas = visitsIn(allVisits, period.from, period.to);
+    const eventos = eventsIn(allEvents, period.from, period.to);
+    const sesiones = resumirSesiones(visitas, eventos);
+    const scroll = [
+      profundidad("Home", (p) => p === "/", visitas, eventos),
+      profundidad("Tienda", (p) => p.startsWith("/tienda"), visitas, eventos),
+      profundidad(
+        "Fichas de producto",
+        (p) => p.startsWith("/producto/"),
+        visitas,
+        eventos,
+      ),
+    ].filter((d): d is NonNullable<typeof d> => d !== null);
+
+    return {
+      origenes: porOrigen(sesiones),
+      devices: porDevice(sesiones),
+      campanas: porCampana(sesiones),
+      scroll,
+      contactos: contactosPorPagina(eventos).slice(0, 8),
+      filtros: filtrosUsados(eventos),
+      errores: erroresDeCheckout(eventos),
+    };
   }, [range, allOrders, allVisits, allEvents]);
 
   const data = useMemo(() => {
@@ -188,8 +227,7 @@ export default function AdminEstadisticas() {
         : null,
       visitasSerie,
       tabla,
-      paginas: topPaths(currentVisits, 6),
-      origenes: topReferrers(currentVisits, 6),
+      paginas: topPaths(currentVisits, 8),
       porPago: toRanking(porPago),
       porEnvio: toRanking(porEnvio),
       porProvincia: toRanking(porProvincia).slice(0, 6),
@@ -298,9 +336,9 @@ export default function AdminEstadisticas() {
               <>
                 <FunnelChart steps={embudo} />
                 <p className="mt-5 text-[11px] leading-relaxed text-ink/65">
-                  Los dos pasos del medio se miden desde el 10/09: antes de esa
-                  fecha el período va a mostrarlos en cero aunque haya habido
-                  ventas.
+                  Carrito y checkout se miden desde el 10/09; los tres pasos de
+                  adentro del checkout, desde el 30/10. Antes de esas fechas el
+                  período los muestra en cero o no los muestra.
                 </p>
               </>
             )}
@@ -315,7 +353,77 @@ export default function AdminEstadisticas() {
             range={range}
           />
 
-          <div className="mt-8 grid gap-3 lg:grid-cols-2">
+          <section className="mt-8 rounded-2xl bg-white p-6">
+            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
+                De dónde vienen y qué hacen
+              </h2>
+              <p className="font-mono text-[11px] text-ink/65">
+                por sesión · % de cada origen
+              </p>
+            </div>
+            <OrigenTable
+              filas={recorrido.origenes}
+              primera="Origen"
+              emptyLabel="Sin visitas registradas."
+            />
+            <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
+              "Sin dato" es gente que abrió un link sin etiqueta desde
+              WhatsApp, lo escribió a mano o lo tenía guardado. Desde el 30/10
+              se reconoce también el navegador de Instagram y Facebook, y los
+              links armados abajo aparecen con su lugar ("Instagram · bio").
+            </p>
+          </section>
+
+          <LinkBuilder />
+
+          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+            <section className="rounded-2xl bg-white p-6">
+              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
+                Celular o compu
+              </h2>
+              <OrigenTable
+                filas={recorrido.devices}
+                primera="Aparato"
+                emptyLabel="Se mide desde el 30/10: todavía no hay sesiones con este dato."
+              />
+            </section>
+            <section className="rounded-2xl bg-white p-6">
+              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
+                Campañas
+              </h2>
+              <OrigenTable
+                filas={recorrido.campanas}
+                primera="Campaña"
+                emptyLabel="Ninguna visita llegó con campaña. Se completa con el campo Campaña del armador de links."
+              />
+            </section>
+          </div>
+
+          <section className="mt-3 rounded-2xl bg-white p-6">
+            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+              <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
+                Hasta dónde bajan
+              </h2>
+              <p className="font-mono text-[11px] text-ink/65">
+                de cada 100 que abren la página
+              </p>
+            </div>
+            {recorrido.scroll.length === 0 ? (
+              <p className="py-8 text-center text-sm text-ink/65">
+                Se mide desde el 30/10: todavía no hay datos de scroll en este
+                período.
+              </p>
+            ) : (
+              <div className="grid gap-8 md:grid-cols-3">
+                {recorrido.scroll.map((d) => (
+                  <ScrollDepth key={d.label} datos={d} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <div className="mt-3 grid gap-3 lg:grid-cols-2">
             <section className="rounded-2xl bg-white p-6">
               <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
                 Páginas más vistas
@@ -327,11 +435,32 @@ export default function AdminEstadisticas() {
             </section>
             <section className="rounded-2xl bg-white p-6">
               <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                De dónde llegan
+                Quién se fue a escribir
               </h2>
               <RankingList
-                items={data.origenes}
-                emptyLabel="Sin orígenes registrados."
+                items={recorrido.contactos}
+                emptyLabel="Nadie tocó WhatsApp ni Instagram en este período (se mide desde el 30/10)."
+              />
+            </section>
+          </div>
+
+          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+            <section className="rounded-2xl bg-white p-6">
+              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
+                Qué filtran en la tienda
+              </h2>
+              <RankingList
+                items={recorrido.filtros}
+                emptyLabel="Nadie usó filtros ni orden en este período (se mide desde el 30/10)."
+              />
+            </section>
+            <section className="rounded-2xl bg-white p-6">
+              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
+                Por qué no entró el pedido
+              </h2>
+              <RankingList
+                items={recorrido.errores}
+                emptyLabel="Ningún pedido falló al confirmarse en este período."
               />
             </section>
           </div>

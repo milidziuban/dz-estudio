@@ -13,6 +13,7 @@ import { useInstallments } from "../hooks/useInstallments";
 import { useProducts } from "../hooks/useProducts";
 import { useStoreSettings } from "../hooks/useStoreSettings";
 import { trackAddToCart, trackViewItem } from "../lib/analytics";
+import { productoWhatsappUrl } from "../lib/whatsapp";
 import { cn } from "../lib/cn";
 import { COLOR_HEX } from "../lib/colors";
 import { envioFrase } from "../lib/envio-texto";
@@ -332,6 +333,22 @@ export default function Producto() {
                 ✦ {aviso}
               </p>
             )}
+
+            {/* La objeción que más frena es "no sé si combina con lo que
+                tengo", y se resuelve con una foto. El link queda medido como
+                `contact_click` desde la ficha (ver Analytics.tsx). */}
+            <a
+              href={productoWhatsappUrl(product.name.split(" · ")[0], !canAdd)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex text-sm underline decoration-ink/30 underline-offset-4 transition-colors hover:decoration-ink"
+            >
+              {canAdd
+                ? `¿No sabés si combina? Mandanos una foto de tu ${
+                    product.category === "almohadones" ? "sillón" : "mesa"
+                  } por WhatsApp`
+                : "Se agotó. Escribinos y te avisamos cuando vuelva"}
+            </a>
 
             {/* Envío y pago: lo que el cliente pregunta antes de comprar */}
             <ul className="mt-6 space-y-2 text-sm">

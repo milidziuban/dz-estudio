@@ -47,6 +47,9 @@ export function useAhoraMismo() {
         supabase
           .from("store_events")
           .select("created_at, kind, session_id, slug, qty, value")
+          // Desde el 30/10 la tabla guarda también fichas vistas, scroll y
+          // clicks: este widget sigue mostrando solo carrito y checkout.
+          .in("kind", ["add_to_cart", "begin_checkout"])
           .gte("created_at", desde)
           .order("created_at", { ascending: false })
           .limit(200),
@@ -86,6 +89,8 @@ export function useAhoraMismo() {
         slug: row.slug,
         qty: row.qty,
         value: row.value,
+        path: null,
+        detail: null,
       }));
 
       return {

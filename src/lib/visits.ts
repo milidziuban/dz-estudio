@@ -1,3 +1,4 @@
+import { esTiendaReal, leerAtribucion } from "./origen";
 import { supabase } from "./supabase";
 
 /**
@@ -61,25 +62,44 @@ export function sessionId(): string {
 
 let lastPath: string | null = null;
 
+/** Si esta pestaña se mide: ni el panel, ni el navegador de quien lo
+ *  administra, ni las previews de Vercel o el localhost (ver `esTiendaReal`). */
+export function seMide(): boolean {
+  return !esNavegadorAdmin() && esTiendaReal();
+}
+
 export async function trackVisit(path: string): Promise<void> {
   // El panel no es tráfico de la tienda
   if (path.startsWith("/admin")) return;
-  // Ni quien lo administra, aunque esté mirando la tienda
-  if (esNavegadorAdmin()) return;
+  // Ni quien lo administra, ni una preview de prueba
+  if (!seMide()) return;
   // StrictMode monta dos veces en desarrollo: sin esto, cada vista va doble
   if (path === lastPath) return;
   lastPath = path;
 
   const { id, isNew } = getSession();
 
+  // El origen solo tiene sentido en la primera vista de la sesión: después
+  // la URL ya no trae la etiqueta del link y el referrer es el propio sitio.
+  const origen = isNew ? leerAtribucion() : null;
+
   try {
     await supabase.from("page_views").insert({
       path: path.slice(0, 300),
-      // El referrer solo tiene sentido en la primera vista de la sesión:
-      // después es siempre la página anterior del propio sitio.
       referrer: isNew ? document.referrer || null : null,
       session_id: id,
       is_new_session: isNew,
+      ...(origen
+        ? {
+            utm_source: origen.utmSource,
+            utm_medium: origen.utmMedium,
+            utm_campaign: origen.utmCampaign,
+            utm_content: origen.utmContent,
+            click_id: origen.clickId,
+            app: origen.app,
+            device: origen.device,
+          }
+        : {}),
     });
   } catch {
     // Que no se registre una visita nunca puede romper la tienda
