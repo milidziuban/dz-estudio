@@ -9,6 +9,13 @@ type PageViewRow = {
   referrer: string | null;
   session_id: string;
   is_new_session: boolean;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  click_id: string | null;
+  app: string | null;
+  device: string | null;
 };
 
 /**
@@ -27,7 +34,9 @@ export function useVisits(range: RangeId) {
     queryFn: async (): Promise<PageView[]> => {
       let query = supabase
         .from("page_views")
-        .select("created_at, path, referrer, session_id, is_new_session")
+        .select(
+          "created_at, path, referrer, session_id, is_new_session, utm_source, utm_medium, utm_campaign, utm_content, click_id, app, device",
+        )
         .order("created_at", { ascending: false })
         .limit(20000);
 
@@ -43,6 +52,13 @@ export function useVisits(range: RangeId) {
         referrer: row.referrer,
         sessionId: row.session_id,
         isNewSession: row.is_new_session,
+        utmSource: row.utm_source,
+        utmMedium: row.utm_medium,
+        utmCampaign: row.utm_campaign,
+        utmContent: row.utm_content,
+        clickId: row.click_id,
+        app: row.app,
+        device: row.device,
       }));
     },
     staleTime: 60 * 1000,

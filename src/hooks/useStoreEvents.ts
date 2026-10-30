@@ -5,11 +5,13 @@ import type { StoreEvent } from "../types/admin";
 
 type StoreEventRow = {
   created_at: string;
-  kind: "add_to_cart" | "begin_checkout";
+  kind: StoreEvent["kind"];
   session_id: string;
   slug: string | null;
   qty: number | null;
   value: number | null;
+  path: string | null;
+  detail: string | null;
 };
 
 /**
@@ -21,7 +23,8 @@ type StoreEventRow = {
  * Mismo tope de 20.000 filas y misma consecuencia: si un rango lo supera se
  * quedan las más nuevas y ese período queda corto. Son bastantes menos que las
  * visitas —hay que hacer algo para generarlos—, así que llegar al techo está
- * lejos.
+ * lejos —aunque desde el 30/10 la tabla guarda también scroll y fichas vistas,
+ * que son bastantes más—.
  */
 export function useStoreEvents(range: RangeId) {
   return useQuery({
@@ -29,7 +32,7 @@ export function useStoreEvents(range: RangeId) {
     queryFn: async (): Promise<StoreEvent[]> => {
       let query = supabase
         .from("store_events")
-        .select("created_at, kind, session_id, slug, qty, value")
+        .select("created_at, kind, session_id, slug, qty, value, path, detail")
         .order("created_at", { ascending: false })
         .limit(20000);
 
@@ -46,6 +49,8 @@ export function useStoreEvents(range: RangeId) {
         slug: row.slug,
         qty: row.qty,
         value: row.value,
+        path: row.path,
+        detail: row.detail,
       }));
     },
     staleTime: 60 * 1000,

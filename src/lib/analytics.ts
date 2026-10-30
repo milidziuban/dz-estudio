@@ -10,7 +10,9 @@ import type { ResolvedCartItem } from "./cart";
 import type { Product, ProductVariant } from "../types/product";
 import {
   initMetaPixel,
+  metaAddPaymentInfo,
   metaAddToCart,
+  metaContact,
   metaInitiateCheckout,
   metaPageView,
   metaPurchase,
@@ -110,6 +112,9 @@ export function trackViewItem(product: Product, variant?: ProductVariant) {
     items: [item],
   });
   metaViewContent(item);
+  // En la base también: sin esto el panel cuenta fichas por `page_views`,
+  // que no distingue una ficha abierta de una que cargó y se cerró.
+  void trackStoreEvent("view_item", { slug: product.slug, value: product.price });
 }
 
 export function trackAddToCart(
@@ -143,6 +148,83 @@ export function trackBeginCheckout(items: ResolvedCartItem[], value: number) {
     qty: items.reduce((total, item) => total + item.qty, 0),
     value,
   });
+}
+
+// ── Adentro del checkout ──────────────────────────────────────
+//
+// Entre "empezó el checkout" y "compró" había un agujero: 18 sesiones
+// empezaron y entraron 6 pedidos, y no se sabía dónde se quedaban las otras.
+// Cada paso que se pasa queda medido, con los dos eventos estándar de GA4
+// para esa parte del embudo (`add_shipping_info` y `add_payment_info`).
+
+/** Pasó del paso 1 (datos) al 2 (envío). */
+export function trackCheckoutDatos(items: ResolvedCartItem[], value: number) {
+  trackEvent("checkout_datos", { currency: CURRENCY, value, items: gaItems(items) });
+  void trackStoreEvent("checkout_step", { detail: "envio", value });
+}
+
+/** Pasó del paso 2 (envío) al 3 (pago), con el envío que eligió. */
+export function trackCheckoutEnvio(
+  items: ResolvedCartItem[],
+  value: number,
+  envio: string,
+) {
+  trackEvent("add_shipping_info", {
+    currency: CURRENCY,
+    value,
+    shipping_tier: envio,
+    items: gaItems(items),
+  });
+  void trackStoreEvent("checkout_step", { detail: `pago:${envio}`, value });
+}
+
+/** El pedido entró a la base. Todavía no es una venta —falta cobrarla—, pero
+ *  es el último paso que la tienda controla. */
+export function trackOrderCreated(
+  items: ResolvedCartItem[],
+  value: number,
+  pago: string,
+  envio: string,
+) {
+  const lineas = gaItems(items);
+  trackEvent("add_payment_info", {
+    currency: CURRENCY,
+    value,
+    payment_type: pago,
+    items: lineas,
+  });
+  metaAddPaymentInfo(lineas, value);
+  void trackStoreEvent("order_created", { detail: `${pago}/${envio}`, value });
+}
+
+/** El pedido no entró: stock, cupón, conexión. El título del error alcanza
+ *  para saber cuál fue. */
+export function trackCheckoutError(motivo: string) {
+  trackEvent("checkout_error", { motivo });
+  void trackStoreEvent("checkout_error", { detail: motivo });
+}
+
+// ── Lo que se toca ────────────────────────────────────────────
+
+/** Tocó un link a WhatsApp o a Instagram. Muchas ventas se cierran por
+ *  mensaje: sin esto, esa persona en el panel es un carrito abandonado. */
+export function trackContactClick(canal: "whatsapp" | "instagram") {
+  trackEvent("contact", { method: canal, page_path: window.location.pathname });
+  metaContact(canal);
+  void trackStoreEvent("contact_click", { detail: canal });
+}
+
+/** Usó un filtro o un orden en la tienda. */
+export function trackFilter(tipo: "categoria" | "orden", valor: string) {
+  trackEvent("filter", { filter_type: tipo, filter_value: valor });
+  void trackStoreEvent("filter", { detail: `${tipo}:${valor}` });
+}
+
+/** Llegó a ese porcentaje de la página. Solo a la base y a GA4: al pixel no
+ *  le sirve para nada y ensucia sus informes. */
+export function trackScroll(percent: 25 | 50 | 75 | 100) {
+  trackEvent("scroll_depth", { percent, page_path: window.location.pathname });
+  void trackStoreEvent("scroll", { qty: percent });
 }
 
 // ── La compra ─────────────────────────────────────────────────

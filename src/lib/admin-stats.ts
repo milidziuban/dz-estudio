@@ -18,6 +18,7 @@ import type {
   StockMovimiento,
   StoreEvent,
 } from "../types/admin";
+import { DEVICE_LABEL, clasificarOrigen } from "./origen";
 
 // ── Períodos ──────────────────────────────────────────────────
 
@@ -232,7 +233,26 @@ export function funnelFor(
       events.filter((event) => event.kind === kind).map((e) => e.sessionId),
     );
 
-  const crudos = [
+  const sesionesDeStep = (prefijo: string) =>
+    new Set(
+      events
+        .filter(
+          (event) =>
+            event.kind === "checkout_step" &&
+            (event.detail ?? "").startsWith(prefijo),
+        )
+        .map((e) => e.sessionId),
+    );
+
+  // Los tres pasos de adentro del checkout se miden desde el 30/10/2026. En
+  // un período que no tiene ninguno —todo anterior a esa fecha— no se
+  // muestran, para no dibujar un embudo que cae a cero y vuelve a subir.
+  const pasoEnvio = sesionesDeStep("envio").size;
+  const pasoPago = sesionesDeStep("pago").size;
+  const confirmados = sesionesDe("order_created").size;
+  const hayPasosDeCheckout = pasoEnvio + pasoPago + confirmados > 0;
+
+  const crudos: Omit<FunnelStep, "desdeElAnterior" | "desdeElInicio">[] = [
     { id: "sesiones", label: "Entraron a la tienda", count: sesiones.size },
     { id: "ficha", label: "Abrieron una ficha", count: fichas.size },
     {
@@ -245,6 +265,13 @@ export function funnelFor(
       label: "Empezaron el checkout",
       count: sesionesDe("begin_checkout").size,
     },
+    ...(hayPasosDeCheckout
+      ? [
+          { id: "envio", label: "Completaron sus datos", count: pasoEnvio },
+          { id: "pago", label: "Eligieron el envío", count: pasoPago },
+          { id: "pedido", label: "Confirmaron el pedido", count: confirmados },
+        ]
+      : []),
     {
       id: "compra",
       label: "Compraron",
@@ -828,4 +855,251 @@ export function productFunnel(
   });
 
   return { rows, ...totals, conversion: promedio };
+}
+
+
+// ── De dónde vienen y qué hacen (desde el 30/10/2026) ─────────
+
+/** Una sesión con todo lo que se sabe de ella: de dónde vino, desde qué
+ *  aparato, qué miró y hasta dónde llegó. Es la base de los cuadros nuevos de
+ *  /admin/estadisticas. */
+export type SesionResumida = {
+  id: string;
+  inicio: string;
+  fuente: string;
+  canal: string | null;
+  campana: string | null;
+  device: string | null;
+  paginas: number;
+  agrego: boolean;
+  checkout: boolean;
+  pidio: boolean;
+  escribio: boolean;
+};
+
+export function resumirSesiones(
+  visits: PageView[],
+  events: StoreEvent[],
+): SesionResumida[] {
+  const porSesion = new Map<string, PageView[]>();
+  for (const visit of visits) {
+    const lista = porSesion.get(visit.sessionId) ?? [];
+    lista.push(visit);
+    porSesion.set(visit.sessionId, lista);
+  }
+  const conEvento = (kind: StoreEvent["kind"]) =>
+    new Set(events.filter((e) => e.kind === kind).map((e) => e.sessionId));
+  const agregaron = conEvento("add_to_cart");
+  const checkouts = conEvento("begin_checkout");
+  const pedidos = conEvento("order_created");
+  const escribieron = conEvento("contact_click");
+
+  const sesiones: SesionResumida[] = [];
+  for (const [id, lista] of porSesion) {
+    lista.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    // La vista que abre la sesión es la que trae las pistas de origen. Si se
+    // perdió (rango cortado a mitad de una sesión), vale la primera que hay.
+    const primera = lista.find((v) => v.isNewSession) ?? lista[0];
+    const { fuente, canal } = clasificarOrigen(primera);
+    sesiones.push({
+      id,
+      inicio: primera.createdAt,
+      fuente,
+      canal,
+      campana: primera.utmCampaign,
+      device: primera.device,
+      paginas: lista.length,
+      agrego: agregaron.has(id),
+      checkout: checkouts.has(id),
+      pidio: pedidos.has(id),
+      escribio: escribieron.has(id),
+    });
+  }
+  return sesiones;
+}
+
+export type FilaDeOrigen = {
+  label: string;
+  sesiones: number;
+  /** % de esas sesiones que agregó algo al carrito */
+  agregaron: number;
+  /** % que empezó el checkout */
+  checkout: number;
+  /** Cuántas confirmaron un pedido (desde el 30/10) */
+  pedidos: number;
+  /** % que tocó WhatsApp o Instagram */
+  escribieron: number;
+  /** Más de una página vista, en % */
+  siguieron: number;
+};
+
+function agrupar(
+  sesiones: SesionResumida[],
+  clave: (s: SesionResumida) => string | null,
+): FilaDeOrigen[] {
+  const grupos = new Map<string, SesionResumida[]>();
+  for (const sesion of sesiones) {
+    const label = clave(sesion);
+    if (!label) continue;
+    const lista = grupos.get(label) ?? [];
+    lista.push(sesion);
+    grupos.set(label, lista);
+  }
+  const pct = (n: number, total: number) => (total ? (n / total) * 100 : 0);
+  return [...grupos.entries()]
+    .map(([label, lista]) => ({
+      label,
+      sesiones: lista.length,
+      agregaron: pct(lista.filter((s) => s.agrego).length, lista.length),
+      checkout: pct(lista.filter((s) => s.checkout).length, lista.length),
+      pedidos: lista.filter((s) => s.pidio).length,
+      escribieron: pct(lista.filter((s) => s.escribio).length, lista.length),
+      siguieron: pct(lista.filter((s) => s.paginas > 1).length, lista.length),
+    }))
+    .sort((a, b) => b.sesiones - a.sesiones);
+}
+
+/** Por fuente: Instagram, WhatsApp, Google, Sin dato… con la etiqueta del
+ *  link como segunda parte cuando la hay ("Instagram · bio"). */
+export function porOrigen(sesiones: SesionResumida[]): FilaDeOrigen[] {
+  return agrupar(sesiones, (s) =>
+    s.canal ? `${s.fuente} · ${s.canal}` : s.fuente,
+  );
+}
+
+/** Por campaña (utm_campaign). Solo las sesiones que llegaron con una. */
+export function porCampana(sesiones: SesionResumida[]): FilaDeOrigen[] {
+  return agrupar(sesiones, (s) => s.campana);
+}
+
+/** Celular, compu o tablet. Las sesiones de antes del 30/10 no lo tienen y
+ *  quedan afuera. */
+export function porDevice(sesiones: SesionResumida[]): FilaDeOrigen[] {
+  return agrupar(sesiones, (s) =>
+    s.device ? (DEVICE_LABEL[s.device] ?? s.device) : null,
+  );
+}
+
+/** Desde cuándo hay datos de un tipo de evento en lo que se cargó. Sirve
+ *  para no comparar contra visitas de antes de que se midiera. */
+export function primerEvento(
+  events: StoreEvent[],
+  kind: StoreEvent["kind"],
+): string | null {
+  let min: string | null = null;
+  for (const e of events) {
+    if (e.kind === kind && (!min || e.createdAt < min)) min = e.createdAt;
+  }
+  return min;
+}
+
+export type Profundidad = {
+  label: string;
+  /** Sesiones que abrieron esa página desde que se mide el scroll */
+  sesiones: number;
+  /** % de esas sesiones que llegó a cada marca */
+  marcas: { pct: 25 | 50 | 75 | 100; alcanzo: number }[];
+};
+
+/**
+ * Hasta dónde se baja en una página (o en un grupo, como todas las fichas).
+ *
+ * El denominador son las sesiones que abrieron la página desde el primer
+ * evento de scroll: las de antes no pudieron mandar ninguno y bajarían todos
+ * los porcentajes.
+ */
+export function profundidad(
+  label: string,
+  coincide: (path: string) => boolean,
+  visits: PageView[],
+  events: StoreEvent[],
+): Profundidad | null {
+  const desde = primerEvento(events, "scroll");
+  if (!desde) return null;
+  const vieron = new Set(
+    visits
+      .filter((v) => v.createdAt >= desde && coincide(v.path))
+      .map((v) => v.sessionId),
+  );
+  if (vieron.size === 0) return null;
+
+  const maxPorSesion = new Map<string, number>();
+  for (const e of events) {
+    if (e.kind !== "scroll" || !e.path || !coincide(e.path)) continue;
+    if (!vieron.has(e.sessionId)) continue;
+    maxPorSesion.set(
+      e.sessionId,
+      Math.max(maxPorSesion.get(e.sessionId) ?? 0, e.qty ?? 0),
+    );
+  }
+
+  const marcas = ([25, 50, 75, 100] as const).map((pct) => ({
+    pct,
+    alcanzo:
+      ([...maxPorSesion.values()].filter((m) => m >= pct).length /
+        vieron.size) *
+      100,
+  }));
+  return { label, sesiones: vieron.size, marcas };
+}
+
+/** Clicks a WhatsApp e Instagram, por canal y por página donde pasaron. */
+export function contactosPorPagina(events: StoreEvent[]): PathCount[] {
+  const map = new Map<string, Set<string>>();
+  for (const e of events) {
+    if (e.kind !== "contact_click") continue;
+    const canal = e.detail === "instagram" ? "Instagram" : "WhatsApp";
+    const label = `${canal} · ${etiquetaDePagina(e.path ?? "")}`;
+    const set = map.get(label) ?? new Set<string>();
+    set.add(e.sessionId);
+    map.set(label, set);
+  }
+  return [...map.entries()]
+    .map(([label, set]) => ({ label, count: set.size }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/** Filtros y órdenes usados en /tienda, en sesiones. */
+export function filtrosUsados(events: StoreEvent[]): PathCount[] {
+  const NOMBRES: Record<string, string> = {
+    "categoria:all": "Categoría: todo",
+    "categoria:almohadones": "Categoría: almohadones",
+    "categoria:individuales": "Categoría: individuales",
+    "orden:destacados": "Orden: destacados",
+    "orden:novedades": "Orden: novedades",
+    "orden:precio-asc": "Orden: precio de menor a mayor",
+    "orden:precio-desc": "Orden: precio de mayor a menor",
+  };
+  const map = new Map<string, Set<string>>();
+  for (const e of events) {
+    if (e.kind !== "filter" || !e.detail) continue;
+    const label = NOMBRES[e.detail] ?? e.detail;
+    const set = map.get(label) ?? new Set<string>();
+    set.add(e.sessionId);
+    map.set(label, set);
+  }
+  return [...map.entries()]
+    .map(([label, set]) => ({ label, count: set.size }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/** Por qué no entró el pedido, en veces. */
+export function erroresDeCheckout(events: StoreEvent[]): PathCount[] {
+  const map = new Map<string, number>();
+  for (const e of events) {
+    if (e.kind !== "checkout_error") continue;
+    const label = e.detail ?? "Sin detalle";
+    map.set(label, (map.get(label) ?? 0) + 1);
+  }
+  return [...map.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/** Cómo se lee un path en el panel. */
+export function etiquetaDePagina(path: string): string {
+  const clean = path.split("?")[0].replace(/\/+$/, "") || "/";
+  if (clean === "/") return "home";
+  if (clean.startsWith("/producto/")) return `ficha ${clean.slice(10)}`;
+  return clean.slice(1);
 }

@@ -32,6 +32,16 @@
   de Meta (escrito en `src/lib/meta-pixel.ts`). Cada evento del embudo se mide
   en los dos desde `src/lib/analytics.ts`: las pantallas llaman a una sola
   función
+- Medición propia (la que lee /admin/estadisticas): `page_views` y
+  `store_events` en Supabase, colgadas del mismo id de sesión. Desde el
+  30/10/2026 `page_views` guarda el origen de la sesión (utm_*, app de
+  Instagram/Facebook, celular o compu — `src/lib/origen.ts`) y `store_events`
+  guarda fichas vistas, filtros, clicks a WhatsApp/Instagram, scroll, cada
+  paso del checkout, pedido confirmado y errores. Los clicks y el scroll los
+  escucha `components/Analytics.tsx` para toda la tienda: un link nuevo a
+  WhatsApp queda medido sin tocar nada. Solo se mide en www.dz-estudio.com —
+  las previews de Vercel escriben en la misma base— salvo con `?medir=1`.
+  Sumar un tipo de evento es una migración (`store_events_kind_check`)
 
 ## Sistema de diseño
 

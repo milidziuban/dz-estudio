@@ -13,7 +13,14 @@ import { useCart } from "../hooks/useCart";
 import { useInstallments } from "../hooks/useInstallments";
 import { useProducts } from "../hooks/useProducts";
 import { useShippingQuote } from "../hooks/useShippingQuote";
-import { stashPurchase, trackBeginCheckout } from "../lib/analytics";
+import {
+  stashPurchase,
+  trackBeginCheckout,
+  trackCheckoutDatos,
+  trackCheckoutEnvio,
+  trackCheckoutError,
+  trackOrderCreated,
+} from "../lib/analytics";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
 import {
   checkoutSchema,
@@ -366,7 +373,14 @@ export default function Checkout() {
     }
     const fields = STEP_FIELDS[step];
     const valid = fields ? await trigger(fields, { shouldFocus: true }) : true;
-    if (valid) setStep(target);
+    if (!valid) return;
+    // Cada paso que se pasa hacia adelante queda medido: es lo que dice dónde
+    // se queda la gente que empieza el checkout y no compra.
+    if (step === 1 && target >= 2) trackCheckoutDatos(resolved, subtotal);
+    if (step <= 2 && target === 3) {
+      trackCheckoutEnvio(resolved, subtotal, envioSel ?? "sin-elegir");
+    }
+    setStep(target);
   };
 
   const onSubmit = async (data: CheckoutData) => {
@@ -435,11 +449,14 @@ export default function Checkout() {
       });
 
       if (error) {
-        setSubmitError(errorDePedido(error));
+        const problema = errorDePedido(error);
+        trackCheckoutError(problema.titulo);
+        setSubmitError(problema);
         return;
       }
 
       ordenGuardada.current = { id: orderId, huella };
+      trackOrderCreated(resolved, total, data.pago, data.envio);
     }
 
     // El pedido queda guardado para medir la compra en la pantalla de gracias:
@@ -469,6 +486,7 @@ export default function Checkout() {
       );
 
       if (fnError || !pref?.init_point) {
+        trackCheckoutError("No conectó con Mercado Pago");
         setSubmitError({
           titulo: "No pudimos conectar con Mercado Pago",
           ayuda:

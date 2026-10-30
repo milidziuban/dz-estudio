@@ -134,6 +134,20 @@ export function metaInitiateCheckout(items: PixelItem[], value: number) {
   });
 }
 
+export function metaAddPaymentInfo(items: PixelItem[], value: number) {
+  track("AddPaymentInfo", {
+    ...contents(items),
+    currency: CURRENCY,
+    value,
+  });
+}
+
+/** Tocó WhatsApp o Instagram: para Meta es un `Contact`, el evento estándar
+ *  de "esta persona quiso hablar con la marca". */
+export function metaContact(canal: string) {
+  track("Contact", { content_name: canal });
+}
+
 /** La compra. Se cuelga de `trackStashedPurchase`, que ya borra el pedido
  *  guardado antes de medir: el pixel no tiene su propio camino de vuelta de
  *  Mercado Pago y por eso tampoco puede contar la venta dos veces. */
