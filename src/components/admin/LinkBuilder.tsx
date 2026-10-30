@@ -134,6 +134,11 @@ export default function LinkBuilder() {
         Usá uno distinto para cada lugar: el de la bio en la bio, otro en cada
         historia. En el cuadro de origen van a aparecer separados. Un link sin
         etiqueta que se abre desde WhatsApp cae en "Sin dato".
+        <br />
+        Para que se vea prolijo hay tres cortos que hacen lo mismo:{" "}
+        <strong>dz-estudio.com/ig</strong> (bio),{" "}
+        <strong>dz-estudio.com/historia</strong> y{" "}
+        <strong>dz-estudio.com/wa</strong> (WhatsApp). Llevan a la home.
       </p>
     </section>
   );
