@@ -1,5 +1,6 @@
 import { cn } from "../../lib/cn";
 import { formatPercent } from "../../lib/admin";
+import Sparkline from "./Sparkline";
 
 type StatCardProps = {
   label: string;
@@ -9,6 +10,8 @@ type StatCardProps = {
   variation?: number | null;
   /** Cuando subir es malo (por ejemplo, ventas rechazadas) */
   invertVariation?: boolean;
+  /** Serie del período para la línea de abajo. Sin serie, no hay línea. */
+  trend?: number[];
 };
 
 export default function StatCard({
@@ -17,6 +20,7 @@ export default function StatCard({
   hint,
   variation,
   invertVariation,
+  trend,
 }: StatCardProps) {
   const showVariation = variation !== undefined && variation !== null;
   const positive = showVariation
@@ -48,6 +52,7 @@ export default function StatCard({
         )}
         {hint && <span className="text-xs leading-snug text-ink/65">{hint}</span>}
       </div>
+      {trend && <Sparkline values={trend} className="mt-3 h-8 w-full" />}
     </div>
   );
 }

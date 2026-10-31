@@ -66,7 +66,7 @@ export default function LinkBuilder() {
   };
 
   return (
-    <section className="mt-3 rounded-2xl bg-white p-6">
+    <section className="rounded-2xl bg-white p-5 sm:p-6">
       <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
           Armá un link con etiqueta

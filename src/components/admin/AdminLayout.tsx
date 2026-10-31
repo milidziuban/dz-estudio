@@ -1,8 +1,9 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
+import { useAdminPendientes } from "../../hooks/useAdminPendientes";
 import { useOrderAlerts } from "../../hooks/useOrderAlerts";
-import { ADMIN_NAV } from "../../lib/admin-nav";
+import { ADMIN_NAV, type AdminNavItem } from "../../lib/admin-nav";
 import { cn } from "../../lib/cn";
 import PageLoader from "../PageLoader";
 import Seo from "../Seo";
@@ -25,6 +26,18 @@ export default function AdminLayout() {
   const location = useLocation();
   const { alerts, esNuevo, unseenCount, markAllSeen, toasts, dismissToast } =
     useOrderAlerts();
+  const pendientes = useAdminPendientes();
+
+  // El numerito de cada sección: cuántas cosas esperan algo de vos ahí
+  const badges: Record<NonNullable<AdminNavItem["badge"]>, number> = {
+    ventas:
+      pendientes.porDespachar +
+      pendientes.porEntregar +
+      pendientes.porConfirmar +
+      pendientes.vencidas,
+    stock: pendientes.pocoStock + pendientes.agotadas,
+    contenido: pendientes.posteosHoy,
+  };
 
   // Al navegar, el menú mobile se cierra solo
   useEffect(() => setMenuOpen(false), [location.pathname]);
@@ -73,6 +86,12 @@ export default function AdminLayout() {
                           )}
                         />
                         <span className="truncate">{item.label}</span>
+                        {item.badge && badges[item.badge] > 0 && (
+                          <span className="ml-auto flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-pink px-1.5 text-[11px] font-medium leading-none tracking-normal text-ink">
+                            {badges[item.badge]}
+                            <span className="sr-only"> pendientes</span>
+                          </span>
+                        )}
                       </>
                     )}
                   </NavLink>

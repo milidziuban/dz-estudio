@@ -1,9 +1,13 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AdminTable from "../../components/admin/AdminTable";
 import FunnelChart from "../../components/admin/FunnelChart";
 import LinkBuilder from "../../components/admin/LinkBuilder";
+import MesAMes from "../../components/admin/MesAMes";
 import OrigenTable from "../../components/admin/OrigenTable";
+import Panel from "../../components/admin/Panel";
 import ScrollDepth from "../../components/admin/ScrollDepth";
+import SectionTabs from "../../components/admin/SectionTabs";
 import PageHeading from "../../components/admin/PageHeading";
 import ProductFunnelTable from "../../components/admin/ProductFunnelTable";
 import QueryError from "../../components/admin/QueryError";
@@ -87,8 +91,33 @@ function RankingList({
   );
 }
 
+/** Las partes de la pantalla. Antes eran catorce bloques uno abajo del otro;
+ *  cada pestaña contesta una pregunta. */
+const TABS = [
+  { id: "resumen", label: "Resumen" },
+  { id: "origen", label: "De dónde vienen" },
+  { id: "recorrido", label: "Qué hacen" },
+  { id: "productos", label: "Productos" },
+  { id: "ventas", label: "Cómo compran" },
+  { id: "meses", label: "Mes a mes" },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
+
 export default function AdminEstadisticas() {
   const [range, setRange] = useState<RangeId>("30d");
+  // En la URL, así Inicio puede linkear directo a una pestaña y el botón de
+  // atrás vuelve a la anterior
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pedida = searchParams.get("tab");
+  const tab: TabId = TABS.some((t) => t.id === pedida)
+    ? (pedida as TabId)
+    : "resumen";
+  const setTab = (id: TabId) => {
+    const next = new URLSearchParams(searchParams);
+    if (id === "resumen") next.delete("tab");
+    else next.set("tab", id);
+    setSearchParams(next);
+  };
   const orders = useAdminOrders();
   const visits = useVisits(range);
   const events = useStoreEvents(range);
@@ -259,12 +288,23 @@ export default function AdminEstadisticas() {
         }
         description="Visitas propias del sitio, de dónde llegan y cómo se convierten en ventas. Google Analytics sigue midiendo aparte, con más detalle."
       >
-        <RangeTabs value={range} onChange={setRange} />
+        {/* Mes a mes mira toda la historia: el rango no aplica y se esconde,
+            así no parece que filtra algo que no filtra. */}
+        {tab !== "meses" && <RangeTabs value={range} onChange={setRange} />}
       </PageHeading>
 
-      {visits.error ? (
+      <SectionTabs
+        tabs={TABS}
+        value={tab}
+        onChange={setTab}
+        label="Partes de las estadísticas"
+      />
+
+      {tab === "meses" ? (
+        <MesAMes />
+      ) : visits.error ? (
         <QueryError error={visits.error} what="las visitas" />
-      ) : (
+      ) : tab === "resumen" ? (
         <>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <StatCard
@@ -273,6 +313,7 @@ export default function AdminEstadisticas() {
               variation={
                 anterior ? variation(actual.visitas, anterior.visitas) : null
               }
+              trend={data.tabla.map((row) => row.visitas)}
             />
             <StatCard
               label="Sesiones"
@@ -281,6 +322,7 @@ export default function AdminEstadisticas() {
               variation={
                 anterior ? variation(actual.sesiones, anterior.sesiones) : null
               }
+              trend={data.tabla.map((row) => row.sesiones)}
             />
             <StatCard
               label="Conversión"
@@ -291,6 +333,7 @@ export default function AdminEstadisticas() {
                   ? variation(actual.conversion, anterior.conversion)
                   : null
               }
+              trend={data.tabla.map((row) => row.conversion)}
             />
             <StatCard
               label="Facturación"
@@ -301,203 +344,22 @@ export default function AdminEstadisticas() {
                   ? variation(actual.facturacion, anterior.facturacion)
                   : null
               }
+              trend={data.tabla.map((row) => row.facturacion)}
             />
           </div>
 
-          <section className="mt-3 rounded-2xl bg-white p-6">
-            <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-              Visitas por {bucketLabel.toLowerCase()}
-            </h2>
+          <Panel className="mt-3" title={`Visitas por ${bucketLabel.toLowerCase()}`}>
             <TrendChart
               points={data.visitasSerie}
               formatValue={(value) => `${value.toLocaleString("es-AR")} vistas`}
               summaryLabel="Total del período"
               summaryValue={`${actual.visitas.toLocaleString("es-AR")} vistas`}
             />
-          </section>
-
-          <section className="mt-3 rounded-2xl bg-white p-6">
-            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-              <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                El camino hasta la compra
-              </h2>
-              <p className="font-mono text-[11px] text-ink/65">
-                por sesión, en el período elegido
-              </p>
-            </div>
-
-            {events.error ? (
-              <QueryError
-                error={events.error}
-                what="los pasos del carrito y del checkout"
-                migration="supabase/migrations/20260910203819_embudo_en_la_base.sql"
-              />
-            ) : (
-              <>
-                <FunnelChart steps={embudo} />
-                <p className="mt-5 text-[11px] leading-relaxed text-ink/65">
-                  Carrito y checkout se miden desde el 10/09; los tres pasos de
-                  adentro del checkout, desde el 30/10. Antes de esas fechas el
-                  período los muestra en cero o no los muestra.
-                </p>
-              </>
-            )}
-          </section>
-
-          {/* La pregunta de la semana del lanzamiento: qué se mira mucho y se
-              vende poco. Va arriba de los rankings de tráfico porque es lo
-              que hay que mirar primero. */}
-          <ProductFunnelTable
-            funnel={funnel.funnel}
-            isLoading={funnel.isLoading}
-            range={range}
-          />
-
-          <section className="mt-8 rounded-2xl bg-white p-6">
-            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-              <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                De dónde vienen y qué hacen
-              </h2>
-              <p className="font-mono text-[11px] text-ink/65">
-                por sesión · % de cada origen
-              </p>
-            </div>
-            <OrigenTable
-              filas={recorrido.origenes}
-              primera="Origen"
-              emptyLabel="Sin visitas registradas."
-            />
-            <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
-              "Sin dato" es gente que abrió un link sin etiqueta desde
-              WhatsApp, lo escribió a mano o lo tenía guardado. Desde el 30/10
-              se reconoce también el navegador de Instagram y Facebook, y los
-              links armados abajo aparecen con su lugar ("Instagram · bio").
-            </p>
-          </section>
-
-          <LinkBuilder />
-
-          <div className="mt-3 grid gap-3 lg:grid-cols-2">
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Celular o compu
-              </h2>
-              <OrigenTable
-                filas={recorrido.devices}
-                primera="Aparato"
-                emptyLabel="Se mide desde el 30/10: todavía no hay sesiones con este dato."
-              />
-            </section>
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Campañas
-              </h2>
-              <OrigenTable
-                filas={recorrido.campanas}
-                primera="Campaña"
-                emptyLabel="Ninguna visita llegó con campaña. Se completa con el campo Campaña del armador de links."
-              />
-            </section>
-          </div>
-
-          <section className="mt-3 rounded-2xl bg-white p-6">
-            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-              <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Hasta dónde bajan
-              </h2>
-              <p className="font-mono text-[11px] text-ink/65">
-                de cada 100 que abren la página
-              </p>
-            </div>
-            {recorrido.scroll.length === 0 ? (
-              <p className="py-8 text-center text-sm text-ink/65">
-                Se mide desde el 30/10: todavía no hay datos de scroll en este
-                período.
-              </p>
-            ) : (
-              <div className="grid gap-8 md:grid-cols-3">
-                {recorrido.scroll.map((d) => (
-                  <ScrollDepth key={d.label} datos={d} />
-                ))}
-              </div>
-            )}
-          </section>
-
-          <div className="mt-3 grid gap-3 lg:grid-cols-2">
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Páginas más vistas
-              </h2>
-              <RankingList
-                items={data.paginas}
-                emptyLabel="Sin visitas registradas."
-              />
-            </section>
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Quién se fue a escribir
-              </h2>
-              <RankingList
-                items={recorrido.contactos}
-                emptyLabel="Nadie tocó WhatsApp ni Instagram en este período (se mide desde el 30/10)."
-              />
-            </section>
-          </div>
-
-          <div className="mt-3 grid gap-3 lg:grid-cols-2">
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Qué filtran en la tienda
-              </h2>
-              <RankingList
-                items={recorrido.filtros}
-                emptyLabel="Nadie usó filtros ni orden en este período (se mide desde el 30/10)."
-              />
-            </section>
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Por qué no entró el pedido
-              </h2>
-              <RankingList
-                items={recorrido.errores}
-                emptyLabel="Ningún pedido falló al confirmarse en este período."
-              />
-            </section>
-          </div>
-
-          <div className="mt-3 grid gap-3 lg:grid-cols-3">
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Cómo pagan
-              </h2>
-              <RankingList
-                items={data.porPago}
-                emptyLabel="Sin ventas cobradas."
-              />
-            </section>
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                Cómo lo reciben
-              </h2>
-              <RankingList
-                items={data.porEnvio}
-                emptyLabel="Sin ventas cobradas."
-              />
-            </section>
-            <section className="rounded-2xl bg-white p-6">
-              <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-                A qué provincias
-              </h2>
-              <RankingList
-                items={data.porProvincia}
-                emptyLabel="Sin ventas cobradas."
-              />
-            </section>
-          </div>
+          </Panel>
 
           {/* Los mismos números del gráfico, en tabla: se leen exacto y se
               pueden bajar a un CSV. */}
-          <div className="mt-8 mb-3 flex items-end justify-between gap-4">
+          <div className="mb-3 mt-8 flex items-end justify-between gap-4">
             <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
               Detalle {data.bucket === "day" ? "diario" : `por ${bucketLabel.toLowerCase()}`}
             </h2>
@@ -558,6 +420,127 @@ export default function AdminEstadisticas() {
             ))}
           </AdminTable>
         </>
+      ) : tab === "origen" ? (
+        <div className="space-y-3">
+          <Panel title="De dónde vienen y qué hacen" aside="por sesión · % de cada origen">
+            <OrigenTable
+              filas={recorrido.origenes}
+              primera="Origen"
+              emptyLabel="Sin visitas registradas."
+            />
+            <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
+              "Sin dato" es gente que abrió un link sin etiqueta desde
+              WhatsApp, lo escribió a mano o lo tenía guardado. Desde el 30/10
+              se reconoce también el navegador de Instagram y Facebook, y los
+              links armados abajo aparecen con su lugar ("Instagram · bio").
+            </p>
+          </Panel>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            <Panel title="Celular o compu">
+              <OrigenTable
+                filas={recorrido.devices}
+                primera="Aparato"
+                emptyLabel="Se mide desde el 30/10: todavía no hay sesiones con este dato."
+              />
+            </Panel>
+            <Panel title="Campañas">
+              <OrigenTable
+                filas={recorrido.campanas}
+                primera="Campaña"
+                emptyLabel="Ninguna visita llegó con campaña. Se completa con el campo Campaña del armador de links."
+              />
+            </Panel>
+          </div>
+
+          <LinkBuilder />
+        </div>
+      ) : tab === "recorrido" ? (
+        <div className="space-y-3">
+          <Panel title="El camino hasta la compra" aside="por sesión, en el período elegido">
+            {events.error ? (
+              <QueryError
+                error={events.error}
+                what="los pasos del carrito y del checkout"
+                migration="supabase/migrations/20260910203819_embudo_en_la_base.sql"
+              />
+            ) : (
+              <>
+                <FunnelChart steps={embudo} />
+                <p className="mt-5 text-[11px] leading-relaxed text-ink/65">
+                  Carrito y checkout se miden desde el 10/09; los tres pasos de
+                  adentro del checkout, desde el 30/10. Antes de esas fechas el
+                  período los muestra en cero o no los muestra.
+                </p>
+              </>
+            )}
+          </Panel>
+
+          <Panel title="Hasta dónde bajan" aside="de cada 100 que abren la página">
+            {recorrido.scroll.length === 0 ? (
+              <p className="py-8 text-center text-sm text-ink/65">
+                Se mide desde el 30/10: todavía no hay datos de scroll en este
+                período.
+              </p>
+            ) : (
+              <div className="grid gap-8 md:grid-cols-3">
+                {recorrido.scroll.map((d) => (
+                  <ScrollDepth key={d.label} datos={d} />
+                ))}
+              </div>
+            )}
+          </Panel>
+
+          <div className="grid gap-3 lg:grid-cols-2">
+            <Panel title="Páginas más vistas">
+              <RankingList
+                items={data.paginas}
+                emptyLabel="Sin visitas registradas."
+              />
+            </Panel>
+            <Panel title="Quién se fue a escribir">
+              <RankingList
+                items={recorrido.contactos}
+                emptyLabel="Nadie tocó WhatsApp ni Instagram en este período (se mide desde el 30/10)."
+              />
+            </Panel>
+            <Panel title="Qué filtran en la tienda">
+              <RankingList
+                items={recorrido.filtros}
+                emptyLabel="Nadie usó filtros ni orden en este período (se mide desde el 30/10)."
+              />
+            </Panel>
+            <Panel title="Por qué no entró el pedido">
+              <RankingList
+                items={recorrido.errores}
+                emptyLabel="Ningún pedido falló al confirmarse en este período."
+              />
+            </Panel>
+          </div>
+        </div>
+      ) : tab === "productos" ? (
+        // La pregunta de la semana del lanzamiento: qué se mira mucho y se
+        // vende poco.
+        <ProductFunnelTable
+          funnel={funnel.funnel}
+          isLoading={funnel.isLoading}
+          range={range}
+        />
+      ) : (
+        <div className="grid gap-3 lg:grid-cols-3">
+          <Panel title="Cómo pagan">
+            <RankingList items={data.porPago} emptyLabel="Sin ventas cobradas." />
+          </Panel>
+          <Panel title="Cómo lo reciben">
+            <RankingList items={data.porEnvio} emptyLabel="Sin ventas cobradas." />
+          </Panel>
+          <Panel title="A qué provincias">
+            <RankingList
+              items={data.porProvincia}
+              emptyLabel="Sin ventas cobradas."
+            />
+          </Panel>
+        </div>
       )}
     </>
   );

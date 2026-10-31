@@ -452,6 +452,100 @@ export function profitFor(
   };
 }
 
+// ── Mes a mes ─────────────────────────────────────────────────
+
+export type MesResumen = {
+  /** YYYY-MM */
+  key: string;
+  /** "oct 26" */
+  label: string;
+  desde: Date;
+  hasta: Date;
+  /** El mes calendario que está corriendo: sus números todavía no cierran */
+  enCurso: boolean;
+  ventas: number;
+  unidades: number;
+  sesiones: number;
+  /** ventas / sesiones, en % */
+  conversion: number;
+  ganancia: Profit;
+};
+
+/**
+ * Un renglón por mes calendario, desde el primer mes con actividad hasta el
+ * actual. Es la vista de "cierre": cuánto entró, cuánto quedó y si la meta se
+ * cumplió, sin tener que ir eligiendo rangos de a uno.
+ *
+ * Mismas reglas que Inicio: facturación sin envío, solo órdenes cobradas,
+ * ganancia con el costo de materiales de hoy y el envío que puso la tienda.
+ */
+export function resumenMensual(
+  orders: Order[],
+  visits: PageView[],
+  products: AdminProduct[],
+  costoRealEnvio: number,
+  now: Date = new Date(),
+): MesResumen[] {
+  const fechas = [
+    ...orders.map((o) => new Date(o.createdAt).getTime()),
+    ...visits.map((v) => new Date(v.createdAt).getTime()),
+  ];
+  if (fechas.length === 0) return [];
+
+  const cursor = new Date(Math.min(...fechas));
+  cursor.setDate(1);
+  cursor.setHours(0, 0, 0, 0);
+
+  const meses: MesResumen[] = [];
+  while (cursor <= now) {
+    const desde = new Date(cursor);
+    const hasta = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    hasta.setMilliseconds(-1);
+
+    const delMes = ordersIn(orders, desde, hasta);
+    const pagadas = delMes.filter(isPaid);
+    const sesiones = new Set(
+      visitsIn(visits, desde, hasta).map((v) => v.sessionId),
+    ).size;
+
+    meses.push({
+      key: `${desde.getFullYear()}-${String(desde.getMonth() + 1).padStart(2, "0")}`,
+      label: monthFormatter.format(desde),
+      desde,
+      hasta,
+      enCurso: now >= desde && now <= hasta,
+      ventas: pagadas.length,
+      unidades: pagadas.reduce(
+        (total, o) => total + o.items.reduce((sum, item) => sum + item.qty, 0),
+        0,
+      ),
+      sesiones,
+      conversion: sesiones ? (pagadas.length / sesiones) * 100 : 0,
+      ganancia: profitFor(delMes, products, costoRealEnvio),
+    });
+
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return meses;
+}
+
+/**
+ * A qué número cierra el mes si sigue al mismo ritmo: lo hecho hasta hoy,
+ * repartido por los días que pasaron, por los días que tiene el mes. Con
+ * menos de tres días no hay ritmo que proyectar —un buen lunes daría un mes
+ * imposible— y devuelve null.
+ */
+export function proyeccionDelMes(
+  hastaHoy: number,
+  now: Date = new Date(),
+): number | null {
+  const diasDelMes = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const transcurridos =
+    now.getDate() - 1 + (now.getHours() * 60 + now.getMinutes()) / 1440;
+  if (transcurridos < 3) return null;
+  return Math.round((hastaHoy / transcurridos) * diasDelMes);
+}
+
 // ── Ranking de productos ──────────────────────────────────────
 
 export type ProductSales = {

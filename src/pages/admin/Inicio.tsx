@@ -1,29 +1,33 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AhoraMismo from "../../components/admin/AhoraMismo";
+import MetaDelMes from "../../components/admin/MetaDelMes";
 import PageHeading from "../../components/admin/PageHeading";
+import Panel from "../../components/admin/Panel";
+import ParaHacerHoy from "../../components/admin/ParaHacerHoy";
 import QueryError from "../../components/admin/QueryError";
 import RangeTabs from "../../components/admin/RangeTabs";
 import StatCard from "../../components/admin/StatCard";
 import StatusBadge from "../../components/admin/StatusBadge";
 import TrendChart from "../../components/admin/TrendChart";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
+import { useAdminPendientes } from "../../hooks/useAdminPendientes";
 import { useAdminProducts } from "../../hooks/useAdminProducts";
 import { useStoreSettings } from "../../hooks/useStoreSettings";
 import { useVisits } from "../../hooks/useVisits";
 import {
-  RESERVA_HORAS,
   formatCompactPrice,
   formatDate,
   formatPercent,
   isPaid,
   orderRevenue,
-  pendingStage,
   variation,
   type RangeId,
 } from "../../lib/admin";
 import {
   bucketFor,
+  bucketKey,
+  bucketStart,
   buildSeries,
   kpisFor,
   ordersIn,
@@ -33,18 +37,30 @@ import {
   visitsIn,
 } from "../../lib/admin-stats";
 import { ENVIO_COSTO_REAL } from "../../lib/checkout";
+import { cn } from "../../lib/cn";
 import { formatPrice } from "../../lib/format";
+
+const METRICAS = [
+  { id: "facturacion", label: "Facturación" },
+  { id: "ventas", label: "Ventas" },
+  { id: "visitas", label: "Visitas" },
+] as const;
+type Metrica = (typeof METRICAS)[number]["id"];
 
 export default function AdminInicio() {
   const [range, setRange] = useState<RangeId>("30d");
+  const [metrica, setMetrica] = useState<Metrica>("facturacion");
 
   const orders = useAdminOrders();
   const visits = useVisits(range);
   const products = useAdminProducts();
   const { data: settings } = useStoreSettings();
+  const pendientes = useAdminPendientes();
 
   const allOrders = orders.data ?? [];
   const allVisits = visits.data ?? [];
+  const catalogo = products.data;
+  const costoRealEnvio = settings?.envios.costoRealEnvio ?? ENVIO_COSTO_REAL;
 
   const stats = useMemo(() => {
     const period = periodFor(range, allOrders, allVisits);
@@ -52,92 +68,88 @@ export default function AdminInicio() {
     const currentVisits = visitsIn(allVisits, period.from, period.to);
     const previousOrders = ordersIn(allOrders, period.prevFrom, period.prevTo);
     const previousVisits = visitsIn(allVisits, period.prevFrom, period.prevTo);
+    const pagadas = currentOrders.filter(isPaid);
 
     const bucket = bucketFor(period.from, period.to);
+    const serie = (entries: { date: Date; value: number }[]) =>
+      buildSeries(entries, period, bucket);
+
+    const facturacionSerie = serie(
+      pagadas.map((order) => ({
+        date: new Date(order.createdAt),
+        value: orderRevenue(order),
+      })),
+    );
+    const ventasSerie = serie(
+      pagadas.map((order) => ({ date: new Date(order.createdAt), value: 1 })),
+    );
+    const visitasSerie = serie(
+      currentVisits.map((visit) => ({
+        date: new Date(visit.createdAt),
+        value: 1,
+      })),
+    );
+
+    // Conversión por tramo: ventas sobre sesiones distintas de ese tramo
+    const sesionesPorBucket = new Map<string, Set<string>>();
+    for (const visit of currentVisits) {
+      const key = bucketKey(bucketStart(new Date(visit.createdAt), bucket), bucket);
+      const set = sesionesPorBucket.get(key) ?? new Set<string>();
+      set.add(visit.sessionId);
+      sesionesPorBucket.set(key, set);
+    }
+    const conversionSerie = ventasSerie.map((point) => {
+      const sesiones = sesionesPorBucket.get(point.key)?.size ?? 0;
+      return sesiones ? point.value / sesiones : 0;
+    });
+
+    // Sin catálogo no hay costos: la ganancia queda en null y la pantalla lo
+    // dice, en vez de mostrar la facturación disfrazada de ganancia.
+    let ganancia = null;
+    if (catalogo) {
+      const inicioDeMes = new Date();
+      inicioDeMes.setDate(1);
+      inicioDeMes.setHours(0, 0, 0, 0);
+
+      ganancia = {
+        periodo: profitFor(currentOrders, catalogo, costoRealEnvio),
+        anterior: period.prevFrom
+          ? profitFor(previousOrders, catalogo, costoRealEnvio)
+          : null,
+        // La meta es mensual: se mide siempre sobre el mes calendario en
+        // curso, no sobre el rango elegido arriba.
+        mes: profitFor(
+          ordersIn(allOrders, inicioDeMes, new Date()),
+          catalogo,
+          costoRealEnvio,
+        ),
+        serie: serie(
+          pagadas.map((order) => ({
+            date: new Date(order.createdAt),
+            value: profitFor([order], catalogo, costoRealEnvio).profit,
+          })),
+        ),
+      };
+    }
 
     return {
-      period,
       bucket,
       actual: kpisFor(currentOrders, currentVisits),
       anterior: period.prevFrom
         ? kpisFor(previousOrders, previousVisits)
         : null,
-      facturacionSerie: buildSeries(
-        currentOrders
-          .filter(isPaid)
-          .map((order) => ({
-            date: new Date(order.createdAt),
-            value: orderRevenue(order),
-          })),
-        period,
-        bucket,
-      ),
-      visitasSerie: buildSeries(
-        currentVisits.map((visit) => ({
-          date: new Date(visit.createdAt),
-          value: 1,
-        })),
-        period,
-        bucket,
-      ),
+      facturacionSerie,
+      ventasSerie,
+      visitasSerie,
+      conversionSerie,
+      ganancia,
       ranking: topProducts(currentOrders).slice(0, 5),
       ultimas: currentOrders.slice(0, 6),
     };
-  }, [range, allOrders, allVisits]);
+  }, [range, allOrders, allVisits, catalogo, costoRealEnvio]);
 
-  const { actual, anterior } = stats;
-
-  // La ganancia necesita el costo de cada producto, así que se calcula fuera
-  // del memo de arriba: depende del catálogo, que carga por su cuenta.
-  const ganancia = useMemo(() => {
-    const catalogo = products.data ?? [];
-    const period = periodFor(range, allOrders, allVisits);
-
-    // El avance del mes se mide siempre sobre el mes calendario en curso, no
-    // sobre el rango elegido: la meta es mensual y con "7 días" seleccionado
-    // compararía siete días contra una meta de treinta.
-    const inicioDeMes = new Date();
-    inicioDeMes.setDate(1);
-    inicioDeMes.setHours(0, 0, 0, 0);
-
-    const costoRealEnvio =
-      settings?.envios.costoRealEnvio ?? ENVIO_COSTO_REAL;
-
-    return {
-      costoRealEnvio,
-      periodo: profitFor(
-        ordersIn(allOrders, period.from, period.to),
-        catalogo,
-        costoRealEnvio,
-      ),
-      mes: profitFor(
-        ordersIn(allOrders, inicioDeMes, new Date()),
-        catalogo,
-        costoRealEnvio,
-      ),
-    };
-  }, [range, allOrders, allVisits, products.data, settings]);
-
+  const { actual, anterior, ganancia } = stats;
   const meta = settings?.precios.metaGananciaMensual ?? 0;
-  const avanceMeta = meta ? Math.min(100, (ganancia.mes.profit / meta) * 100) : 0;
-
-  // Las reservas vencidas se cuentan sobre todas las órdenes y no sobre el
-  // período elegido: una transferencia que se cayó hace un mes sigue siendo
-  // algo para cerrar, aunque el gráfico esté mostrando los últimos 7 días.
-  const vencidas = useMemo(
-    () => allOrders.filter((order) => pendingStage(order) === "vencida").length,
-    [allOrders],
-  );
-
-  const lowStockThreshold = settings?.distribucion.lowStockThreshold ?? 3;
-  const bajoStock = (products.data ?? []).filter((product) =>
-    product.variants?.length
-      ? product.variants.some(
-          (variant) =>
-            variant.stock !== null && variant.stock <= lowStockThreshold,
-        )
-      : product.stock !== null && product.stock <= lowStockThreshold,
-  );
 
   const bucketLabel =
     stats.bucket === "hour"
@@ -157,6 +169,27 @@ export default function AdminInicio() {
     );
   }
 
+  const grafico = {
+    facturacion: {
+      points: stats.facturacionSerie,
+      format: formatPrice,
+      total: formatPrice(actual.facturacion),
+      empty: "Sin ventas cobradas en este período.",
+    },
+    ventas: {
+      points: stats.ventasSerie,
+      format: (v: number) => `${v} ${v === 1 ? "venta" : "ventas"}`,
+      total: `${actual.ventas} ${actual.ventas === 1 ? "venta" : "ventas"}`,
+      empty: "Sin ventas cobradas en este período.",
+    },
+    visitas: {
+      points: stats.visitasSerie,
+      format: (v: number) => `${v.toLocaleString("es-AR")} vistas`,
+      total: `${actual.visitas.toLocaleString("es-AR")} vistas`,
+      empty: "Todavía no hay visitas registradas.",
+    },
+  }[metrica];
+
   return (
     <>
       <PageHeading
@@ -168,82 +201,59 @@ export default function AdminInicio() {
             </em>
           </>
         }
-        description="Todo lo que pasó en el período elegido: lo que entró, lo que se vendió y cuánta gente pasó por el sitio."
+        description="Arriba, lo que espera algo de vos. Abajo, los números del período elegido comparados con el anterior."
       >
         <RangeTabs value={range} onChange={setRange} />
       </PageHeading>
 
-      {(vencidas > 0 || actual.pendientes > 0 || bajoStock.length > 0) && (
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row">
-          {/* Primero lo que rompe una promesa: el sitio dice que la reserva
-              dura 48 h y hasta ahora nada avisaba cuando se cumplían */}
-          {vencidas > 0 && (
-            <Link
-              to="/admin/ventas?estado=vencidas"
-              className="flex-1 rounded-xl bg-amarillo px-4 py-3 text-xs leading-relaxed transition-opacity hover:opacity-90"
-            >
-              ✦ {vencidas}{" "}
-              {vencidas === 1
-                ? "transferencia pasó"
-                : "transferencias pasaron"}{" "}
-              las {RESERVA_HORAS} h reservadas sin acreditarse →
-            </Link>
-          )}
-          {actual.pendientes > 0 && (
-            <Link
-              to="/admin/ventas?estado=pending"
-              className="flex-1 rounded-xl bg-ink/5 px-4 py-3 text-xs leading-relaxed transition-opacity hover:opacity-90"
-            >
-              ✦ {actual.pendientes}{" "}
-              {actual.pendientes === 1 ? "orden pendiente" : "órdenes pendientes"}{" "}
-              de pago o confirmación →
-            </Link>
-          )}
-          {bajoStock.length > 0 && (
-            <Link
-              to="/admin/distribucion"
-              className="flex-1 rounded-xl bg-orange/15 px-4 py-3 text-xs leading-relaxed transition-opacity hover:opacity-90"
-            >
-              ✧ {bajoStock.length}{" "}
-              {bajoStock.length === 1 ? "producto" : "productos"} con poco stock →
-            </Link>
-          )}
+      {/* Lo único sobre lo que todavía se puede hacer algo va primero: lo
+          pendiente y el minuto que corre. Los números del período, después. */}
+      <div className="grid gap-3 lg:grid-cols-5">
+        <div className="lg:col-span-2">
+          <ParaHacerHoy pendientes={pendientes} />
         </div>
-      )}
-
-      {/* Va antes que los KPIs a propósito: las tarjetas de abajo miran un
-          período cerrado y esto mira el minuto que corre, que es lo único
-          sobre lo que todavía se puede hacer algo. */}
-      <div className="mb-3">
-        <AhoraMismo />
+        <div className="lg:col-span-3 [&>section]:h-full">
+          <AhoraMismo />
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard
           label="Facturación"
           value={formatCompactPrice(actual.facturacion)}
           hint={
-            actual.envios
-              ? `${actual.ventas} ${actual.ventas === 1 ? "venta" : "ventas"} · ${formatCompactPrice(actual.envios)} de envío aparte`
-              : `${actual.ventas} ${actual.ventas === 1 ? "venta" : "ventas"}`
+            actual.ventas
+              ? `${actual.ventas} ${actual.ventas === 1 ? "venta" : "ventas"} · ticket ${formatCompactPrice(actual.ticket)}`
+              : "sin ventas cobradas"
           }
           variation={
             anterior ? variation(actual.facturacion, anterior.facturacion) : null
           }
+          trend={stats.facturacionSerie.map((p) => p.value)}
         />
         <StatCard
-          label="Ticket promedio"
-          value={actual.ticket ? formatPrice(actual.ticket) : "—"}
-          hint={`${actual.unidades} unidades, sin envío`}
-          variation={anterior ? variation(actual.ticket, anterior.ticket) : null}
+          label="Ganancia"
+          value={ganancia ? formatCompactPrice(ganancia.periodo.profit) : "—"}
+          hint={
+            ganancia && ganancia.periodo.revenue
+              ? `margen ${formatPercent(ganancia.periodo.margin, 0)} · sin mano de obra`
+              : "sin mano de obra"
+          }
+          variation={
+            ganancia?.anterior
+              ? variation(ganancia.periodo.profit, ganancia.anterior.profit)
+              : null
+          }
+          trend={ganancia?.serie.map((p) => p.value)}
         />
         <StatCard
           label="Visitas"
           value={actual.visitas.toLocaleString("es-AR")}
-          hint={`${actual.sesiones} ${actual.sesiones === 1 ? "sesión" : "sesiones"}`}
+          hint={`${actual.sesiones.toLocaleString("es-AR")} ${actual.sesiones === 1 ? "sesión" : "sesiones"}`}
           variation={
             anterior ? variation(actual.visitas, anterior.visitas) : null
           }
+          trend={stats.visitasSerie.map((p) => p.value)}
         />
         <StatCard
           label="Conversión"
@@ -252,165 +262,127 @@ export default function AdminInicio() {
           variation={
             anterior ? variation(actual.conversion, anterior.conversion) : null
           }
+          trend={stats.conversionSerie}
         />
       </div>
 
-      <section className="mt-3 rounded-2xl bg-white p-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
-            Ganancia del período
-          </h2>
-          <p className="font-mono text-[11px] text-ink/65">
-            facturación − materiales − envío, sin mano de obra
-          </p>
-        </div>
-
-        {/* Sin el catálogo no hay costos, y todo se leería como ganancia
-            pura: mejor no mostrar un número que va a estar mal. */}
-        {products.isLoading || products.error ? (
-          <p className="mt-6 text-sm text-ink/65">
-            {products.error
-              ? "No se pudo cargar el catálogo, así que no se puede calcular la ganancia."
-              : "Cargando los costos del catálogo…"}
-          </p>
-        ) : (
-          <>
-            <p className="mt-4 font-mono text-3xl font-medium tracking-tight">
-              {formatPrice(ganancia.periodo.profit)}
-            </p>
-            <p className="mt-1.5 text-[11px] text-ink/65">
-              {formatPrice(ganancia.periodo.revenue)} facturados −{" "}
-              {formatPrice(ganancia.periodo.cost)} de materiales
-              {ganancia.periodo.revenue > 0 && (
-                <> · margen {formatPercent(ganancia.periodo.margin, 1)}</>
-              )}
-            </p>
-            {/* Línea aparte: es lo que pone la tienda por despachar, no un
-                costo del producto, y con todo retirado en el depósito es cero. */}
-            <p className="mt-1 text-[11px] text-ink/65">
-              −{" "}
-              {formatPrice(ganancia.periodo.shipping)} de envío puesto por la
-              tienda
-              {ganancia.periodo.shippedOrders > 0 ? (
-                <>
-                  {" "}
-                  · {ganancia.periodo.shippedOrders}{" "}
-                  {ganancia.periodo.shippedOrders === 1
-                    ? "orden enviada"
-                    : "órdenes enviadas"}{" "}
-                  a {formatPrice(ganancia.costoRealEnvio)} de costo real menos
-                  lo cobrado
-                </>
-              ) : (
-                <> · ninguna orden se despachó</>
-              )}
-            </p>
-
-            {meta > 0 && (
-              <div className="mt-6 border-t border-ink/[0.08] pt-5">
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/65">
-                    Meta del mes
-                  </p>
-                  <p className="font-mono text-xs">
-                    {formatPrice(ganancia.mes.profit)}{" "}
-                    <span className="text-ink/65">
-                      de {formatPrice(meta)} ·{" "}
-                      {formatPercent(avanceMeta, avanceMeta < 10 ? 1 : 0)}
-                    </span>
-                  </p>
-                </div>
-                <div
-                  role="progressbar"
-                  aria-valuenow={Math.round(avanceMeta)}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label="Avance de la meta de ganancia del mes"
-                  className="mt-2.5 h-1.5 rounded-full bg-ink/[0.07]"
+      <div className="mt-3 grid gap-3 lg:grid-cols-3">
+        <Panel
+          className="lg:col-span-2"
+          title={`${METRICAS.find((m) => m.id === metrica)!.label} ${bucketLabel}`}
+          aside={
+            <div
+              role="group"
+              aria-label="Qué mostrar en el gráfico"
+              className="flex gap-1 rounded-full bg-cream p-1"
+            >
+              {METRICAS.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  aria-pressed={metrica === m.id}
+                  onClick={() => setMetrica(m.id)}
+                  className={cn(
+                    "rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-widest transition-colors",
+                    metrica === m.id ? "bg-ink text-cream" : "text-ink/65 hover:text-ink",
+                  )}
                 >
-                  <div
-                    className="h-full rounded-full bg-verde transition-[width]"
-                    style={{ width: `${Math.max(avanceMeta, 0)}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-[11px] text-ink/65">
-                  Es el mes calendario en curso, no el rango de arriba.
-                </p>
-              </div>
-            )}
-
-            {ganancia.periodo.unitsWithoutCost > 0 && (
-              <p className="mt-5 rounded-xl bg-amarillo/40 px-4 py-3 text-[11px] leading-relaxed">
-                ✦ {ganancia.periodo.unitsWithoutCost}{" "}
-                {ganancia.periodo.unitsWithoutCost === 1
-                  ? "unidad vendida no tiene"
-                  : "unidades vendidas no tienen"}{" "}
-                el costo cargado ({ganancia.periodo.productsWithoutCost.join(", ")}),
-                así que cuentan como costo cero y la ganancia de arriba está
-                inflada.{" "}
-                <Link to="/admin/precios" className="underline">
-                  Cargar el costo →
-                </Link>
-              </p>
-            )}
-
-            <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
-              El costo es el que tiene el producto hoy: las órdenes guardan el
-              precio cobrado, no el costo del día de la venta.
-            </p>
-          </>
-        )}
-      </section>
-
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <section className="rounded-2xl bg-white p-6">
-          <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-            Facturación {bucketLabel}
-          </h2>
-          <TrendChart
-            points={stats.facturacionSerie}
-            formatValue={formatPrice}
-            summaryLabel="Total del período"
-            summaryValue={formatPrice(actual.facturacion)}
-            emptyLabel="Sin ventas cobradas en este período."
-          />
-        </section>
-
-        <section className="rounded-2xl bg-white p-6">
-          <h2 className="mb-5 font-mono text-xs font-medium uppercase tracking-[0.15em]">
-            Visitas {bucketLabel}
-          </h2>
-          {visits.error ? (
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          }
+        >
+          {metrica === "visitas" && visits.error ? (
             <QueryError error={visits.error} what="las visitas" />
           ) : (
             <TrendChart
-              points={stats.visitasSerie}
-              formatValue={(value) => `${value.toLocaleString("es-AR")} vistas`}
+              points={grafico.points}
+              formatValue={grafico.format}
               summaryLabel="Total del período"
-              summaryValue={`${actual.visitas.toLocaleString("es-AR")} vistas`}
-              emptyLabel="Todavía no hay visitas registradas."
+              summaryValue={grafico.total}
+              emptyLabel={grafico.empty}
             />
           )}
-        </section>
+        </Panel>
+
+        <MetaDelMes mes={ganancia?.mes ?? null} meta={meta} />
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <section className="rounded-2xl bg-white p-6">
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
-              Lo que más se vende
-            </h2>
-            <Link
-              to="/admin/productos"
-              className="font-mono text-[11px] uppercase tracking-widest text-ink/65 hover:text-ink"
-            >
+      <div className="mt-3 grid gap-3 lg:grid-cols-3">
+        <Panel title="Cuenta de la ganancia" aside="del período">
+          {products.error ? (
+            <p className="text-sm text-ink/65">
+              No se pudo cargar el catálogo, así que no se puede calcular la
+              ganancia.
+            </p>
+          ) : !ganancia ? (
+            <p className="text-sm text-ink/65">Cargando los costos del catálogo…</p>
+          ) : (
+            <>
+              <dl className="space-y-2.5 font-mono text-xs">
+                <div className="flex justify-between gap-3">
+                  <dt className="text-ink/65">Facturado</dt>
+                  <dd>{formatPrice(ganancia.periodo.revenue)}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-ink/65">− Materiales</dt>
+                  <dd>{formatPrice(ganancia.periodo.cost)}</dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-ink/65">
+                    − Envío puesto
+                    {ganancia.periodo.shippedOrders > 0 && (
+                      <span className="text-ink/45">
+                        {" "}
+                        · {ganancia.periodo.shippedOrders}{" "}
+                        {ganancia.periodo.shippedOrders === 1 ? "envío" : "envíos"}
+                      </span>
+                    )}
+                  </dt>
+                  <dd>{formatPrice(ganancia.periodo.shipping)}</dd>
+                </div>
+                <div className="flex justify-between gap-3 border-t border-ink/10 pt-2.5 text-sm font-medium">
+                  <dt>= Ganancia</dt>
+                  <dd>{formatPrice(ganancia.periodo.profit)}</dd>
+                </div>
+              </dl>
+
+              {ganancia.periodo.unitsWithoutCost > 0 && (
+                <p className="mt-4 rounded-xl bg-amarillo/40 px-3.5 py-2.5 text-[11px] leading-relaxed">
+                  ✦ {ganancia.periodo.unitsWithoutCost}{" "}
+                  {ganancia.periodo.unitsWithoutCost === 1
+                    ? "unidad vendida no tiene"
+                    : "unidades vendidas no tienen"}{" "}
+                  costo cargado ({ganancia.periodo.productsWithoutCost.join(", ")})
+                  y la ganancia sale inflada.{" "}
+                  <Link to="/admin/precios" className="underline">
+                    Cargarlo →
+                  </Link>
+                </p>
+              )}
+
+              <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
+                El envío puesto es el costo real ({formatPrice(costoRealEnvio)})
+                menos lo cobrado, en cada orden que salió por transportista. Los
+                materiales son los de hoy: las órdenes no guardan el costo del
+                día de la venta.
+              </p>
+            </>
+          )}
+        </Panel>
+
+        <Panel
+          title="Lo que más se vende"
+          aside={
+            <Link to="/admin/estadisticas?tab=productos" className="uppercase tracking-widest hover:text-ink">
               Ver todo →
             </Link>
-          </div>
-
+          }
+        >
           {stats.ranking.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink/65">
-              Sin ventas cobradas todavía.
+              Sin ventas cobradas en este período.
             </p>
           ) : (
             <ol className="space-y-3">
@@ -446,21 +418,16 @@ export default function AdminInicio() {
               })}
             </ol>
           )}
-        </section>
+        </Panel>
 
-        <section className="rounded-2xl bg-white p-6">
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">
-              Últimas ventas
-            </h2>
-            <Link
-              to="/admin/ventas"
-              className="font-mono text-[11px] uppercase tracking-widest text-ink/65 hover:text-ink"
-            >
+        <Panel
+          title="Últimas órdenes"
+          aside={
+            <Link to="/admin/ventas" className="uppercase tracking-widest hover:text-ink">
               Ver todas →
             </Link>
-          </div>
-
+          }
+        >
           {orders.isLoading ? (
             <p className="animate-pulse py-8 text-center font-mono text-xs uppercase tracking-widest text-ink/65">
               ✦ Cargando…
@@ -470,30 +437,26 @@ export default function AdminInicio() {
               Sin órdenes en este período.
             </p>
           ) : (
-            <ul className="divide-y divide-ink/[0.08]">
+            <ul className="-my-2.5 divide-y divide-ink/[0.08]">
               {stats.ultimas.map((order) => (
-                <li
-                  key={order.id}
-                  className="flex items-center justify-between gap-3 py-2.5 text-sm"
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate">{order.customerName}</span>
-                    <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
-                      {formatDate(order.createdAt)} ·{" "}
-                      {order.id.slice(0, 8).toUpperCase()}
+                <li key={order.id}>
+                  <Link
+                    to={`/admin/ventas?orden=${order.id}`}
+                    className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate">{order.customerName}</span>
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink/65">
+                        {formatDate(order.createdAt)} · {formatPrice(order.total)}
+                      </span>
                     </span>
-                  </span>
-                  <span className="flex shrink-0 items-center gap-3">
                     <StatusBadge kind="pago" value={order.status} />
-                    <span className="font-mono text-xs">
-                      {formatPrice(order.total)}
-                    </span>
-                  </span>
+                  </Link>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </Panel>
       </div>
     </>
   );

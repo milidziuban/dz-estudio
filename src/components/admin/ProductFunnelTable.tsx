@@ -76,7 +76,7 @@ export default function ProductFunnelTable({
   const sinVentas = funnel.views > 0 && funnel.orders === 0;
 
   return (
-    <section className="mt-8">
+    <section>
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="font-mono text-xs font-medium uppercase tracking-[0.15em]">

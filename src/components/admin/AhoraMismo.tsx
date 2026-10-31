@@ -163,7 +163,7 @@ export default function AhoraMismo() {
           <p className="mt-5 text-[11px] leading-relaxed text-ink/65">
             Una persona es una pestaña abierta, no un cliente distinto: quien
             vuelve mañana cuenta de nuevo.{" "}
-            <Link to="/admin/estadisticas" className="underline">
+            <Link to="/admin/estadisticas?tab=recorrido" className="underline">
               Ver el embudo completo →
             </Link>
           </p>

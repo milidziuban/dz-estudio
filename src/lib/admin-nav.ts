@@ -6,6 +6,8 @@ export type AdminNavItem = {
   icon: IconName;
   /** `/admin` matchea exacto; el resto por prefijo */
   exact?: boolean;
+  /** Qué cuenta el numerito al lado del nombre (ver `useAdminPendientes`) */
+  badge?: "ventas" | "stock" | "contenido";
 };
 
 export type AdminNavGroup = {
@@ -28,7 +30,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   {
     title: "Ventas",
     items: [
-      { to: "/admin/ventas", label: "Ventas", icon: "ventas" },
+      { to: "/admin/ventas", label: "Ventas", icon: "ventas", badge: "ventas" },
       { to: "/admin/clientes", label: "Clientes", icon: "clientes" },
     ],
   },
@@ -41,6 +43,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         to: "/admin/distribucion",
         label: "Centro de distribución",
         icon: "distribucion",
+        badge: "stock",
       },
     ],
   },
@@ -52,6 +55,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         to: "/admin/contenido",
         label: "Contenido y redes",
         icon: "contenido",
+        badge: "contenido",
       },
       { to: "/admin/marketing", label: "Marketing", icon: "marketing" },
     ],
