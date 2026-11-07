@@ -25,7 +25,7 @@ import { COLOR_HEX } from "../../lib/colors";
 import type { AdminProduct, ProductDraft } from "../../types/admin";
 import type { Category } from "../../types/product";
 
-type Filtro = "todos" | "almohadones" | "individuales";
+type Filtro = "todos" | Category;
 type SortKey = "name" | "price" | "stock";
 type Sort = { key: SortKey; dir: "asc" | "desc" };
 
@@ -110,6 +110,7 @@ function ProductCategoryCell({ product }: { product: AdminProduct }) {
     >
       <option value="almohadones">Almohadones</option>
       <option value="individuales">Individuales</option>
+      <option value="manteles">Manteles</option>
     </select>
   );
 }
@@ -314,6 +315,7 @@ export default function AdminProductos() {
               ["todos", "Todos"],
               ["almohadones", "Almohadones"],
               ["individuales", "Individuales"],
+              ["manteles", "Manteles"],
             ] as [Filtro, string][]
           ).map(([id, label]) => (
             <button

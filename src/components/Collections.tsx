@@ -7,9 +7,13 @@ import CollectionCard from "./CollectionCard";
 const TAG_COLOR = {
   almohadones: "pink",
   individuales: "celeste",
+  manteles: "pink",
 } as const;
 
-const CATEGORIES = Object.keys(CATEGORY_LABEL) as Category[];
+/** Solo las categorías con portada cargada en CATEGORY_INTRO. */
+const CATEGORIES = (Object.keys(CATEGORY_LABEL) as Category[]).filter(
+  (category) => CATEGORY_INTRO[category],
+);
 
 /** " · $29.300" si todos cuestan lo mismo, " · desde $8.700" si no. */
 function precioDeCategoria(products: Product[], category: Category): string {
@@ -40,6 +44,7 @@ export default function Collections() {
         <div className="grid gap-8 md:grid-cols-2 md:gap-6 lg:gap-8">
           {CATEGORIES.map((category) => {
             const intro = CATEGORY_INTRO[category];
+            if (!intro) return null;
             return (
               <CollectionCard
                 key={category}

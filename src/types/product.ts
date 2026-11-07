@@ -9,8 +9,8 @@ export type ColorToken =
   | "ink"
   | "cream";
 
-/** Las dos categorías que existen en Tienda Nube. */
-export type Category = "almohadones" | "individuales";
+/** Categorías de la tienda. Manteles se sumó el 06/11/2026. */
+export type Category = "almohadones" | "individuales" | "manteles";
 
 export type ProductImage = {
   /** Foto real del catálogo, servida desde /public/productos */

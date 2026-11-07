@@ -18,17 +18,22 @@ const CATEGORIAS = Object.keys(CATEGORY_LABEL) as Category[];
 const categoriaFromParam = (param: string | null): CategoriaActiva =>
   CATEGORIAS.find((c) => c === param) ?? "all";
 
-/** Las mismas tres entradas que la navbar. La categoría vive en la URL
+/** Las mismas entradas que la navbar. La categoría vive en la URL
  *  (`?categoria=`) y no en un estado local: un link compartido abre la tienda
- *  ya filtrada y el botón "atrás" deshace el filtro. */
-const CATEGORY_LINKS: { id: CategoriaActiva; label: string; to: string }[] = [
-  { id: "all", label: "Todo", to: "/tienda" },
-  ...CATEGORIAS.map((id) => ({
-    id,
-    label: CATEGORY_LABEL[id],
-    to: `/tienda?categoria=${id}`,
-  })),
-];
+ *  ya filtrada y el botón "atrás" deshace el filtro. Una categoría sin
+ *  productos publicados no tiene pestaña (salvo que sea la que está abierta). */
+function categoryLinks(
+  categorias: Category[],
+): { id: CategoriaActiva; label: string; to: string }[] {
+  return [
+    { id: "all", label: "Todo", to: "/tienda" },
+    ...categorias.map((id) => ({
+      id,
+      label: CATEGORY_LABEL[id],
+      to: `/tienda?categoria=${id}`,
+    })),
+  ];
+}
 
 type SortId = "destacados" | "novedades" | "precio-asc" | "precio-desc";
 
@@ -44,6 +49,15 @@ export default function Tienda() {
   const [searchParams] = useSearchParams();
   const categoria = categoriaFromParam(searchParams.get("categoria"));
   const [sort, setSort] = useState<SortId>("destacados");
+  const links = useMemo(
+    () =>
+      categoryLinks(
+        CATEGORIAS.filter(
+          (c) => c === categoria || products.some((p) => p.category === c),
+        ),
+      ),
+    [categoria, products],
+  );
 
   const visible = useMemo(() => {
     const filtered =
@@ -99,7 +113,7 @@ export default function Tienda() {
             aria-label="Filtrar por categoría"
             className="flex flex-wrap gap-2"
           >
-            {CATEGORY_LINKS.map((link) => {
+            {links.map((link) => {
               const selected = categoria === link.id;
               return (
                 <Link

@@ -76,6 +76,8 @@ function mapRow(row: ProductRow): Product {
   };
 }
 
+const conFotos = (product: Product) => product.images.length > 0;
+
 export function useProducts() {
   return useQuery({
     queryKey: ["products"],
@@ -94,7 +96,10 @@ export function useProducts() {
           .order("orden")
           .order("id", { ascending: false });
         if (error) throw error;
-        if (data?.length) return (data as ProductRow[]).map(mapRow);
+        // Un producto sin fotos no se publica: queda cargado en el panel y
+        // aparece en la tienda recién cuando se le sube la primera foto.
+        if (data?.length)
+          return (data as ProductRow[]).map(mapRow).filter(conFotos);
       } catch (error) {
         // Sin Supabase configurado (o sin la migración corrida) la tienda
         // igual muestra el catálogo espejo de Tienda Nube.
@@ -103,7 +108,7 @@ export function useProducts() {
           error,
         );
       }
-      return localCatalog;
+      return localCatalog.filter(conFotos);
     },
     retry: false,
     staleTime: 5 * 60 * 1000,

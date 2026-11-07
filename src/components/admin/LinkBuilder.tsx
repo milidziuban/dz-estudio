@@ -100,6 +100,7 @@ export default function LinkBuilder() {
           <option value="/tienda">La tienda</option>
           <option value="/tienda?categoria=almohadones">Almohadones</option>
           <option value="/tienda?categoria=individuales">Individuales</option>
+          <option value="/tienda?categoria=manteles">Manteles</option>
           {products.map((p) => (
             <option key={p.slug} value={`/producto/${p.slug}`}>
               {p.name.split(" · ")[0]}

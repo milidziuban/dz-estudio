@@ -1,10 +1,19 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useHideOnScroll } from "../hooks/useHideOnScroll";
+import { useProducts } from "../hooks/useProducts";
 import { cartCount } from "../lib/cart";
 import { cn } from "../lib/cn";
+import type { Category } from "../types/product";
 
-const NAV_LINKS: { label: string; short?: string; to: string }[] = [
+const NAV_LINKS: {
+  label: string;
+  short?: string;
+  to: string;
+  /** Si la tiene, el link se muestra solo con productos publicados de esa
+   *  categoría (Manteles no aparece hasta que el mantel tenga fotos). */
+  category?: Category;
+}[] = [
   { label: "Todo", to: "/tienda" },
   {
     label: "Almohadones",
@@ -16,6 +25,12 @@ const NAV_LINKS: { label: string; short?: string; to: string }[] = [
     short: "Individuales",
     to: "/tienda?categoria=individuales",
   },
+  {
+    label: "Manteles",
+    short: "Manteles",
+    to: "/tienda?categoria=manteles",
+    category: "manteles",
+  },
 ];
 
 export default function Header() {
@@ -25,6 +40,11 @@ export default function Header() {
   // En mobile la fila de categorías se esconde al bajar y vuelve al subir;
   // el logo y el carrito quedan siempre a la vista.
   const categories = useHideOnScroll();
+  const { data: products = [] } = useProducts();
+  const navLinks = NAV_LINKS.filter(
+    (link) =>
+      !link.category || products.some((p) => p.category === link.category),
+  );
 
   return (
     <>
@@ -54,7 +74,7 @@ export default function Header() {
             {/* Desktop: las categorías van al lado del logo */}
             <nav aria-label="Navegación principal" className="hidden md:block">
               <div className="flex items-center gap-6">
-                {NAV_LINKS.map((link) => (
+                {navLinks.map((link) => (
                   <Link
                     key={link.label}
                     to={link.to}
@@ -113,7 +133,7 @@ export default function Header() {
           categories.hidden && "-translate-y-full",
         )}
       >
-        {NAV_LINKS.map((link) => (
+        {navLinks.map((link) => (
           <Link
             key={link.label}
             to={link.to}

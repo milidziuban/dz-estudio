@@ -4,10 +4,11 @@
 
 - Nombre: DZ Estudio — `dz-estudio.com`, taller en Santa Fe Capital
 - Rubro: objetos textiles maximalistas, hoy en dos líneas de producto
-- Productos: almohadones (40 × 40 cm, pana estampada) e individuales (packs
-  de 2, 30 × 42 cm, gabardina acrílica impermeable). Nada de manteles,
-  servilletas, caminos de mesa ni mantas; los totes se pensaron y todavía no
-  existen — no inventarlos.
+- Productos: almohadones (40 × 40 cm, pana estampada), individuales (packs
+  de 2, 30 × 42 cm, gabardina acrílica impermeable) y, desde el 06/11/2026,
+  manteles (gabardina acrílica impermeable pesada). Nada de servilletas,
+  caminos de mesa ni mantas; los totes se pensaron y todavía no existen — no
+  inventarlos.
 - Público: adultos jóvenes (28-45) con gusto formado, dispuestos a pagar por diseño con criterio
 - País: Argentina — precios en ARS. Desde el 28/09/2026 la tienda entrega de
   dos maneras: retiro gratis en el depósito de Santa Fe Capital, o **envío a
@@ -155,7 +156,7 @@ envío.
 
 ## Catálogo real
 
-Seis productos, dos categorías. **La fuente de verdad es la tabla `products`
+Productos en tres categorías. **La fuente de verdad es la tabla `products`
 de Supabase**, que es la que edita el panel; `src/data/products.ts` es un
 espejo que todavía usa la home (ver T1 en el backlog). Los precios de acá son
 los del 28/09/2026 —costo de materiales × 1,8 (margen 80%) ÷ 0,56 (el 44%
@@ -174,6 +175,15 @@ Individuales — pack x2, 30 × 42 cm cada uno, gabardina acrílica impermeable,
 4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $11.600
 5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $11.600
 6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $8.700
+
+Manteles (categoría `manteles`, desde el 06/11/2026; sin promo de combo y sin
+tarjeta en la home hasta que tenga foto de portada en `CATEGORY_INTRO`):
+
+7. Mantel Rayas Rosa y Rojo · Mediano · 130 × 180 cm — `mantel-rayas-rosa-y-rojo-mediano` — $88.400, pieza única
+
+**Un producto sin fotos no se publica**: `useProducts` lo filtra, y con él la
+pestaña de su categoría en /tienda y el link de la navbar. Se carga desde el
+panel, se le suben fotos y recién ahí aparece.
 
 Cuidados, iguales en todos: lavar con agua fría, a ciclo suave o a mano, no
 secar al sol.

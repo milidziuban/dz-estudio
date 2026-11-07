@@ -8,10 +8,13 @@ import type { Category, ColorToken, Product } from "../types/product";
 export const CATEGORY_LABEL: Record<Category, string> = {
   almohadones: "Almohadones",
   individuales: "Individuales",
+  manteles: "Manteles",
 };
 
-/** Copy y foto de portada de cada categoría para la home. */
-export const CATEGORY_INTRO: Record<
+/** Copy y foto de portada de cada categoría para la home. Una categoría sin
+ *  entrada acá no aparece en la home (Manteles, hasta que tenga foto de
+ *  portada propia). */
+export const CATEGORY_INTRO: Partial<Record<
   Category,
   {
     colorB: ColorToken;
@@ -26,7 +29,7 @@ export const CATEGORY_INTRO: Record<
     imageWidth: number;
     imageHeight: number;
   }
-> = {
+>> = {
   almohadones: {
     colorB: "petroleo",
     tagLabel: "3 modelos",
