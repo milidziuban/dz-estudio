@@ -231,8 +231,12 @@ export type PaqueteEstandar = {
 
 export type EnviosSettings = {
   options: ShippingOptionSetting[];
-  /** Monto desde el que el envío es gratis. null = sin envío gratis */
+  /** Monto desde el que el envío baja a `costoRebajado`. null = sin rebaja. El
+   *  nombre quedó de cuando bajaba a cero; lo leen también el trigger de las
+   *  órdenes y `create-preference`. */
   freeShippingFrom: number | null;
+  /** Lo que cuesta el envío desde `freeShippingFrom`. 0 = gratis. */
+  costoRebajado: number;
   /** Lo que le cuesta a la tienda despachar un pedido, en ARS. Solo lo usa el
    *  panel: la ganancia de Inicio resta, por orden enviada, la diferencia
    *  entre esto y lo que se le cobró de envío a la clienta. */

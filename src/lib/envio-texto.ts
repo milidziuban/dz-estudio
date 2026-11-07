@@ -7,16 +7,21 @@ import { formatPrice } from "./format";
 export type EnvioNacional = {
   activo: boolean;
   costo: number;
-  gratisDesde: number | null;
+  rebajaDesde: number | null;
+  costoRebajado: number;
 };
 
 const COORDINAR = "el costo se coordina por WhatsApp";
 
-/** "gratis desde $50.000", o null si no hay envío gratis. */
-const gratis = ({ gratisDesde }: EnvioNacional): string | null =>
-  gratisDesde === null ? null : `gratis desde ${formatPrice(gratisDesde)}`;
+/** "a $7.500 desde $50.000" ("gratis desde…" si baja a cero), o null si no hay
+ *  rebaja. */
+const rebaja = ({ rebajaDesde, costoRebajado }: EnvioNacional): string | null => {
+  if (rebajaDesde === null) return null;
+  const cuanto = costoRebajado > 0 ? `a ${formatPrice(costoRebajado)}` : "gratis";
+  return `${cuanto} desde ${formatPrice(rebajaDesde)}`;
+};
 
-/** "$7.500", o "sin cargo" si el panel lo dejó en cero. */
+/** "$15.000", o "sin cargo" si el panel lo dejó en cero. */
 const costo = ({ costo }: EnvioNacional): string =>
   costo > 0 ? formatPrice(costo) : "sin cargo";
 
@@ -29,7 +34,7 @@ export function envioFrase(envio: EnvioNacional): string {
     return "Envíos a todo el país. El costo del envío lo coordinamos por WhatsApp antes de despachar.";
   }
   if (envio.costo <= 0) return "Envío sin cargo a todo el país.";
-  const desde = gratis(envio);
+  const desde = rebaja(envio);
   return `Envío a todo el país a ${costo(envio)}, vaya a donde vaya.${
     desde ? ` ${mayuscula(desde)}.` : ""
   }`;
@@ -39,7 +44,7 @@ export function envioFrase(envio: EnvioNacional): string {
 export function envioFraseCorta(envio: EnvioNacional): string {
   if (!envio.activo) return `Envíos a todo el país, ${COORDINAR}`;
   if (envio.costo <= 0) return "Envío sin cargo a todo el país";
-  const desde = gratis(envio);
+  const desde = rebaja(envio);
   return `Envío a todo el país a ${costo(envio)}${desde ? `, ${desde}` : ""}`;
 }
 
@@ -47,7 +52,7 @@ export function envioFraseCorta(envio: EnvioNacional): string {
 export function envioTitular(envio: EnvioNacional): string {
   if (!envio.activo) return "Envíos a todo el país";
   if (envio.costo <= 0) return "Envío sin cargo a todo el país";
-  const desde = gratis(envio);
+  const desde = rebaja(envio);
   return desde ? `Envío ${desde}` : `Envío a todo el país a ${costo(envio)}`;
 }
 
@@ -57,7 +62,7 @@ export function envioDetalle(envio: EnvioNacional): string {
     return "El costo lo coordinamos por WhatsApp antes de despachar.";
   }
   if (envio.costo <= 0) return "Sin cargo, vaya a donde vaya.";
-  const desde = gratis(envio);
+  const desde = rebaja(envio);
   return `${formatPrice(envio.costo)} fijos, vaya a donde vaya.${
     desde ? ` ${mayuscula(desde)}.` : ""
   }`;

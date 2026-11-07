@@ -243,22 +243,23 @@ export default function Checkout() {
   const isQuoting = (option: (typeof shippingOptions)[number]) =>
     option.mode === "vivo" && cpCompleto && (quote.isLoading || quote.isFetching);
 
-  // Envío gratis a partir del monto configurado (null = sin envío gratis)
-  const envioGratis =
+  // El envío baja a `costoRebajado` a partir del monto configurado (null = sin
+  // rebaja; 0 = gratis).
+  const llegaALaRebaja =
     envios.freeShippingFrom !== null && subtotal >= envios.freeShippingFrom;
   // El cupón de envío gratis va sobre la línea de envío, no sobre los
   // productos: con él, hasta el envío a coordinar es sin cargo.
   const envioGratisPorCupon = cupon?.kind === "free-shipping";
-  // Cuánto falta para el envío gratis. Solo tiene sentido si hay alguna
-  // opción que se cobre: con retiro y "a coordinar" no hay nada que ahorrar.
+  // Cuánto falta para la rebaja. Solo tiene sentido si hay alguna opción que
+  // se cobre: con retiro y "a coordinar" no hay nada que ahorrar.
   const cobraAlgunEnvio = opcionesDeEnvio.some(
     (option) => !esACoordinar(option) && option.cost > 0,
   );
-  const faltaParaGratis =
+  const faltaParaRebaja =
     cobraAlgunEnvio &&
     !envioGratisPorCupon &&
     envios.freeShippingFrom !== null &&
-    !envioGratis
+    !llegaALaRebaja
       ? envios.freeShippingFrom - subtotal
       : null;
 
@@ -269,8 +270,8 @@ export default function Checkout() {
       ? 0
       : esACoordinar(option)
         ? null
-        : envioGratis
-          ? 0
+        : llegaALaRebaja
+          ? Math.min(liveCostFor(option) ?? option.cost, envios.costoRebajado)
           : (liveCostFor(option) ?? option.cost);
 
   /** Lo que va a la derecha de cada opción. Nunca "$0" ni "Gratis" para el
@@ -278,7 +279,7 @@ export default function Checkout() {
    *  cotizan en vivo no muestran número hasta tener el código postal: el de
    *  respaldo del panel se usa solo si la cotización falla. */
   const priceLabel = (option: (typeof shippingOptions)[number]): string => {
-    if (option.mode === "vivo" && !cpCompleto && !envioGratis) {
+    if (option.mode === "vivo" && !cpCompleto && !llegaALaRebaja) {
       return "Según tu CP";
     }
     if (isQuoting(option)) return "Calculando…";
@@ -703,15 +704,31 @@ export default function Checkout() {
                     <p className="mb-3 mt-8 font-mono text-xs font-medium uppercase tracking-widest">
                       ✧ ¿Cómo lo recibís?
                     </p>
-                    {envioGratis && (
+                    {llegaALaRebaja && (
                       <p className="mb-3 rounded-xl bg-verde/20 px-4 py-3 text-xs leading-relaxed">
-                        ✦ Tu compra tiene <strong>envío gratis</strong>.
+                        ✦ Tu compra tiene{" "}
+                        <strong>
+                          {envios.costoRebajado > 0
+                            ? `envío a ${formatPrice(envios.costoRebajado)}`
+                            : "envío gratis"}
+                        </strong>
+                        .
                       </p>
                     )}
-                    {faltaParaGratis !== null && (
+                    {faltaParaRebaja !== null && (
                       <p className="mb-3 rounded-xl bg-white px-4 py-3 text-xs leading-relaxed">
-                        ✦ Sumá {formatPrice(faltaParaGratis)} más y el envío
-                        es <strong>gratis</strong>.
+                        ✦ Sumá {formatPrice(faltaParaRebaja)} más y el envío{" "}
+                        {envios.costoRebajado > 0 ? (
+                          <>
+                            baja a{" "}
+                            <strong>{formatPrice(envios.costoRebajado)}</strong>
+                          </>
+                        ) : (
+                          <>
+                            es <strong>gratis</strong>
+                          </>
+                        )}
+                        .
                       </p>
                     )}
                     <div className="space-y-3">

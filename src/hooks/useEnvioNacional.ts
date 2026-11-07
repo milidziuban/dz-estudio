@@ -14,6 +14,7 @@ export function useEnvioNacional(): EnvioNacional {
   return {
     activo: Boolean(option?.enabled),
     costo: option?.cost ?? 0,
-    gratisDesde: data?.envios.freeShippingFrom ?? null,
+    rebajaDesde: data?.envios.freeShippingFrom ?? null,
+    costoRebajado: data?.envios.costoRebajado ?? 0,
   };
 }

@@ -4,13 +4,13 @@ import SettingsSection from "../../components/admin/SettingsSection";
 import Toggle from "../../components/admin/Toggle";
 import TextField from "../../components/TextField";
 import { useSettingsDraft } from "../../hooks/useStoreSettings";
-import { ENVIO_GRATIS_DESDE } from "../../lib/checkout";
+import { ENVIO_REBAJA_DESDE } from "../../lib/checkout";
 import { formatPrice } from "../../lib/format";
 import type { ShippingOptionSetting } from "../../types/admin";
 
 export default function AdminMetodosEnvio() {
   const envios = useSettingsDraft("envios");
-  const { options, freeShippingFrom, costoRealEnvio, origenCp, paquete } =
+  const { options, freeShippingFrom, costoRebajado, costoRealEnvio, origenCp, paquete } =
     envios.value;
 
   const setOption = (index: number, patch: Partial<ShippingOptionSetting>) => {
@@ -240,44 +240,62 @@ export default function AdminMetodosEnvio() {
         </SettingsSection>
 
         <SettingsSection
-          title="Envío gratis"
-          description="Desde este monto de subtotal, cualquier opción de envío pasa a costar cero. Vacío = sin envío gratis."
+          title="Envío rebajado"
+          description="Desde este monto de subtotal, cualquier opción de envío baja a este costo. En 0, el envío es gratis."
           footer={saveBar}
         >
           <div className="max-w-xs space-y-4">
             <Toggle
-              label="Activar envío gratis"
+              label="Activar envío rebajado"
               checked={freeShippingFrom !== null}
               onChange={(checked) =>
                 envios.update({
                   ...envios.value,
-                  freeShippingFrom: checked ? ENVIO_GRATIS_DESDE : null,
+                  freeShippingFrom: checked ? ENVIO_REBAJA_DESDE : null,
                 })
               }
             />
 
             {freeShippingFrom !== null && (
-              <TextField
-                id="e-free-from"
-                label="Desde (ARS)"
-                type="number"
-                min={0}
-                step={1000}
-                value={freeShippingFrom}
-                onChange={(event) =>
-                  envios.update({
-                    ...envios.value,
-                    freeShippingFrom: Number(event.target.value) || 0,
-                  })
-                }
-              />
+              <>
+                <TextField
+                  id="e-free-from"
+                  label="Desde (ARS)"
+                  type="number"
+                  min={0}
+                  step={1000}
+                  value={freeShippingFrom}
+                  onChange={(event) =>
+                    envios.update({
+                      ...envios.value,
+                      freeShippingFrom: Number(event.target.value) || 0,
+                    })
+                  }
+                />
+                <TextField
+                  id="e-costo-rebajado"
+                  label="Costo del envío (ARS)"
+                  type="number"
+                  min={0}
+                  step={500}
+                  value={costoRebajado}
+                  onChange={(event) =>
+                    envios.update({
+                      ...envios.value,
+                      costoRebajado: Number(event.target.value) || 0,
+                    })
+                  }
+                />
+              </>
             )}
           </div>
 
           {freeShippingFrom !== null && (
             <p className="mt-4 text-[11px] leading-relaxed text-ink/65">
-              Queda: envío sin cargo comprando {formatPrice(freeShippingFrom)} o
-              más. Acordate de contarlo en la marquesina.
+              Queda: envío{" "}
+              {costoRebajado > 0 ? `a ${formatPrice(costoRebajado)}` : "sin cargo"}{" "}
+              comprando {formatPrice(freeShippingFrom)} o más. Acordate de
+              contarlo en la marquesina.
             </p>
           )}
         </SettingsSection>

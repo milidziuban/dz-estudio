@@ -35,16 +35,19 @@ export default function Hero() {
   const parMasBarato = disponibles.length
     ? Math.min(...disponibles) * minQty
     : null;
-  const conEnvioGratis =
+  const conEnvioRebajado =
     parMasBarato !== null &&
     envio.activo &&
-    envio.gratisDesde !== null &&
-    parMasBarato >= envio.gratisDesde;
+    envio.rebajaDesde !== null &&
+    parMasBarato >= envio.rebajaDesde;
+  const envioDelBadge = !conEnvioRebajado
+    ? ""
+    : envio.costoRebajado > 0
+      ? ` y envío a ${formatPrice(envio.costoRebajado)}`
+      : " y envío gratis";
   const badge =
     promos.combo.enabled && parMasBarato !== null
-      ? `${minQty} almohadones: ${promos.combo.percent}% off${
-          conEnvioGratis ? " y envío gratis" : ""
-        }`
+      ? `${minQty} almohadones: ${promos.combo.percent}% off${envioDelBadge}`
       : cuotas.label;
 
   return (

@@ -4,7 +4,8 @@ import { GA_ID } from "../lib/analytics";
 import {
   BANK_INFO,
   ENVIO_COSTO_REAL,
-  ENVIO_NACIONAL_COSTO,
+  ENVIO_REBAJA_DESDE,
+  ENVIO_REBAJADO_COSTO,
   ORIGEN_CP_DEFAULT,
   PAQUETE_DEFAULT_CM,
   SHIPPING_OPTIONS,
@@ -56,9 +57,10 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       ...("service" in option ? { service: option.service } : {}),
     })),
     // null a propósito: mergeSettings saltea los null de la base, así que con
-    // un número acá el "sin envío gratis" que se guarda desde el panel nunca
-    // podría ganar.
+    // un número acá el "sin rebaja" que se guarda desde el panel nunca podría
+    // ganar. El monto real lo carga la migración `envio_rebajado_y_mantel`.
     freeShippingFrom: null,
+    costoRebajado: ENVIO_REBAJADO_COSTO,
     costoRealEnvio: ENVIO_COSTO_REAL,
     origenCp: ORIGEN_CP_DEFAULT,
     paquete: PAQUETE_DEFAULT_CM,
@@ -87,7 +89,7 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       INSTALLMENTS.label,
       transferLabel(DEFAULT_PROMOS),
       comboLabel(DEFAULT_PROMOS),
-      `Envío a todo el país a ${formatPrice(ENVIO_NACIONAL_COSTO)}`,
+      `Envío a ${formatPrice(ENVIO_REBAJADO_COSTO)} desde ${formatPrice(ENVIO_REBAJA_DESDE)}`,
       "Retiro gratis en Santa Fe Capital",
     ],
     promos: DEFAULT_PROMOS,

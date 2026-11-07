@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatPrice } from "./format";
 
 export const PROVINCIAS = [
   "Buenos Aires",
@@ -36,12 +37,13 @@ export const PROVINCIAS = [
  *    de pasarle el costo a la clienta. */
 export type ShippingMode = "fijo" | "vivo" | "a-coordinar";
 
-/** Envío a todo el país: costo fijo, sin envío gratis (desde noviembre de
- *  2026). En la base está en `store_settings.envios`; este es el respaldo. */
-export const ENVIO_NACIONAL_COSTO = 7500;
-/** Hoy no hay envío gratis: es solo el monto que propone /admin/envios si se
- *  vuelve a prender. */
-export const ENVIO_GRATIS_DESDE = 50000;
+/** Envío a todo el país: costo fijo, y baja a `ENVIO_REBAJADO_COSTO` cuando el
+ *  subtotal —antes de descuentos— llega a `ENVIO_REBAJA_DESDE` (desde noviembre
+ *  de 2026; antes bajaba a cero). En la base está en `store_settings.envios`;
+ *  estos son el respaldo. */
+export const ENVIO_NACIONAL_COSTO = 15000;
+export const ENVIO_REBAJADO_COSTO = 7500;
+export const ENVIO_REBAJA_DESDE = 50000;
 /** Lo que le cuesta de verdad a la tienda despachar un pedido. Es solo del
  *  panel —la clienta nunca lo ve—: con esto la ganancia de Inicio descuenta
  *  lo que la tienda pone de envío en cada orden enviada. Se edita en
@@ -72,7 +74,7 @@ export const SHIPPING_OPTIONS = [
   {
     id: "envio-nacional",
     label: "Envío a todo el país",
-    detail: "Costo fijo, sin importar a dónde va",
+    detail: `Costo fijo, sin importar a dónde va · a ${formatPrice(ENVIO_REBAJADO_COSTO)} desde ${formatPrice(ENVIO_REBAJA_DESDE)}`,
     mode: "fijo",
     cost: ENVIO_NACIONAL_COSTO,
     enabled: true,
