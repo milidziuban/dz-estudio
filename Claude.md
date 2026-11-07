@@ -12,7 +12,8 @@
 - Público: adultos jóvenes (28-45) con gusto formado, dispuestos a pagar por diseño con criterio
 - País: Argentina — precios en ARS. Desde el 07/11/2026 la tienda entrega de
   dos maneras: retiro gratis en el depósito de Santa Fe Capital, o **envío a
-  todo el país a $7.500 fijos, sin envío gratis**. El envío real sale ~$22.000:
+  todo el país a $15.000 fijos, $7.500 desde $50.000** de subtotal (antes de
+  descuentos; no hay envío gratis). El envío real sale ~$22.000:
   lo que la clienta no paga lo pone la tienda, y por eso el precio publicado de
   cada producto lleva parte del envío repartido (30%). "Envío a coordinar" quedó
   apagado (no borrado: hay pedidos viejos con ese método). Andreani y Correo Argentino siguen cargados en el panel y
@@ -178,7 +179,7 @@ Individuales — pack x2, 30 × 42 cm cada uno, gabardina acrílica impermeable,
 Manteles (categoría `manteles`, desde el 06/11/2026; sin promo de combo y sin
 tarjeta en la home hasta que tenga foto de portada en `CATEGORY_INTRO`):
 
-7. Mantel Rayas Rosa y Rojo · Mediano · 130 × 180 cm — `mantel-rayas-rosa-y-rojo-mediano` — $62.900, pieza única
+7. Mantel Rayas Rosa y Rojo · Mediano · 130 × 180 cm — `mantel-rayas-rosa-y-rojo-mediano` — $70.700, pieza única
 
 **Un producto sin fotos no se publica**: `useProducts` lo filtra, y con él la
 pestaña de su categoría en /tienda y el link de la navbar. Se carga desde el
@@ -203,8 +204,8 @@ Todo esto vive en `src/lib/site.ts`, que es de donde lo lee el sitio.
 - Instagram: [@dzestudio_](https://instagram.com/dzestudio_)
 - WhatsApp: 342 529 9662
 - Retiro: Tacuarí 7618, Guadalupe, Santa Fe Capital — lunes a viernes de 9 a 20
-- Envíos: retiro gratis en el depósito, o envío a todo el país a $7.500
-  fijos, sin envío gratis. Andreani y Correo Argentino, apagados
+- Envíos: retiro gratis en el depósito, o envío a todo el país a $15.000
+  fijos, $7.500 desde $50.000. Andreani y Correo Argentino, apagados
 - Pagos: Mercado Pago (tarjetas + efectivo) y transferencia bancaria
 
 ## Convenciones de código
