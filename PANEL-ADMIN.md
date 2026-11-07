@@ -35,6 +35,7 @@ supabase/migrations/20260912201842_cupon_en_el_checkout.sql
 supabase/migrations/20260929022440_envio_nacional_y_precios.sql
 supabase/migrations/20261107030745_envio_7500_sin_gratis.sql
 supabase/migrations/20261107032019_envio_rebajado_y_mantel.sql
+supabase/migrations/20261107032929_individuales_precio_anterior.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -67,7 +68,11 @@ desde el principio. `cupon_en_el_checkout`: el trigger de las
 órdenes aprende a validar y aplicar el cupón, y `get_order_tracking` devuelve
 si el envío va sin cargo.
 
-`envio_rebajado_y_mantel` (07/11/2026) es la última: el envío vuelve a $15.000
+`individuales_precio_anterior` (07/11/2026) es la última: los individuales
+vuelven a $11.600 y $8.700. En /admin/precios van a mostrar "Sugerido" con el 30%
+de envío: es esperable, el precio se eligió a mano.
+
+`envio_rebajado_y_mantel` (07/11/2026): el envío vuelve a $15.000
 fijos y desde $50.000 baja a $7.500 (`costoRebajado`) en vez de a cero, en el
 trigger de las órdenes y en la configuración. **Se corre DESPUÉS de desplegar el
 código.** `envio_7500_sin_gratis`, del mismo día, bajó los precios (el envío

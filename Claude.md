@@ -160,7 +160,8 @@ Productos en tres categorías. **La fuente de verdad es la tabla `products`
 de Supabase**, que es la que edita el panel; `src/data/products.ts` es un
 espejo que todavía usa la home (ver T1 en el backlog). Los precios de acá son
 los del 07/11/2026 —costo de materiales × 1,8 (margen 80%) ÷ 0,7 (el 30%
-que ayuda a pagar el envío), redondeado hacia arriba a $100— y cambian sin
+que ayuda a pagar el envío), redondeado hacia arriba a $100, salvo los
+individuales, que Mili dejó en el precio anterior (÷ 0,56)— y cambian sin
 avisar: si importan, consultarlos. Margen y porcentaje de envío se editan en
 /admin/precios.
 
@@ -172,9 +173,9 @@ Almohadones — 40 × 40 cm, pana estampada, 350 g, $23.500:
 
 Individuales — pack x2, 30 × 42 cm cada uno, gabardina acrílica impermeable, 400 g:
 
-4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $9.300
-5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $9.300
-6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $7.000
+4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $11.600
+5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $11.600
+6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $8.700
 
 Manteles (categoría `manteles`, desde el 06/11/2026; sin promo de combo y sin
 tarjeta en la home hasta que tenga foto de portada en `CATEGORY_INTRO`):

@@ -15,7 +15,7 @@ const CATEGORIES = (Object.keys(CATEGORY_LABEL) as Category[]).filter(
   (category) => CATEGORY_INTRO[category],
 );
 
-/** " · $23.500" si todos cuestan lo mismo, " · desde $7.000" si no. */
+/** " · $23.500" si todos cuestan lo mismo, " · desde $8.700" si no. */
 function precioDeCategoria(products: Product[], category: Category): string {
   const precios = products
     .filter((p) => p.category === category)
