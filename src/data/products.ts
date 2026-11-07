@@ -66,7 +66,7 @@ export const products: Product[] = [
     name: "Almohadón Rombo Rosa · 40 × 40 cm",
     category: "almohadones",
     colors: ["pink", "orange"],
-    price: 29300,
+    price: 23500,
     description:
       "Rombos rosas y bordó sobre pana. La estampa ya la pone el almohadón: el resto del sillón puede quedarse tranquilo. Funda con solapa, se saca para lavar, relleno incluido.",
     medidas: "40 x 40 cm (aprox.)",
@@ -88,7 +88,7 @@ export const products: Product[] = [
     name: "Almohadón Rayas Blanco y Negro · 40 × 40 cm",
     category: "almohadones",
     colors: ["ink", "cream"],
-    price: 29300,
+    price: 23500,
     description:
       "Rayas negras sobre crudo, en pana. El único de la serie que no discute con nada: va con los rombos, va solo y va sobre cualquier color de sillón. Si estás armando de a dos, este es la mitad tranquila del par. Funda con solapa, se saca para lavar, relleno incluido.",
     medidas: "40 x 40 cm (aprox.)",
@@ -110,7 +110,7 @@ export const products: Product[] = [
     name: "Almohadón Rombo Celeste · 40 × 40 cm",
     category: "almohadones",
     colors: ["celeste"],
-    price: 29300,
+    price: 23500,
     description:
       "Rombos celestes y marrones sobre pana. El marrón lo ata a la madera y el celeste lo levanta, así que es el que mejor cae sobre sillones claros —lino crudo, beige, gris— y en cualquier ambiente donde haya madera cerca. Funda con solapa, se saca para lavar, relleno incluido.",
     medidas: "40 x 40 cm (aprox.)",
@@ -134,7 +134,7 @@ export const products: Product[] = [
     name: "Individuales Reversibles Celeste · Pack x2 · 30 × 42 cm",
     category: "individuales",
     colors: ["celeste", "orange"],
-    price: 11600,
+    price: 9300,
     description: REVERSIBLE_DESC.replace("COLORES", "celeste y marrón"),
     medidas: "30 x 42 cm cada uno · pack x2",
     peso: "400 g el pack (aprox.)",
@@ -156,7 +156,7 @@ export const products: Product[] = [
     name: "Individuales Reversibles Rosa · Pack x2 · 30 × 42 cm",
     category: "individuales",
     colors: ["pink", "celeste"],
-    price: 11600,
+    price: 9300,
     description: REVERSIBLE_DESC.replace("COLORES", "rosa y azul"),
     medidas: "30 x 42 cm cada uno · pack x2",
     peso: "400 g el pack (aprox.)",
@@ -181,7 +181,7 @@ export const products: Product[] = [
     name: "Individuales Rayas Blanco y Negro · Pack x2 · 30 × 42 cm",
     category: "individuales",
     colors: ["ink", "cream"],
-    price: 8700,
+    price: 7000,
     description:
       "Dos individuales de una sola cara, en rayas blancas y negras. Es la base: no compite con la vajilla, no pasa de moda y aguanta que le pongas encima lo que sea. Gabardina impermeable, así que lo que se vuelca se limpia con un paño en vez de terminar en el lavarropas.",
     medidas: "30 x 42 cm cada uno · pack x2",

@@ -16,7 +16,7 @@ const COORDINAR = "el costo se coordina por WhatsApp";
 const gratis = ({ gratisDesde }: EnvioNacional): string | null =>
   gratisDesde === null ? null : `gratis desde ${formatPrice(gratisDesde)}`;
 
-/** "$15.000", o "sin cargo" si el panel lo dejó en cero. */
+/** "$7.500", o "sin cargo" si el panel lo dejó en cero. */
 const costo = ({ costo }: EnvioNacional): string =>
   costo > 0 ? formatPrice(costo) : "sin cargo";
 

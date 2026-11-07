@@ -48,8 +48,8 @@ export function isPaid(order: Order): boolean {
 /** Lo que factura la tienda en una orden. El `total` incluye el envío, que es
  *  plata que pasa de largo hacia Andreani o el Correo: como
  *  `total = subtotal − descuento + envío`, restarle el envío deja justo lo que
- *  entra por producto. Sobre un almohadón de $29.300 con el envío de $15.000 la
- *  diferencia es de más del 30% del total. */
+ *  entra por producto. Sobre un almohadón de $23.500 con el envío de $7.500 la
+ *  diferencia es de más del 20% del total. */
 export function orderRevenue(order: Order): number {
   return order.total - order.shippingCost;
 }

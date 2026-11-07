@@ -4,7 +4,7 @@ import { GA_ID } from "../lib/analytics";
 import {
   BANK_INFO,
   ENVIO_COSTO_REAL,
-  ENVIO_GRATIS_DESDE,
+  ENVIO_NACIONAL_COSTO,
   ORIGEN_CP_DEFAULT,
   PAQUETE_DEFAULT_CM,
   SHIPPING_OPTIONS,
@@ -55,10 +55,9 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       ...("provider" in option ? { provider: option.provider } : {}),
       ...("service" in option ? { service: option.service } : {}),
     })),
-    // null a propósito, aunque el envío gratis real sea desde $50.000:
-    // mergeSettings saltea los null de la base, así que con un número acá el
-    // "sin envío gratis" que se guarde desde el panel nunca podría ganar. El
-    // 50.000 lo carga la migración `envio_nacional_y_precios`.
+    // null a propósito: mergeSettings saltea los null de la base, así que con
+    // un número acá el "sin envío gratis" que se guarda desde el panel nunca
+    // podría ganar.
     freeShippingFrom: null,
     costoRealEnvio: ENVIO_COSTO_REAL,
     origenCp: ORIGEN_CP_DEFAULT,
@@ -88,14 +87,14 @@ export const SETTINGS_DEFAULTS: StoreSettings = {
       INSTALLMENTS.label,
       transferLabel(DEFAULT_PROMOS),
       comboLabel(DEFAULT_PROMOS),
-      `Envío gratis desde ${formatPrice(ENVIO_GRATIS_DESDE)}`,
+      `Envío a todo el país a ${formatPrice(ENVIO_NACIONAL_COSTO)}`,
       "Retiro gratis en Santa Fe Capital",
     ],
     promos: DEFAULT_PROMOS,
   },
   precios: {
     marginPercent: 80,
-    envioEnPrecioPercent: 44,
+    envioEnPrecioPercent: 30,
     metaGananciaMensual: 500000,
   },
 };

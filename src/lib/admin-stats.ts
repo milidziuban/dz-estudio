@@ -384,11 +384,11 @@ export type Profit = {
  * vendió, menos lo que la tienda puso de envío. La mano de obra no entra — la
  * decisión está fechada en el vault.
  *
- * El envío se resta con el costo real y no con el 44% que el precio aparta
+ * El envío se resta con el costo real y no con el 30% que el precio aparta
  * para pagarlo (`precios.envioEnPrecioPercent`): ese porcentaje es una
  * reserva, y restar las dos cosas sería contar el envío dos veces. Así, en
  * una orden con retiro la reserva queda como ganancia —nadie la gastó—, y en
- * una con envío gratis se descuenta el costo real entero. `/admin/precios`
+ * una con cupón de envío gratis se descuenta el costo real entero. `/admin/precios`
  * hace la cuenta por producto y por eso aparta la reserva; esta es sobre lo
  * que pasó de verdad.
  *

@@ -33,6 +33,7 @@ supabase/migrations/20260911142100_aviso_de_pedido_nuevo.sql
 supabase/migrations/20260911220000_registro_de_produccion.sql
 supabase/migrations/20260912201842_cupon_en_el_checkout.sql
 supabase/migrations/20260929022440_envio_nacional_y_precios.sql
+supabase/migrations/20261107030745_envio_7500_sin_gratis.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -65,7 +66,10 @@ desde el principio. `cupon_en_el_checkout`: el trigger de las
 órdenes aprende a validar y aplicar el cupón, y `get_order_tracking` devuelve
 si el envío va sin cargo.
 
-`envio_nacional_y_precios` (28/09/2026) es la última: suma el método
+`envio_7500_sin_gratis` (07/11/2026) deja el envío a $7.500 fijos, saca el envío
+gratis y baja los precios: el envío dentro del precio pasa del 44% al 30%.
+
+`envio_nacional_y_precios` (28/09/2026) suma el método
 `envio-nacional` al CHECK de `orders`, lo carga en `store_settings` a $15.000
 fijos con envío gratis desde $50.000, apaga "a coordinar" (sin borrarlo),
 cambia la frase de envío de la marquesina y sube los seis precios (cada

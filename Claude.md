@@ -10,13 +10,12 @@
   caminos de mesa ni mantas; los totes se pensaron y todavía no existen — no
   inventarlos.
 - Público: adultos jóvenes (28-45) con gusto formado, dispuestos a pagar por diseño con criterio
-- País: Argentina — precios en ARS. Desde el 28/09/2026 la tienda entrega de
+- País: Argentina — precios en ARS. Desde el 07/11/2026 la tienda entrega de
   dos maneras: retiro gratis en el depósito de Santa Fe Capital, o **envío a
-  todo el país a $15.000 fijos, gratis desde $50.000** de subtotal (antes de
-  descuentos). El envío real sale ~$22.000: lo que la clienta no paga lo pone
-  la tienda, y por eso el precio publicado de cada producto ya lleva el envío
-  repartido. "Envío a coordinar" quedó apagado (no borrado: hay pedidos viejos
-  con ese método). Andreani y Correo Argentino siguen cargados en el panel y
+  todo el país a $7.500 fijos, sin envío gratis**. El envío real sale ~$22.000:
+  lo que la clienta no paga lo pone la tienda, y por eso el precio publicado de
+  cada producto lleva parte del envío repartido (30%). "Envío a coordinar" quedó
+  apagado (no borrado: hay pedidos viejos con ese método). Andreani y Correo Argentino siguen cargados en el panel y
   **apagados**. Los textos de envío de la tienda salen de `store_settings`
   (`useEnvioNacional` + `lib/envio-texto.ts`): no escribir montos a mano.
 - Referencia estética: Coolhouse (thisiscoolhouse.com.ar) pero apuntando más adulto, más editorial y menos "hecho con IA"
@@ -159,12 +158,12 @@ envío.
 Productos en tres categorías. **La fuente de verdad es la tabla `products`
 de Supabase**, que es la que edita el panel; `src/data/products.ts` es un
 espejo que todavía usa la home (ver T1 en el backlog). Los precios de acá son
-los del 28/09/2026 —costo de materiales × 1,8 (margen 80%) ÷ 0,56 (el 44%
-que paga el envío gratis), redondeado hacia arriba a $100— y cambian sin
+los del 07/11/2026 —costo de materiales × 1,8 (margen 80%) ÷ 0,7 (el 30%
+que ayuda a pagar el envío), redondeado hacia arriba a $100— y cambian sin
 avisar: si importan, consultarlos. Margen y porcentaje de envío se editan en
 /admin/precios.
 
-Almohadones — 40 × 40 cm, pana estampada, 350 g, $29.300:
+Almohadones — 40 × 40 cm, pana estampada, 350 g, $23.500:
 
 1. Almohadón Rombo Rosa — `almohadones-rombo-rosa` — rosa/naranja
 2. Almohadón Rombo Celeste — `almohadones-rombo-celeste` — celeste
@@ -172,14 +171,14 @@ Almohadones — 40 × 40 cm, pana estampada, 350 g, $29.300:
 
 Individuales — pack x2, 30 × 42 cm cada uno, gabardina acrílica impermeable, 400 g:
 
-4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $11.600
-5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $11.600
-6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $8.700
+4. Individuales Reversibles Rosa — `individuales-reversibles-rosa` — rosa/celeste — $9.300
+5. Individuales Reversibles Celeste — `individuales-reversibles-celeste` — celeste/naranja — $9.300
+6. Individuales Rayas Blanco y Negro — `individuales-simple-pack-x2` — tinta/cream — $7.000
 
 Manteles (categoría `manteles`, desde el 06/11/2026; sin promo de combo y sin
 tarjeta en la home hasta que tenga foto de portada en `CATEGORY_INTRO`):
 
-7. Mantel Rayas Rosa y Rojo · Mediano · 130 × 180 cm — `mantel-rayas-rosa-y-rojo-mediano` — $88.400, pieza única
+7. Mantel Rayas Rosa y Rojo · Mediano · 130 × 180 cm — `mantel-rayas-rosa-y-rojo-mediano` — $62.900, pieza única
 
 **Un producto sin fotos no se publica**: `useProducts` lo filtra, y con él la
 pestaña de su categoría en /tienda y el link de la navbar. Se carga desde el
@@ -204,8 +203,8 @@ Todo esto vive en `src/lib/site.ts`, que es de donde lo lee el sitio.
 - Instagram: [@dzestudio_](https://instagram.com/dzestudio_)
 - WhatsApp: 342 529 9662
 - Retiro: Tacuarí 7618, Guadalupe, Santa Fe Capital — lunes a viernes de 9 a 20
-- Envíos: retiro gratis en el depósito, o envío a todo el país a $15.000
-  fijos, gratis desde $50.000. Andreani y Correo Argentino, apagados
+- Envíos: retiro gratis en el depósito, o envío a todo el país a $7.500
+  fijos, sin envío gratis. Andreani y Correo Argentino, apagados
 - Pagos: Mercado Pago (tarjetas + efectivo) y transferencia bancaria
 
 ## Convenciones de código

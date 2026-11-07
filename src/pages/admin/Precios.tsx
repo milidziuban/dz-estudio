@@ -241,8 +241,9 @@ export default function AdminPrecios() {
                 }
               />
               <p className="mt-3 text-[11px] leading-relaxed text-ink/65">
-                La parte del precio que paga el envío gratis. Con 44%, el
-                precio es costo + margen ÷ 0,56. No se cuenta como ganancia.
+                La parte del precio que ayuda a pagar el envío. Con 30%, el
+                precio es costo + margen ÷ 0,7. En 0, no hay nada adentro. No
+                se cuenta como ganancia.
               </p>
             </div>
 

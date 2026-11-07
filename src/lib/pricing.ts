@@ -23,8 +23,8 @@ export function computeListPrice(
 ): number {
   const withMargin = cost * (1 + marginPercent / 100);
   const withCombo = isBundle ? withMargin * (1 - comboPercent / 100) : withMargin;
-  // El envío gratis va repartido en el precio: con 44%, de cada peso que se
-  // cobra, 44 centavos son para el envío y el resto es costo + margen.
+  // La parte del envío que va repartida en el precio: con 30%, de cada peso
+  // que se cobra, 30 centavos son para el envío y el resto es costo + margen.
   return roundUpToHundred(withCombo / (1 - envioEnPrecioPercent / 100));
 }
 

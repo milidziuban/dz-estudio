@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { formatPrice } from "./format";
 
 export const PROVINCIAS = [
   "Buenos Aires",
@@ -37,12 +36,11 @@ export const PROVINCIAS = [
  *    de pasarle el costo a la clienta. */
 export type ShippingMode = "fijo" | "vivo" | "a-coordinar";
 
-/** Envío a todo el país (28/09/2026): costo fijo, y gratis cuando el
- *  subtotal —antes de descuentos— llega a este monto. El envío real sale
- *  ~$22.000: la diferencia la pone la tienda y va repartida en el precio de
- *  los productos. En la base los carga la migración
- *  `envio_nacional_y_precios`; estos son el respaldo. */
-export const ENVIO_NACIONAL_COSTO = 15000;
+/** Envío a todo el país: costo fijo, sin envío gratis (desde noviembre de
+ *  2026). En la base está en `store_settings.envios`; este es el respaldo. */
+export const ENVIO_NACIONAL_COSTO = 7500;
+/** Hoy no hay envío gratis: es solo el monto que propone /admin/envios si se
+ *  vuelve a prender. */
 export const ENVIO_GRATIS_DESDE = 50000;
 /** Lo que le cuesta de verdad a la tienda despachar un pedido. Es solo del
  *  panel —la clienta nunca lo ve—: con esto la ganancia de Inicio descuenta
@@ -74,7 +72,7 @@ export const SHIPPING_OPTIONS = [
   {
     id: "envio-nacional",
     label: "Envío a todo el país",
-    detail: `Costo fijo, sin importar a dónde va · gratis desde ${formatPrice(ENVIO_GRATIS_DESDE)}`,
+    detail: "Costo fijo, sin importar a dónde va",
     mode: "fijo",
     cost: ENVIO_NACIONAL_COSTO,
     enabled: true,
