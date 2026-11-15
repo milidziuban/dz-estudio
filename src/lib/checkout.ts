@@ -52,6 +52,11 @@ export const ENVIO_COSTO_REAL = 22000;
 
 // Métodos de envío.
 //
+// 15/11/2026 — "a coordinar" vuelve, pero solo para Santa Fe Capital: la
+// clienta elige la opción y se arregla por WhatsApp (día, horario y costo).
+// Se reusa el mismo id para no tocar el CHECK de la base, la RPC ni el mail;
+// el esquema de abajo exige que la provincia sea Santa Fe.
+//
 // 28/09/2026 — Entra "envio-nacional" a costo fijo y "a coordinar" se apaga.
 // No se borra: hay pedidos viejos con ese método y el CHECK de la base lo
 // sigue aceptando.
@@ -81,11 +86,11 @@ export const SHIPPING_OPTIONS = [
   },
   {
     id: "envio-a-coordinar",
-    label: "Envío a coordinar",
-    detail: "Te escribimos por WhatsApp con el costo antes de despachar",
+    label: "Envío dentro de Santa Fe Capital",
+    detail: "Te escribimos por WhatsApp y coordinamos día, horario y costo",
     mode: "a-coordinar",
     cost: 0,
-    enabled: false,
+    enabled: true,
   },
   {
     id: "andreani-sucursal",
@@ -264,6 +269,22 @@ export const checkoutSchema = z
       (PROVINCIAS as readonly string[]).includes(valor("provincia")),
       "Elegí tu provincia",
     );
+    // El envío a coordinar es solo para Santa Fe Capital. La ciudad es texto
+    // libre ("Santa Fe", "Santa Fe Capital", "SF"…) y no se puede chequear
+    // bien; la provincia sí, y frena el error más probable: elegirla desde
+    // otra punta del país porque no muestra precio.
+    if (
+      data.envio === "envio-a-coordinar" &&
+      valor("provincia") &&
+      valor("provincia") !== "Santa Fe"
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["envio"],
+        message:
+          "Esa opción es solo para Santa Fe Capital. Para el resto del país, elegí el envío a todo el país",
+      });
+    }
     // El código postal es lo primero que se pide en el paso 2 —con él se
     // cotiza el envío—, así que el mensaje tiene que servir con el campo
     // todavía vacío.

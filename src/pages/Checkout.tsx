@@ -207,9 +207,10 @@ export default function Checkout() {
     else resetField("envio");
   };
 
-  // Con una sola forma de envío —hoy, el envío a todo el país, con "a
-  // coordinar" y las transportistas apagadas— no hay nada que elegir: queda marcada y la clienta no se come
-  // un "Elegí cómo lo recibís" por una lista de una.
+  // Con una sola forma de envío —con las transportistas apagadas y sin el
+  // envío a coordinar de Santa Fe Capital— no hay nada que elegir: queda
+  // marcada y la clienta no se come un "Elegí cómo lo recibís" por una lista
+  // de una.
   const unicaFormaDeEnvio =
     opcionesDeEnvio.length === 1 ? opcionesDeEnvio[0].id : null;
   useEffect(() => {

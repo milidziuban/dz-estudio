@@ -209,8 +209,8 @@ export default function CheckoutExito() {
                 ✦ Falta el envío
               </p>
               <p className="mt-2 text-sm leading-relaxed">
-                Lo que pagaste es el producto. El envío se cobra aparte: te
-                escribimos por WhatsApp con el costo antes de despachar.
+                Lo que pagaste es el producto. El envío se arregla aparte: te
+                escribimos por WhatsApp para coordinar día, horario y costo.
               </p>
             </div>
           )}
