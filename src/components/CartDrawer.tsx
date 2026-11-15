@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useCart } from "../hooks/useCart";
+import { useEnvioNacional } from "../hooks/useEnvioNacional";
 import { useInstallments } from "../hooks/useInstallments";
 import { useProducts } from "../hooks/useProducts";
 import { cartSubtotal, resolveCartItems } from "../lib/cart";
@@ -49,6 +50,19 @@ export default function CartDrawer() {
   const envioGratis = llegaALaRebaja && envios.costoRebajado === 0;
   const faltaParaRebaja =
     rebajaDesde !== null && !llegaALaRebaja ? rebajaDesde - subtotal : null;
+
+  // El envío a todo el país tiene precio fijo, así que el carrito ya lo sabe:
+  // decir "se calcula al final" al lado de un aviso de rebaja no cerraba.
+  // `null` mientras la opción esté apagada o la configuración no haya llegado.
+  const nacional = useEnvioNacional();
+  const costoEnvio = !nacional.activo
+    ? null
+    : llegaALaRebaja
+      ? Math.min(nacional.costo, envios.costoRebajado)
+      : nacional.costo;
+  const ahorroEnvio = nacional.costo - envios.costoRebajado;
+  const muestraRebaja =
+    faltaParaRebaja !== null && (envios.costoRebajado === 0 || ahorroEnvio > 0);
 
   // El drawer está montado en todas las páginas de la tienda, así que es el
   // lugar donde el carrito guardado se pone al día con el stock de hoy: sin
@@ -143,16 +157,17 @@ export default function CartDrawer() {
                 </p>
               )}
 
-              {faltaParaRebaja !== null && (
+              {muestraRebaja && faltaParaRebaja !== null && (
                 <p className="mb-4 rounded-xl bg-white px-4 py-3 text-xs leading-relaxed">
-                  ✦ Sumá {formatPrice(faltaParaRebaja)} más y el envío{" "}
+                  ✦ Agregando {formatPrice(faltaParaRebaja)} más,{" "}
                   {envios.costoRebajado > 0 ? (
                     <>
-                      baja a <strong>{formatPrice(envios.costoRebajado)}</strong>
+                      pagás <strong>{formatPrice(envios.costoRebajado)}</strong>{" "}
+                      de envío
                     </>
                   ) : (
                     <>
-                      es <strong>gratis</strong>
+                      el envío es <strong>gratis</strong>
                     </>
                   )}
                   .
@@ -174,16 +189,29 @@ export default function CartDrawer() {
                 )}
                 <div className="flex justify-between gap-3">
                   <dt className="uppercase text-xs">Envío</dt>
-                  <dd className="text-xs">
-                    {envioGratis
-                      ? "Gratis"
-                      : cotizaEnLaTienda
-                        ? "Se calcula al final"
-                        : "A coordinar"}
+                  <dd className="text-right text-xs">
+                    {envioGratis || costoEnvio === 0 ? (
+                      "Gratis"
+                    ) : costoEnvio !== null ? (
+                      <>
+                        {formatPrice(costoEnvio)}
+                        <span className="block text-[11px] text-ink/65">
+                          o retiro gratis
+                        </span>
+                      </>
+                    ) : cotizaEnLaTienda ? (
+                      "Se calcula al final"
+                    ) : (
+                      "A coordinar"
+                    )}
                   </dd>
                 </div>
                 <div className="flex justify-between border-t border-ink/15 pt-2 text-base font-medium">
-                  <dt className="uppercase">Total</dt>
+                  <dt className="uppercase">
+                    {costoEnvio !== null && costoEnvio > 0
+                      ? "Total sin envío"
+                      : "Total"}
+                  </dt>
                   <dd>{formatPrice(total)}</dd>
                 </div>
               </dl>

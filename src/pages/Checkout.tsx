@@ -263,6 +263,15 @@ export default function Checkout() {
     !llegaALaRebaja
       ? envios.freeShippingFrom - subtotal
       : null;
+  // Cuánto menos se paga de envío al llegar a la rebaja: se mide contra el
+  // envío más caro que se cobre, que es el que la clienta vería.
+  const ahorroEnvio =
+    Math.max(
+      0,
+      ...opcionesDeEnvio
+        .filter((option) => !esACoordinar(option))
+        .map((option) => option.cost),
+    ) - envios.costoRebajado;
 
   /** Cuánto sale el envío. `null` = a coordinar: todavía no lo sabemos, no
    *  se muestra ningún número y no entra en el total. */
@@ -716,17 +725,19 @@ export default function Checkout() {
                         .
                       </p>
                     )}
-                    {faltaParaRebaja !== null && (
+                    {faltaParaRebaja !== null &&
+                      (envios.costoRebajado === 0 || ahorroEnvio > 0) && (
                       <p className="mb-3 rounded-xl bg-white px-4 py-3 text-xs leading-relaxed">
-                        ✦ Sumá {formatPrice(faltaParaRebaja)} más y el envío{" "}
+                        ✦ Agregando {formatPrice(faltaParaRebaja)} más,{" "}
                         {envios.costoRebajado > 0 ? (
                           <>
-                            baja a{" "}
-                            <strong>{formatPrice(envios.costoRebajado)}</strong>
+                            pagás{" "}
+                            <strong>{formatPrice(envios.costoRebajado)}</strong>{" "}
+                            de envío
                           </>
                         ) : (
                           <>
-                            es <strong>gratis</strong>
+                            el envío es <strong>gratis</strong>
                           </>
                         )}
                         .
