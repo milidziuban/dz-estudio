@@ -144,7 +144,7 @@ policies de RLS que pasan por `public.is_admin()`, no el guard del front.
 Secciones, en el orden del sidebar: Inicio (KPIs, gráficos, top productos,
 últimas ventas) y Estadísticas (tráfico propio y conversión); Ventas y
 Clientes; Productos, Precios y Centro de distribución (depósitos y stock);
-Descuentos, Contenido y redes, Publicidad (los anuncios de Meta, solo
+Descuentos, Contenido y redes, Instagram (informe con fecha), Publicidad (los anuncios de Meta, solo
 lectura) y Marketing; Métodos de pago y Métodos de
 envío.
 

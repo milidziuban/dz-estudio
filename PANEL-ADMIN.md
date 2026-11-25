@@ -37,6 +37,7 @@ supabase/migrations/20261107030745_envio_7500_sin_gratis.sql
 supabase/migrations/20261107032019_envio_rebajado_y_mantel.sql
 supabase/migrations/20261107032929_individuales_precio_anterior.sql
 supabase/migrations/20261125003443_publicidad_meta.sql
+supabase/migrations/20261125004731_instagram_en_el_panel.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -277,6 +278,19 @@ Realtime requiere la migración `20260819170000_notificaciones_ventas.sql`
 tenga habilitado — viene prendido por default, pero si algún proyecto lo
 desactivó a mano hay que prenderlo en **Database → Replication**.
 
+## Instagram
+
+`/admin/instagram` junta los números de @dzestudio_ y un informe: conclusiones,
+qué hacer y qué no, ideas con un botón que las pasa a Contenido y redes, y
+competencia. **No se actualiza solo**: es una lectura con fecha.
+
+Vive en `ig_posts`, `ig_diario`, `ig_publico` e `ig_informes`, que solo lee
+quien es admin. Para hacer una lectura nueva: sacar los números de Meta Business
+Suite (Estadísticas → Contenido, Resultados y Público), cargarlos con upsert y
+sumar una fila a `ig_informes` con la fecha del día; la pantalla muestra la
+última. La forma del json está en `src/types/instagram.ts`. Los datos van a la
+base y nunca al repositorio.
+
 ## Publicidad (los anuncios de Meta)
 
 `/admin/publicidad` muestra en limpio lo que está en el Administrador de
@@ -286,8 +300,8 @@ Solo lee: crear, pausar o cambiar un anuncio se sigue haciendo en Instagram.
 
 Los números viven en cuatro tablas (`meta_campanas`, `meta_diario`,
 `meta_publico`, `meta_sync`) que llena la Edge Function `meta-ads`. La
-migración `publicidad_meta` las crea y las deja cargadas con lo que había el
-24/11/2026, copiado a mano. El cruce con la tienda sale de `utm_campaign`: Meta
+migración `publicidad_meta` las crea; la primera carga (24/11/2026) se hizo
+aparte, porque el repositorio es público. El cruce con la tienda sale de `utm_campaign`: Meta
 firma cada visita con el id de la campaña.
 
 ### Conectar la cuenta, una sola vez
@@ -316,7 +330,7 @@ casi siempre es la clave vencida o borrada, y se repiten los pasos 4 y 5.
 
 ```
 src/pages/admin/          Inicio, Estadisticas, Productos, Ventas, Clientes,
-                          Descuentos, Contenido, Publicidad, Marketing, MetodosPago,
+                          Descuentos, Contenido, Instagram, Publicidad, Marketing, MetodosPago,
                           MetodosEnvio, Distribucion, Login
 src/components/admin/     Layout, sidebar, tablas, drawers, gráfico, guard
 src/hooks/                useAdminAuth, useAdminOrders, useAdminProducts,

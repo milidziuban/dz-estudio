@@ -8,6 +8,7 @@ export type IconName =
   | "descuentos"
   | "marketing"
   | "publicidad"
+  | "instagram"
   | "contenido"
   | "pagos"
   | "envios"
@@ -28,6 +29,8 @@ const PATHS: Record<IconName, string> = {
     "M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1",
   descuentos: "M8 8h.01M16 16h.01M7 17 17 7M4 4h16v16H4z",
   marketing: "M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1Zm14-3a5 5 0 0 1 0 8",
+  instagram:
+    "M8 3h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5ZM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 7h.01",
   publicidad:
     "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z",
   contenido: "M4 5h16v15H4zM4 10h16M8 3v4M16 3v4M8 14h2M14 14h2",
