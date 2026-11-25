@@ -254,7 +254,7 @@ export default function AdminPublicidad() {
         <QueryError
           error={meta.error}
           what="la publicidad"
-          migration="supabase/migrations/20261124120000_publicidad_meta.sql"
+          migration="supabase/migrations/20261125003443_publicidad_meta.sql"
         />
       ) : meta.isLoading ? (
         <p role="status" className="py-16 text-center text-sm text-ink/65">

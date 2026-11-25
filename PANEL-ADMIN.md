@@ -36,7 +36,7 @@ supabase/migrations/20260929022440_envio_nacional_y_precios.sql
 supabase/migrations/20261107030745_envio_7500_sin_gratis.sql
 supabase/migrations/20261107032019_envio_rebajado_y_mantel.sql
 supabase/migrations/20261107032929_individuales_precio_anterior.sql
-supabase/migrations/20261124120000_publicidad_meta.sql
+supabase/migrations/20261125003443_publicidad_meta.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
