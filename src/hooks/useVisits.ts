@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { previousRangeStart, type RangeId } from "../lib/admin";
+import { leerTodo } from "../lib/leer-todo";
 import { supabase } from "../lib/supabase";
 import type { PageView } from "../types/admin";
 
@@ -32,21 +33,24 @@ export function useVisits(range: RangeId) {
   return useQuery({
     queryKey: ["admin", "page-views", range],
     queryFn: async (): Promise<PageView[]> => {
-      let query = supabase
-        .from("page_views")
-        .select(
-          "created_at, path, referrer, session_id, is_new_session, utm_source, utm_medium, utm_campaign, utm_content, click_id, app, device",
-        )
-        .order("created_at", { ascending: false })
-        .limit(20000);
-
       const from = previousRangeStart(range);
-      if (from) query = query.gte("created_at", from.toISOString());
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const filas = await leerTodo<PageViewRow>((desde, hasta) => {
+        let query = supabase
+          .from("page_views")
+          .select(
+            "created_at, path, referrer, session_id, is_new_session, utm_source, utm_medium, utm_campaign, utm_content, click_id, app, device",
+          )
+          .order("created_at", { ascending: false })
+          // Dos filas del mismo instante tienen que salir siempre en el mismo
+          // orden, o una página las repite y la otra las saltea
+          .order("id", { ascending: false })
+          .range(desde, hasta);
+        if (from) query = query.gte("created_at", from.toISOString());
+        return query;
+      });
 
-      return (data as PageViewRow[]).map((row) => ({
+      return filas.map((row) => ({
         createdAt: row.created_at,
         path: row.path,
         referrer: row.referrer,

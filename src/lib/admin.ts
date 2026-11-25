@@ -145,7 +145,10 @@ export const RANGES = [
 export type RangeId = (typeof RANGES)[number]["id"];
 
 export function rangeDays(range: RangeId): number | null {
-  return RANGES.find((r) => r.id === range)?.days ?? 30;
+  const encontrado = RANGES.find((r) => r.id === range);
+  // Con un "?? 30" directo sobre los días, "Todo" (que vale null) caía en 30:
+  // hasta el 24/11/2026 ese botón mostraba un mes.
+  return encontrado ? encontrado.days : 30;
 }
 
 /** Arranque del rango, a las 00:00 hora local. null = sin límite. */

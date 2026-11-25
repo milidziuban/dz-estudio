@@ -57,6 +57,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
         icon: "contenido",
         badge: "contenido",
       },
+      { to: "/admin/publicidad", label: "Publicidad", icon: "publicidad" },
       { to: "/admin/marketing", label: "Marketing", icon: "marketing" },
     ],
   },

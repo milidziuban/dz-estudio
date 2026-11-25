@@ -36,6 +36,7 @@ supabase/migrations/20260929022440_envio_nacional_y_precios.sql
 supabase/migrations/20261107030745_envio_7500_sin_gratis.sql
 supabase/migrations/20261107032019_envio_rebajado_y_mantel.sql
 supabase/migrations/20261107032929_individuales_precio_anterior.sql
+supabase/migrations/20261124120000_publicidad_meta.sql
 ```
 
 `catalogo_tiendanube` deja el esquema de `products` como lo espera el código
@@ -276,11 +277,46 @@ Realtime requiere la migración `20260819170000_notificaciones_ventas.sql`
 tenga habilitado — viene prendido por default, pero si algún proyecto lo
 desactivó a mano hay que prenderlo en **Database → Replication**.
 
+## Publicidad (los anuncios de Meta)
+
+`/admin/publicidad` muestra en limpio lo que está en el Administrador de
+anuncios: cuánto se gastó, cuánta gente entró a la tienda por eso, qué costó
+cada visita, a quién se le mostró y qué hizo esa gente adentro de la tienda.
+Solo lee: crear, pausar o cambiar un anuncio se sigue haciendo en Instagram.
+
+Los números viven en cuatro tablas (`meta_campanas`, `meta_diario`,
+`meta_publico`, `meta_sync`) que llena la Edge Function `meta-ads`. La
+migración `publicidad_meta` las crea y las deja cargadas con lo que había el
+24/11/2026, copiado a mano. El cruce con la tienda sale de `utm_campaign`: Meta
+firma cada visita con el id de la campaña.
+
+### Conectar la cuenta, una sola vez
+
+Hasta hacer esto la pantalla funciona, pero queda con los números del 24/11.
+
+1. **La app.** Entrar a [developers.facebook.com/apps](https://developers.facebook.com/apps)
+   → *Crear app*. Elegir el caso de uso de la **API de marketing** y, cuando pida
+   el portfolio comercial, **diseño industrial**. Nombre: "Panel DZ". No hace
+   falta publicarla ni mandarla a revisión: lee una cuenta propia.
+2. **El usuario del sistema.** [Configuración del negocio](https://business.facebook.com/latest/settings/system_users)
+   → *Usuarios del sistema* → *Agregar*. Nombre: "panel-dz", rol **Empleado**.
+3. **Los permisos.** En ese usuario → *Asignar activos*: la cuenta publicitaria
+   **1021137270760625** con **Ver rendimiento** y nada más, y la app "Panel DZ".
+4. **La clave.** En el mismo usuario → *Generar token*: app "Panel DZ", que
+   caduque **nunca**, y tildar solo **ads_read**. Copiarla: se muestra una vez.
+5. **Guardarla.** Supabase → el proyecto → *Edge Functions* → *Secrets* →
+   agregar `META_ADS_TOKEN` con la clave. No va en el código, ni en Vercel, ni
+   en un mensaje.
+6. Entrar a `/admin/publicidad`: se actualiza sola al abrirla.
+
+Si algún día dice "No se pudo actualizar", abajo está el motivo que dio Meta;
+casi siempre es la clave vencida o borrada, y se repiten los pasos 4 y 5.
+
 ## Estructura
 
 ```
 src/pages/admin/          Inicio, Estadisticas, Productos, Ventas, Clientes,
-                          Descuentos, Contenido, Marketing, MetodosPago,
+                          Descuentos, Contenido, Publicidad, Marketing, MetodosPago,
                           MetodosEnvio, Distribucion, Login
 src/components/admin/     Layout, sidebar, tablas, drawers, gráfico, guard
 src/hooks/                useAdminAuth, useAdminOrders, useAdminProducts,

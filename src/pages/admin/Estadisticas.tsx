@@ -15,6 +15,7 @@ import RangeTabs from "../../components/admin/RangeTabs";
 import StatCard from "../../components/admin/StatCard";
 import TrendChart from "../../components/admin/TrendChart";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
+import { useMetaAds } from "../../hooks/useMetaAds";
 import { useProductFunnel } from "../../hooks/useProductFunnel";
 import { useStoreEvents } from "../../hooks/useStoreEvents";
 import { useVisits } from "../../hooks/useVisits";
@@ -124,6 +125,12 @@ export default function AdminEstadisticas() {
   // Mismo rango que el resto de la pantalla: el hook recorta por fecha y por
   // nada más, igual que los totales de Ventas.
   const funnel = useProductFunnel(range);
+
+  // Para que un anuncio se lea con su nombre y no con el número de Meta
+  const meta = useMetaAds();
+  const nombreDeCampana = new Map(
+    (meta.data?.campanas ?? []).map((c) => [c.id, `Anuncio: ${c.nombre}`]),
+  );
 
   const allOrders = orders.data ?? [];
   const allVisits = visits.data ?? [];
@@ -446,7 +453,10 @@ export default function AdminEstadisticas() {
             </Panel>
             <Panel title="Campañas">
               <OrigenTable
-                filas={recorrido.campanas}
+                filas={recorrido.campanas.map((fila) => ({
+                  ...fila,
+                  label: nombreDeCampana.get(fila.label) ?? fila.label,
+                }))}
                 primera="Campaña"
                 emptyLabel="Ninguna visita llegó con campaña. Se completa con el campo Campaña del armador de links."
               />

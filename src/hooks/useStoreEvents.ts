@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { previousRangeStart, type RangeId } from "../lib/admin";
+import { leerTodo } from "../lib/leer-todo";
 import { supabase } from "../lib/supabase";
 import type { StoreEvent } from "../types/admin";
 
@@ -30,19 +31,24 @@ export function useStoreEvents(range: RangeId) {
   return useQuery({
     queryKey: ["admin", "store-events", range],
     queryFn: async (): Promise<StoreEvent[]> => {
-      let query = supabase
-        .from("store_events")
-        .select("created_at, kind, session_id, slug, qty, value, path, detail")
-        .order("created_at", { ascending: false })
-        .limit(20000);
-
       const from = previousRangeStart(range);
-      if (from) query = query.gte("created_at", from.toISOString());
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const filas = await leerTodo<StoreEventRow>((desde, hasta) => {
+        let query = supabase
+          .from("store_events")
+          .select(
+            "created_at, kind, session_id, slug, qty, value, path, detail",
+          )
+          .order("created_at", { ascending: false })
+          // Dos filas del mismo instante tienen que salir siempre en el mismo
+          // orden, o una página las repite y la otra las saltea
+          .order("id", { ascending: false })
+          .range(desde, hasta);
+        if (from) query = query.gte("created_at", from.toISOString());
+        return query;
+      });
 
-      return (data as StoreEventRow[]).map((row) => ({
+      return filas.map((row) => ({
         createdAt: row.created_at,
         kind: row.kind,
         sessionId: row.session_id,

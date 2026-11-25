@@ -90,6 +90,12 @@ export function leerAtribucion(): Atribucion {
 
 // ── Clasificación, para el panel ──────────────────────────────
 
+/** Meta firma las visitas de un anuncio con el id de la campaña, que es un
+ *  número largo. Las campañas propias se escriben con letras. */
+export function esCampanaDeMeta(campana: string | null): boolean {
+  return campana !== null && /^d{12,}$/.test(campana);
+}
+
 /** Lo que el panel sabe de la primera vista de una sesión. */
 export type PistasDeOrigen = {
   referrer: string | null;
@@ -158,7 +164,10 @@ export function clasificarOrigen(p: PistasDeOrigen): {
 } {
   if (p.utmSource) {
     const fuente = FUENTES[p.utmSource] ?? capitalizar(p.utmSource);
-    return { fuente, canal: p.utmMedium };
+    // Los anuncios usan el link de la bio y Meta les agrega el número de la
+    // campaña: sin esto, la gente que trajo un anuncio contaba como "bio".
+    const canal = esCampanaDeMeta(p.utmCampaign) ? "anuncio" : p.utmMedium;
+    return { fuente, canal };
   }
   if (p.app === "instagram") return { fuente: "Instagram", canal: null };
   if (p.app === "facebook") return { fuente: "Facebook", canal: null };
