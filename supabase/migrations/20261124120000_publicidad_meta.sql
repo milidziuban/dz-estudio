@@ -184,5 +184,5 @@ values
 on conflict (tipo, valor) do nothing;
 
 insert into public.meta_sync (id, actualizado, origen, alcance_total)
-values (true, now(), 'a-mano', 5793)
+values (true, '2026-11-24T20:30:00-03:00', 'a-mano', 5793)
 on conflict (id) do nothing;
