@@ -187,6 +187,16 @@ tarjeta en la home hasta que tenga foto de portada en `CATEGORY_INTRO`):
 pestaña de su categoría en /tienda y el link de la navbar. Se carga desde el
 panel, se le suben fotos y recién ahí aparece.
 
+**Productos ocultos** (desde el 27/11/2026): la columna `visible` de
+`products` en `false` deja el producto cargado pero fuera de la tienda. Lo
+hace RLS (`visible or is_admin()`), no el front: la tienda no lo trae ni por
+link, y la cuenta admin logueada lo ve igual, con la marca "Oculto · solo lo
+ves vos". Se prende desde la ficha del panel ("Visible en la tienda").
+
+Lámparas (categoría `lamparas`, desde el 27/11/2026, sin promo de combo ni
+tarjeta en la home). Sus productos arrancan ocultos hasta tener precio,
+medidas y material.
+
 Cuidados, iguales en todos: lavar con agua fría, a ciclo suave o a mano, no
 secar al sol.
 

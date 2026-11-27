@@ -1160,6 +1160,7 @@ export function filtrosUsados(events: StoreEvent[]): PathCount[] {
     "categoria:almohadones": "Categoría: almohadones",
     "categoria:individuales": "Categoría: individuales",
     "categoria:manteles": "Categoría: manteles",
+    "categoria:lamparas": "Categoría: lámparas",
     "orden:destacados": "Orden: destacados",
     "orden:novedades": "Orden: novedades",
     "orden:precio-asc": "Orden: precio de menor a mayor",

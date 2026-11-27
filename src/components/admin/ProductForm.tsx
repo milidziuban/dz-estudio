@@ -146,6 +146,7 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
             <option value="almohadones">Almohadones</option>
             <option value="individuales">Individuales</option>
             <option value="manteles">Manteles</option>
+            <option value="lamparas">Lámparas</option>
           </SelectField>
 
           <TextField
@@ -162,6 +163,13 @@ export default function ProductForm({ draft, onChange }: ProductFormProps) {
 
       <Bloque title="Stock">
         <div className="space-y-4">
+          <Toggle
+            label="Visible en la tienda"
+            hint="Apagado, el producto queda oculto: no aparece en la tienda ni se puede abrir su link. Vos lo seguís viendo mientras estés logueada en el panel."
+            checked={draft.visible}
+            onChange={(checked) => set("visible", checked)}
+          />
+
           <Toggle
             label="A la venta"
             hint="Si lo apagás, el producto sigue en la tienda pero no se puede comprar."

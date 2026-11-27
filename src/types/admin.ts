@@ -28,6 +28,8 @@ export type AdminProduct = Omit<Product, "variants"> & {
   /** Lugar en el orden de la tienda (home y /tienda): menor va antes. Se
    *  arma con las flechas del listado de /admin/productos. */
   orden: number;
+  /** false = oculto: cargado pero fuera de la tienda (solo lo ve el admin). */
+  visible: boolean;
 };
 
 /** Estado del pago. Lo escribe el webhook de Mercado Pago o el panel. */
@@ -320,6 +322,8 @@ export type ProductDraft = {
   material: string;
   cuidados: string;
   inStock: boolean;
+  /** false = oculto en la tienda. */
+  visible: boolean;
   images: { src: string; fit: "cover" | "contain"; background?: ColorToken }[];
   variants: AdminProductVariant[];
 };

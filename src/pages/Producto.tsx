@@ -223,6 +223,11 @@ export default function Producto() {
           {/* Info */}
           <div>
             <Tag>{CATEGORY_LABEL[product.category]}</Tag>
+            {product.visible === false && (
+              <span className="ml-2 inline-flex rounded-full bg-ink px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-cream">
+                Oculto · solo lo ves vos
+              </span>
+            )}
 
             <h1 className="mt-5 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
               {product.name}

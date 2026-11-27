@@ -9,8 +9,9 @@ export type ColorToken =
   | "ink"
   | "cream";
 
-/** Categorías de la tienda. Manteles se sumó el 06/11/2026. */
-export type Category = "almohadones" | "individuales" | "manteles";
+/** Categorías de la tienda. Manteles se sumó el 06/11/2026; Lámparas, el
+ *  27/11/2026. */
+export type Category = "almohadones" | "individuales" | "manteles" | "lamparas";
 
 export type ProductImage = {
   /** Foto real del catálogo, servida desde /public/productos */
@@ -57,4 +58,7 @@ export type Product = {
   stock?: number | null;
   images: ProductImage[];
   inStock: boolean;
+  /** false = oculto: la base solo se lo devuelve a la cuenta admin, que lo ve
+   *  en la tienda para revisarlo antes de publicarlo. Ausente = visible. */
+  visible?: boolean;
 };

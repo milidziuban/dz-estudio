@@ -8,6 +8,7 @@ const TAG_COLOR = {
   almohadones: "pink",
   individuales: "celeste",
   manteles: "pink",
+  lamparas: "celeste",
 } as const;
 
 /** Solo las categorías con portada cargada en CATEGORY_INTRO. */

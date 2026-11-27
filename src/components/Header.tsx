@@ -31,6 +31,12 @@ const NAV_LINKS: {
     to: "/tienda?categoria=manteles",
     category: "manteles",
   },
+  {
+    label: "Lámparas",
+    short: "Lámparas",
+    to: "/tienda?categoria=lamparas",
+    category: "lamparas",
+  },
 ];
 
 export default function Header() {

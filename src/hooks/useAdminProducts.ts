@@ -42,6 +42,7 @@ type AdminProductRow = {
   cost: number | null;
   is_bundle: boolean;
   orden: number;
+  visible: boolean;
 };
 
 function mapProduct(row: AdminProductRow): AdminProduct {
@@ -66,6 +67,7 @@ function mapProduct(row: AdminProductRow): AdminProduct {
     cost: row.cost,
     isBundle: row.is_bundle,
     orden: row.orden,
+    visible: row.visible,
   };
 }
 
@@ -106,6 +108,7 @@ export function draftFromProduct(product: AdminProduct): ProductDraft {
     material: product.material ?? "",
     cuidados: product.cuidados ?? "",
     inStock: product.inStock,
+    visible: product.visible,
     images: product.images,
     variants: product.variants ?? [],
   };
@@ -130,6 +133,7 @@ export function emptyDraft(): ProductDraft {
     material: "",
     cuidados: "",
     inStock: true,
+    visible: true,
     images: [],
     variants: [],
   };
@@ -155,6 +159,7 @@ function rowFromDraft(draft: ProductDraft) {
     variants: draft.variants,
     images: draft.images,
     in_stock: draft.inStock,
+    visible: draft.visible,
     stock: draft.stock,
     sku: draft.sku || null,
     cost: draft.cost,
@@ -259,6 +264,7 @@ export function useQuickUpdateProduct() {
         cost?: number | null;
         isBundle?: boolean;
         category?: Category;
+        visible?: boolean;
       };
     }) => {
       const row: Record<string, unknown> = {};
@@ -267,6 +273,7 @@ export function useQuickUpdateProduct() {
       if (patch.cost !== undefined) row.cost = patch.cost;
       if (patch.isBundle !== undefined) row.is_bundle = patch.isBundle;
       if (patch.category !== undefined) row.category = patch.category;
+      if (patch.visible !== undefined) row.visible = patch.visible;
 
       const { error } = await supabase.from("products").update(row).eq("id", id);
       if (error) throw error;

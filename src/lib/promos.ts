@@ -20,6 +20,7 @@ const COMBO_NOUN: Record<Category, { singular: string; plural: string }> = {
   almohadones: { singular: "almohadón", plural: "almohadones" },
   individuales: { singular: "pack", plural: "packs" },
   manteles: { singular: "mantel", plural: "manteles" },
+  lamparas: { singular: "lámpara", plural: "lámparas" },
 };
 
 export const COMBO_PROMO = {

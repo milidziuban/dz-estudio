@@ -37,13 +37,14 @@ type ProductRow = {
   images: ProductImage[];
   in_stock: boolean;
   stock: number | null;
+  visible: boolean;
 };
 
 /** Lo que la tienda necesita de `products`. Tiene que coincidir con el
  *  `grant select (…) to anon` de la base: pedir una columna de más falla, y
  *  la tienda se cae al catálogo espejo. */
 // prettier-ignore
-const COLUMNAS_PUBLICAS = "id,slug,name,category,colors,price,description,medidas,peso,peso_gramos,material,cuidados,variants,images,in_stock,stock,orden";
+const COLUMNAS_PUBLICAS = "id,slug,name,category,colors,price,description,medidas,peso,peso_gramos,material,cuidados,variants,images,in_stock,stock,orden,visible";
 
 function mapVariant(row: ProductVariantRow): ProductVariant {
   return {
@@ -73,6 +74,7 @@ function mapRow(row: ProductRow): Product {
     images: row.images,
     inStock: row.in_stock,
     stock: row.stock ?? null,
+    visible: row.visible,
   };
 }
 

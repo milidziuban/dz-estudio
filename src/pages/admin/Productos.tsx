@@ -111,6 +111,7 @@ function ProductCategoryCell({ product }: { product: AdminProduct }) {
       <option value="almohadones">Almohadones</option>
       <option value="individuales">Individuales</option>
       <option value="manteles">Manteles</option>
+      <option value="lamparas">Lámparas</option>
     </select>
   );
 }
@@ -316,6 +317,7 @@ export default function AdminProductos() {
               ["almohadones", "Almohadones"],
               ["individuales", "Individuales"],
               ["manteles", "Manteles"],
+              ["lamparas", "Lámparas"],
             ] as [Filtro, string][]
           ).map(([id, label]) => (
             <button
@@ -436,6 +438,11 @@ export default function AdminProductos() {
                     {product.name}
                   </button>
                   <span className="font-mono text-[11px] text-ink/65">
+                    {!product.visible && (
+                      <span className="mr-1.5 rounded-full bg-ink px-2 py-0.5 uppercase tracking-widest text-cream">
+                        Oculto
+                      </span>
+                    )}
                     {product.sku ? `${product.sku} · ` : ""}
                     {product.slug}
                   </span>

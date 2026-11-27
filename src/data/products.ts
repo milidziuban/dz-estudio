@@ -9,6 +9,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   almohadones: "Almohadones",
   individuales: "Individuales",
   manteles: "Manteles",
+  lamparas: "Lámparas",
 };
 
 /** Copy y foto de portada de cada categoría para la home. Una categoría sin
